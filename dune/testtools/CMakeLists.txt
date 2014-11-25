@@ -1,3 +1,7 @@
+add_subdirectory(test EXCLUDE_FROM_ALL)
+
 #install headers
-install(FILES testtools.hh DESTINATION include/dune/testtools)
+install(FILES outputtree.hh DESTINATION include/dune/testtools)
+
+
 
