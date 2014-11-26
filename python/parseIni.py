@@ -1,8 +1,7 @@
 """ define tools for parsing Dune-style ini files into python
 
 TODO:
-- allow values to be lists (as pntained by Dune::FieldVector)
-- improve the group key detection
+- allow values to be lists (as obtained by Dune::FieldVector)
 """
 
 # inspired by http://www.decalage.info/fr/python/configparser
@@ -44,8 +43,7 @@ def parse_ini_file(filename, commentChar = ("#",), assignChar=("=",":"), asStrin
                 line, comment = line.split(char, 1)        
             
         # check whether this line specifies a group
-        # TODO allow keys to contain a "[" too
-        if "[" in line:
+        if "[" in line and "]" in line:
             # reset the current dictionary
             current_dict = result_dict
        
@@ -57,21 +55,33 @@ def parse_ini_file(filename, commentChar = ("#",), assignChar=("=",":"), asStrin
             # process the stack of subgroups given
             while "." in group:
                 subgroup, group = group.split(".", 1)
-                current_dict[subgroup] = {}
+                if subgroup not in current_dict:
+                    current_dict[subgroup] = {}
                 current_dict = current_dict[subgroup]
                  
             # add a new dictionary for the group name and set the current dict to it
-            current_dict[group] = {}
+            if group not in current_dict:
+                current_dict[group] = {}
             current_dict = current_dict[group]
-            
+
+        # save the current_dict to reset it after each key/value pair evaluation
+        # this is necessary to have some subgroup definitions in keys instead of in square brackets.
+        group_dict = current_dict
+
         # check whether this line defines a key
         for char in assignChar:
             if char in line:
-                print "Line with a key/value pair: {}".format(line)
-                
                 # split key from value
                 key, value = line.split(char, 1)
                 
+                # look for additional groups in the key
+                key = key.strip()
+                while "." in key:
+                    group, key = key.split(".")
+                    if group not in current_dict:
+                        current_dict[group] = {}
+                    current_dict = current_dict[group]
+
                 # strip blanks from the value 
                 value = value.strip()
                  
@@ -86,6 +96,9 @@ def parse_ini_file(filename, commentChar = ("#",), assignChar=("=",":"), asStrin
                             current_dict[key] = rule(value)
                         except ValueError:
                             pass
+
+        # restore the current dictionary to the current group
+        current_dict = group_dict
                         
     return result_dict
         
