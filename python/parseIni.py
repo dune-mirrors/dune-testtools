@@ -73,7 +73,6 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
         if line.count(assignment) is 1:
             # split key from value
             import re
-            print re.split(char, line)
             key, value = re.split(assignment, line)
 
             # look for additional groups in the key
