@@ -153,8 +153,49 @@ def expand_meta_ini(filename):
         print c
     
     # resolve all key-dependent names
-    # TODO
-    
+    for c in configurations:
+
+        def needs_resolution(d):
+            for key, value in d.items():
+                print "value: {}".format(value)
+                if type(value) is dict:
+                    if needs_resolution(value) is True:
+                        return True
+                else:
+                    if ("{" in value) and ("}" in value):
+                        return True
+            return False
+
+        def dotkey(d, key):
+            if "." in key:
+                group, key = key.split(".", 1)
+                return dotkey(d[group], key)
+            else:
+                return d[key]
+
+        def resolve_key_dependencies(fulldict, processdict):
+            for key, value in processdict.items():
+                if type(value) is dict:
+                    resolve_key_dependencies(fulldict, value)
+                else:
+                    while ("{" in value) and ("}" in value):
+                        rest, dkey = value.split("{", 1)
+                        dkey, rest = dkey.split("}", 1)
+                        processdict[key] = value.replace("{" + dkey + "}", dotkey(fulldict, dkey))
+                        value = processdict[key]
+
+        # values might depend on keys, whose value also depend on other keys.
+        # In a worst case scenario concerning the order of resolution,
+        # a call to resolve_key_dependencies only resolves one such layer.
+        # That is why we need to do this until all dependencies are resolved.
+        while needs_resolution(c) is True:
+            resolve_key_dependencies(c, c)
+
+    print "Configs after replacement: "
+    for c in configurations:
+        print c
+
+
     # write the configurations
     counter = 0
     base, extension = filename.split(".", 1)
