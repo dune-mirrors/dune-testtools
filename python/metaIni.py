@@ -200,6 +200,9 @@ def expand_meta_ini(filename):
     counter = 0
     base, extension = filename.split(".", 1)
     for conf in configurations:
-        conffile = base + str(counter)
-        counter = counter + 1
+        if "__name" in conf:
+            conffile = conf["__name"]
+        else:
+            conffile = base + str(counter)
+            counter = counter + 1
         write_dict_to_ini(conf, conffile)
