@@ -1,12 +1,51 @@
 """ A module for expanding meta ini files into sets of ini files.
 
-TODO: Write a documentation on the format.
+This module provides methods to expand a meta ini files into a set
+of corresponding ini files. The meta ini file format is defined as
+follows.
 
-TODO
-- Is it too restrictive to forbid assignment chars in keys and values?
-- Implement key-dependent values, like
-    vtkfile = refinement{grid.level}.vtk
-- Reserve a __name key as an alternative to consecutive numbering
+- The syntax of a regular ini file with "=" as assignment operator for
+  key/value pairs is entirely valid. Every ini file is also a meta ini file.
+- A user can use an arbitrary amount of additional assignment operators.
+  These must be of the form "=<type>=", where <type> is any string identifying
+- Such custom assignment operators are followed by a comma separated list of
+  values instead of a single value. All assignments using the same operator
+  must use the same number of values.
+- For each assignment operator present in the meta ini file <n> sets of key/value pairs
+  are generated, where <n> is the number of entries in the lists after that
+  assignment operator.
+- The sets of key/value pairs from different assignment operators are combined
+  to larger set by taking the cartesian product of the individual sets.
+- The assignment operator "==" (<type> is empty) is special, in the sense,
+  that it will always build a product, even with other key/value pairs using "=="
+- You can have values depending on other key/value pairs. The syntax for such dependency
+  is having a key (use dots for nested keys) in curly brackets inside the value.
+  Those values are replaced by the actual value after expanding the meta ini file
+  into the set of ini files.
+- The output ini files use the meta ini name as a base name. By default, an
+  increasing number is appended to the basename.
+- You can also set a custom name for the generated ini file by setting the
+  reserved key "__name" in your meta ini file and use the {} syntax for meaningful naming.
+
+This is an example aiming at showing the full power of the meta ini syntax:
+
+==== START example
+__name = {model.parameters}_gridlevel{grid.level}
+
+[grid]
+level =grid= 3, 4, 5
+screenOutput =grid= 1, 0, 0 #screen output for level >= 4 kills me
+
+[model]
+parameters == simple, complex
+==== END example
+
+The example produces a total of 6 ini files.
+
+Known issues:
+- The characters '=', ',',' {','}','[' and ']' should neither appear in keys nor in values.
+- A combination of custom naming and numbering may be interesting for a lot of applications
+- the code could use a lot more error checking
 """
 
 from parseIni import parse_ini_file
@@ -100,12 +139,9 @@ def expand_meta_ini(filename):
     if "" in result:
         configurations = [l for l in generate_configs(result[""], configurations)]
 
-    print "Configs: "
-    for c in configurations:
-        print c
-
     def expand_dict(d, output=None, prefix=[]):
-
+        """ expand the dictionary of one assignment operator into a set of dictionary
+            containing the actual key value pairs of that assignment operator """
         for key, values in d.items():
             if type(values) is dict:
                 pref = prefix + [key]
@@ -125,6 +161,7 @@ def expand_meta_ini(filename):
         return output
 
     def join_nested_dicts(d1, d2):
+        """ join two dictionaries recursively """
         for key, item in d2.items():
             if type(item) is dict:
                 d1[key] = join_nested_dicts(d1[key], item)
@@ -148,14 +185,11 @@ def expand_meta_ini(filename):
 
             configurations = newconfigurations
 
-    print "Configs: "
-    for c in configurations:
-        print c
-
-    # resolve all key-dependent names
+    # resolve all key-dependent names present in the configurations
     for c in configurations:
 
         def needs_resolution(d):
+            """ whether curly brackets can be found somewhere in the dictionary d """
             for key, value in d.items():
                 print "value: {}".format(value)
                 if type(value) is dict:
@@ -167,6 +201,7 @@ def expand_meta_ini(filename):
             return False
 
         def dotkey(d, key):
+            """ Given a key containing dots, return the value from a nested dictionary """
             if "." in key:
                 group, key = key.split(".", 1)
                 return dotkey(d[group], key)
@@ -174,6 +209,7 @@ def expand_meta_ini(filename):
                 return d[key]
 
         def resolve_key_dependencies(fulldict, processdict):
+            """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
             for key, value in processdict.items():
                 if type(value) is dict:
                     resolve_key_dependencies(fulldict, value)
@@ -191,18 +227,14 @@ def expand_meta_ini(filename):
         while needs_resolution(c) is True:
             resolve_key_dependencies(c, c)
 
-    print "Configs after replacement: "
-    for c in configurations:
-        print c
-
-
-    # write the configurations
+    # write the configurations to disk
     counter = 0
     base, extension = filename.split(".", 1)
     for conf in configurations:
+        # check whether a custom name has been provided by the user
         if "__name" in conf:
             conffile = conf["__name"]
         else:
             conffile = base + str(counter)
             counter = counter + 1
-        write_dict_to_ini(conf, conffile)
+        write_dict_to_ini(conf, conffile + ".ini")
