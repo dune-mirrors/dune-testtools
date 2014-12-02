@@ -95,7 +95,7 @@ def expand_meta_ini(filename):
     result = {}
 
     # we always have normal assignment
-    normal = parse_ini_file(filename)
+    normal = parse_ini_file(filename, asStrings=True)
 
     # look into the file to determine the set of assignment operators used
     file = open(filename)
@@ -113,7 +113,6 @@ def expand_meta_ini(filename):
     configurations = [normal]
 
     def generate_configs(d, configurations, prefix=[]):
-
         def configs_for_key(key, vals, configs, prefix):
             for config in configs:
                 for val in vals:
@@ -191,7 +190,6 @@ def expand_meta_ini(filename):
         def needs_resolution(d):
             """ whether curly brackets can be found somewhere in the dictionary d """
             for key, value in d.items():
-                print "value: {}".format(value)
                 if type(value) is dict:
                     if needs_resolution(value) is True:
                         return True
