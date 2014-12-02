@@ -51,14 +51,14 @@ Known issues:
 from parseIni import parse_ini_file
 from copy import deepcopy
 
-def write_dict_to_ini(d, filename):
+def write_dict_to_ini(d, filename, assignment):
     with open(filename, 'w') as f:
 
         def traverse_dict(file, d, prefix):
             # first traverse all non-group values (they would otherwise be considered part of a group)
             for key, value in d.items():
                 if type(value) is not dict:
-                    file.write("{} = {}\n".format(key, value))
+                    file.write("{} {} {}\n".format(key, assignment, value))
 
             # now go into subgroups
             for key, value in d.items():
@@ -80,13 +80,18 @@ def write_dict_to_ini(d, filename):
         traverse_dict(f, d, prefix)
 
 
-def expand_meta_ini(filename):
+def expand_meta_ini(filename, assignment="=", subgroups=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
     ----------
     filename : string
         The filename of the meta ini file
+        
+    Keyword Arguments:
+    ------------------
+    assignment : string
+        The standard assignment operator
     """
 
     # one dictionary to hold the results from several parser runs
@@ -95,7 +100,7 @@ def expand_meta_ini(filename):
     result = {}
 
     # we always have normal assignment
-    normal = parse_ini_file(filename, asStrings=True)
+    normal = parse_ini_file(filename, assignment=assignment, asStrings=True, subgroups=subgroups)
 
     # look into the file to determine the set of assignment operators used
     file = open(filename)
@@ -107,7 +112,7 @@ def expand_meta_ini(filename):
     # get dictionaries for all sorts of assignments
     for key in result:
         assignChar = "={}=".format(key)
-        result[key] = parse_ini_file(filename, assignment=assignChar)
+        result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True, subgroups=subgroups)
 
     # start combining dictionaries - there is always the normal dict
     configurations = [normal]
@@ -235,4 +240,4 @@ def expand_meta_ini(filename):
         else:
             conffile = base + str(counter)
             counter = counter + 1
-        write_dict_to_ini(conf, conffile + ".ini")
+        write_dict_to_ini(conf, conffile + ".ini", assignment)
