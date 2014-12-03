@@ -44,7 +44,6 @@ The example produces a total of 6 ini files.
 
 Known issues:
 - The characters '=', ',',' {','}','[' and ']' should neither appear in keys nor in values.
-- A combination of custom naming and numbering may be interesting for a lot of applications
 - the code could use a lot more error checking
 """
 
@@ -231,12 +230,33 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
             resolve_key_dependencies(c, c)
 
     # write the configurations to disk
+
+    # count the number of occurences of __name keys in the data set
+    name_dict = {}
+    for c in configurations:
+        if "__name" in c:
+            if c["__name"] not in name_dict:
+                name_dict[c["__name"]] = 1
+            else:
+                name_dict[c["__name"]] += 1
+
+    # now delete all those keys that occure once and reset all others to a counter
+    for key, value in name_dict.items():
+        if value is 1:
+            del name_dict[key]
+        else:
+            name_dict[key] = 0
+
+    # initialize a counter in the case of number only file name generation
     counter = 0
     base, extension = filename.split(".", 1)
     for conf in configurations:
         # check whether a custom name has been provided by the user
         if "__name" in conf:
             conffile = conf["__name"]
+            if conf["__name"] in name_dict:
+                conffile += "_" + str(name_dict[conf["__name"]])
+                name_dict[conf["__name"]] += 1
         else:
             conffile = base + str(counter)
             counter = counter + 1
