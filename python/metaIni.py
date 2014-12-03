@@ -45,6 +45,11 @@ The example produces a total of 6 ini files.
 Known issues:
 - The characters '=', ',',' {','}','[' and ']' should neither appear in keys nor in values.
 - the code could use a lot more error checking
+
+Known bugs:
+- Having special assignment and a subgrouping by keyname in the same line is broken, if that
+subgroup is not used elsewhere. THe reason is that the dictionary "normal" doesnt pick it up
+correctly.
 """
 
 from parseIni import parse_ini_file
