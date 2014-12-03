@@ -255,9 +255,9 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
         if "__name" in conf:
             conffile = conf["__name"]
             if conf["__name"] in name_dict:
-                conffile += "_" + str(name_dict[conf["__name"]])
+                conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
                 name_dict[conf["__name"]] += 1
         else:
-            conffile = base + str(counter)
+            conffile = base + str(counter).zfill(4)
             counter = counter + 1
         write_dict_to_ini(conf, conffile + ".ini", assignment)
