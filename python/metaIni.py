@@ -60,12 +60,12 @@ def write_dict_to_ini(d, filename, assignment):
 
         def traverse_dict(file, d, prefix):
             # first traverse all non-group values (they would otherwise be considered part of a group)
-            for key, value in d.items():
+            for key, value in sorted(d.items()):
                 if type(value) is not dict:
                     file.write("{} {} {}\n".format(key, assignment, value))
 
             # now go into subgroups
-            for key, value in d.items():
+            for key, value in sorted(d.items()):
                 if type(value) is dict:
                     pre = prefix + [key]
 
