@@ -15,6 +15,7 @@
 #
 # add_dune_system_test(TARGET target)
 
+include(ConditionalIncludes)
 
 function(add_dune_system_test)
   # define what kind of parameters can be given to this function
