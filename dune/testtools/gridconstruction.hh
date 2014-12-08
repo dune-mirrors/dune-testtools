@@ -50,7 +50,7 @@ public:
     try
     {
       if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = Dune::BackuprestoreFacility < Grid
+        grid = Dune::BackupRestoreFacility < Grid
             > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
@@ -145,7 +145,7 @@ public:
     try
     {
       if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = Dune::BackuprestoreFacility < Grid
+        grid = Dune::BackupRestoreFacility < Grid
             > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
@@ -247,7 +247,7 @@ public:
     try
     {
       if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = Dune::BackuprestoreFacility < Grid
+        grid = Dune::BackupRestoreFacility < Grid
             > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
