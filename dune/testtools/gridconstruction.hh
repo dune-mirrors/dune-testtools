@@ -47,47 +47,59 @@ public:
 
   IniGridFactory(const Dune::ParameterTree& params)
   {
-    // extract all constructor parameters from the ini file
-    // upper right corner
-    Dune::FieldVector<ct, dim> extension =
-        params.get<Dune::FieldVector<ct, dim> >("yaspgrid.extension");
-
-    // number of cells per direction
-    std::array<int, dim> cells = params.get<std::array<int, dim> >(
-        "yaspgrid.cells");
-
-    // periodicity
-    std::bitset<dim> periodic;
-    periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
-
-    // overlap cells
-    int overlap = params.get<int>("yaspgrid.overlap", 1);
-
-    // (eventually) a non-standard load balancing
-    bool default_lb = true;
-    std::array<int, dim> partitioning;
-    if (params.hasKey("yaspgrid.partitioning"))
+    try
     {
-      default_lb = false;
-      partitioning = params.get<std::array<int, dim> >("yaspgrid.partitioning");
+      if (params.hasKey("yaspgrid.loadFromFile"))
+        grid = Dune::BackuprestoreFacility < Grid
+            > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
+      else
+        DUNE_THROW(Dune::Exception, "Execute catch in that case");
     }
-
-    // build the actual grid
-    if (default_lb)
-      grid = new Grid(extension, cells, periodic, overlap);
-    else
+    catch (...)
     {
-      typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
-      grid = new Grid(extension, cells, periodic, overlap,
-          typename Grid::CollectiveCommunicationType(), &lb);
+      // extract all constructor parameters from the ini file
+      // upper right corner
+      Dune::FieldVector<ct, dim> extension = params.get<
+          Dune::FieldVector<ct, dim> >("yaspgrid.extension");
+
+      // number of cells per direction
+      std::array<int, dim> cells = params.get<std::array<int, dim> >(
+          "yaspgrid.cells");
+
+      // periodicity
+      std::bitset<dim> periodic;
+      periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
+
+      // overlap cells
+      int overlap = params.get<int>("yaspgrid.overlap", 1);
+
+      // (eventually) a non-standard load balancing
+      bool default_lb = true;
+      std::array<int, dim> partitioning;
+      if (params.hasKey("yaspgrid.partitioning"))
+      {
+        default_lb = false;
+        partitioning = params.get<std::array<int, dim> >(
+            "yaspgrid.partitioning");
+      }
+
+      // build the actual grid
+      if (default_lb)
+        grid = new Grid(extension, cells, periodic, overlap);
+      else
+      {
+        typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
+        grid = new Grid(extension, cells, periodic, overlap,
+            typename Grid::CollectiveCommunicationType(), &lb);
+      }
+
+      bool keepPhysicalOverlap = params.get<bool>(
+          "yaspgrid.keepPhysicalOverlap", true);
+      grid->refineOptions(keepPhysicalOverlap);
+
+      int refinement = params.get<int>("yaspgrid.refinement", 0);
+      grid->globalRefine(refinement);
     }
-
-    bool keepPhysicalOverlap = params.get<bool>("yaspgrid.keepPhysicalOverlap",
-        true);
-    grid->refineOptions(keepPhysicalOverlap);
-
-    int refinement = params.get<int>("yaspgrid.refinement", 0);
-    grid->globalRefine(refinement);
   }
 
   ~IniGridFactory()
@@ -130,58 +142,70 @@ public:
 
   IniGridFactory(const Dune::ParameterTree& params)
   {
-    // extract all constructor parameters from the ini file
-    // upper right corner
-    Dune::FieldVector<ct, dim> lowerleft =
-        params.get<Dune::FieldVector<ct, dim> >("yaspgrid.lowerleft");
-
-    Dune::FieldVector<ct, dim> upperright(lowerleft);
-    if (params.hasKey("upperright"))
-      upperright = params.get<Dune::FieldVector<ct, dim> >(
-          "yaspgrid.upperright");
-    else
+    try
     {
-      Dune::FieldVector<ct, dim> extension = params.get<
-          Dune::FieldVector<ct, dim> >("yaspgrid.extension");
-      upperright += extension;
+      if (params.hasKey("yaspgrid.loadFromFile"))
+        grid = Dune::BackuprestoreFacility < Grid
+            > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
+      else
+        DUNE_THROW(Dune::Exception, "Execute catch in that case");
     }
-
-    // number of cells per direction
-    std::array<int, dim> cells = params.get<std::array<int, dim> >(
-        "yaspgrid.cells");
-
-    // periodicity
-    std::bitset<dim> periodic;
-    periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
-
-    // overlap cells
-    int overlap = params.get<int>("yaspgrid.overlap", 1);
-
-    // (eventually) a non-standard load balancing
-    bool default_lb = true;
-    std::array<int, dim> partitioning;
-    if (params.hasKey("yaspgrid.partitioning"))
+    catch (...)
     {
-      default_lb = false;
-      partitioning = params.get<std::array<int, dim> >("yaspgrid.partitioning");
+      // extract all constructor parameters from the ini file
+      // upper right corner
+      Dune::FieldVector<ct, dim> lowerleft = params.get<
+          Dune::FieldVector<ct, dim> >("yaspgrid.lowerleft");
+
+      Dune::FieldVector<ct, dim> upperright(lowerleft);
+      if (params.hasKey("upperright"))
+        upperright = params.get<Dune::FieldVector<ct, dim> >(
+            "yaspgrid.upperright");
+      else
+      {
+        Dune::FieldVector<ct, dim> extension = params.get<
+            Dune::FieldVector<ct, dim> >("yaspgrid.extension");
+        upperright += extension;
+      }
+
+      // number of cells per direction
+      std::array<int, dim> cells = params.get<std::array<int, dim> >(
+          "yaspgrid.cells");
+
+      // periodicity
+      std::bitset<dim> periodic;
+      periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
+
+      // overlap cells
+      int overlap = params.get<int>("yaspgrid.overlap", 1);
+
+      // (eventually) a non-standard load balancing
+      bool default_lb = true;
+      std::array<int, dim> partitioning;
+      if (params.hasKey("yaspgrid.partitioning"))
+      {
+        default_lb = false;
+        partitioning = params.get<std::array<int, dim> >(
+            "yaspgrid.partitioning");
+      }
+
+      // build the actual grid
+      if (default_lb)
+        grid = new Grid(lowerleft, upperright, cells, periodic, overlap);
+      else
+      {
+        typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
+        grid = new Grid(lowerleft, upperright, cells, periodic, overlap,
+            typename Grid::CollectiveCommunicationType(), &lb);
+      }
+
+      bool keepPhysicalOverlap = params.get<bool>(
+          "yaspgrid.keepPhysicalOverlap", true);
+      grid->refineOptions(keepPhysicalOverlap);
+
+      int refinement = params.get<int>("yaspgrid.refinement", 0);
+      grid->globalRefine(refinement);
     }
-
-    // build the actual grid
-    if (default_lb)
-      grid = new Grid(lowerleft, upperright, cells, periodic, overlap);
-    else
-    {
-      typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
-      grid = new Grid(lowerleft, upperright, cells, periodic, overlap,
-          typename Grid::CollectiveCommunicationType(), &lb);
-    }
-
-    bool keepPhysicalOverlap = params.get<bool>("yaspgrid.keepPhysicalOverlap",
-        true);
-    grid->refineOptions(keepPhysicalOverlap);
-
-    int refinement = params.get<int>("yaspgrid.refinement", 0);
-    grid->globalRefine(refinement);
   }
 
   ~IniGridFactory()
@@ -216,51 +240,62 @@ class IniGridFactory<
     Dune::YaspGrid<dim, Dune::TensorProductCoordinates<ct, dim> > >
 {
 public:
-  typedef typename Dune::YaspGrid<dim,
-      Dune::TensorProductCoordinates<ct, dim> > Grid;
+  typedef typename Dune::YaspGrid<dim, Dune::TensorProductCoordinates<ct, dim> > Grid;
 
   IniGridFactory(const Dune::ParameterTree& params)
   {
-    std::array<std::vector<ct>, dim> coordinates;
-    for (int i=0; i<dim; ++i)
+    try
     {
-      std::ostringstream key_str;
-      key_str << "yaspgrid.coordinates" << i;
-      coordinates[i] = params.get<std::vector<ct> >(key_str.str());
+      if (params.hasKey("yaspgrid.loadFromFile"))
+        grid = Dune::BackuprestoreFacility < Grid
+            > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
+      else
+        DUNE_THROW(Dune::Exception, "Execute catch in that case");
     }
-
-    // periodicity
-    std::bitset<dim> periodic;
-    periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
-
-    // overlap cells
-    int overlap = params.get<int>("yaspgrid.overlap", 1);
-
-    // (eventually) a non-standard load balancing
-    bool default_lb = true;
-    std::array<int, dim> partitioning;
-    if (params.hasKey("yaspgrid.partitioning"))
+    catch (...)
     {
-      default_lb = false;
-      partitioning = params.get<std::array<int, dim> >("yaspgrid.partitioning");
+      std::array<std::vector<ct>, dim> coordinates;
+      for (int i = 0; i < dim; ++i)
+      {
+        std::ostringstream key_str;
+        key_str << "yaspgrid.coordinates" << i;
+        coordinates[i] = params.get<std::vector<ct> >(key_str.str());
+      }
+
+      // periodicity
+      std::bitset<dim> periodic;
+      periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
+
+      // overlap cells
+      int overlap = params.get<int>("yaspgrid.overlap", 1);
+
+      // (eventually) a non-standard load balancing
+      bool default_lb = true;
+      std::array<int, dim> partitioning;
+      if (params.hasKey("yaspgrid.partitioning"))
+      {
+        default_lb = false;
+        partitioning = params.get<std::array<int, dim> >(
+            "yaspgrid.partitioning");
+      }
+
+      // build the actual grid
+      if (default_lb)
+        grid = new Grid(coordinates, periodic, overlap);
+      else
+      {
+        typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
+        grid = new Grid(coordinates, periodic, overlap,
+            typename Grid::CollectiveCommunicationType(), &lb);
+      }
+
+      bool keepPhysicalOverlap = params.get<bool>(
+          "yaspgrid.keepPhysicalOverlap", true);
+      grid->refineOptions(keepPhysicalOverlap);
+
+      int refinement = params.get<int>("yaspgrid.refinement", 0);
+      grid->globalRefine(refinement);
     }
-
-    // build the actual grid
-    if (default_lb)
-      grid = new Grid(coordinates, periodic, overlap);
-    else
-    {
-      typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
-      grid = new Grid(coordinates, periodic, overlap,
-          typename Grid::CollectiveCommunicationType(), &lb);
-    }
-
-    bool keepPhysicalOverlap = params.get<bool>("yaspgrid.keepPhysicalOverlap",
-        true);
-    grid->refineOptions(keepPhysicalOverlap);
-
-    int refinement = params.get<int>("yaspgrid.refinement", 0);
-    grid->globalRefine(refinement);
   }
 
   ~IniGridFactory()
