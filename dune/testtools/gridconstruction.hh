@@ -37,16 +37,14 @@ struct IniGridFactory
  *     in physical size or in number of cells upon refinement
  * - refinement : the number of global refines to apply initially.
  */
-template<int dim>
-struct IniGridFactory<Dune::YaspGrid<dim> >
+template<class ct, int dim>
+struct IniGridFactory<Dune::YaspGrid<dim, Dune::EquidistantCoordinates<ct, dim> > >
 {
   public:
-	typedef typename Dune::YaspGrid<dim> Grid;
+	typedef typename Dune::YaspGrid<dim, Dune::EquidistantCoordinates<ct, dim> > Grid;
 
 	IniGridFactory(const Dune::ParameterTree& params)
 	{
-		typedef typename Grid::ctype ct;
-
     // extract all constructor parameters from the ini file
 		// upper right corner
 		Dune::FieldVector<ct, dim> extension =
