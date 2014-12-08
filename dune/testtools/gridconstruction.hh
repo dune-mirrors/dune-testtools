@@ -328,6 +328,25 @@ private:
   std::shared_ptr<Grid> grid;
 };
 
+/** An IniGridFactory for an UGGrid
+ *
+ * All keys are expected to be in group uggrid.
+ *
+ * The grid is constructed through different mechanism with
+ * the following priority order:
+ * 1) GMSH import
+ * 2) DGF import
+ * 3) construct a structured grid from the given parameters
+ *
+ * The following keys are recognized:
+ * - gmshFile : A gmsh file to load from
+ * - dgfFile : A DGF File to load from
+ * - lowerleft : lowerleft corner of a structured grid
+ * - upperright : upperright corner of a structured grid
+ * - elements : number of elements in a structured grid
+ * - elementType : "quadrialteral" or "simplical" to be used for structured grids
+ * - refinement : the number of global refines to perform
+ */
 template<int dim>
 class IniGridFactory<Dune::UGGrid<dim> >
 {
