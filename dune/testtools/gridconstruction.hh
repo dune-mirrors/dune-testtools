@@ -428,11 +428,8 @@ public:
 
     // given we have successfully created a grid, maybe perform some operations on it
     // TODO what are suitable such operations for an unstructured grid.
-    if (grid != NULL)
-    {
-      int refinement = params.get<int>("ug.refinement", 0);
-      grid->globalRefine(refinement);
-    }
+    int refinement = params.get<int>("ug.refinement", 0);
+    grid->globalRefine(refinement);
   }
 
   std::shared_ptr<Grid> getGrid()
