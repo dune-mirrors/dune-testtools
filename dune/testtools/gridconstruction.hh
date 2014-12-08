@@ -15,7 +15,7 @@
  *  throws an exception upon construction.
  */
 template<class GRID>
-struct IniGridFactory
+class IniGridFactory
 {
 	typedef GRID Grid;
 	IniGridFactory(const Dune::ParameterTree& params)
@@ -38,7 +38,7 @@ struct IniGridFactory
  * - refinement : the number of global refines to apply initially.
  */
 template<class ct, int dim>
-struct IniGridFactory<Dune::YaspGrid<dim, Dune::EquidistantCoordinates<ct, dim> > >
+class IniGridFactory<Dune::YaspGrid<dim, Dune::EquidistantCoordinates<ct, dim> > >
 {
   public:
 	typedef typename Dune::YaspGrid<dim, Dune::EquidistantCoordinates<ct, dim> > Grid;
