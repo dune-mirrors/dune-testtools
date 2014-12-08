@@ -3,6 +3,7 @@
 
 #include<array>
 #include<bitset>
+#include<memory>
 #include<sstream>
 
 #include<dune/common/exceptions.hh>
@@ -50,8 +51,9 @@ public:
     try
     {
       if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = Dune::BackupRestoreFacility < Grid
-            > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
+        grid = std::shared_ptr < Grid
+            > (Dune::BackupRestoreFacility<Grid>::restore(
+                params.get<std::string>("yaspgrid.loadFromFile")));
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
     }
@@ -85,12 +87,13 @@ public:
 
       // build the actual grid
       if (default_lb)
-        grid = new Grid(extension, cells, periodic, overlap);
+        grid = std::make_shared < Grid > (extension, cells, periodic, overlap);
       else
       {
         typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
-        grid = new Grid(extension, cells, periodic, overlap,
-            typename Grid::CollectiveCommunicationType(), &lb);
+        grid =
+            std::make_shared < Grid
+                > (extension, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
       }
 
       bool keepPhysicalOverlap = params.get<bool>(
@@ -102,18 +105,13 @@ public:
     }
   }
 
-  ~IniGridFactory()
+  std::shared_ptr<Grid> getGrid()
   {
-    delete grid;
-  }
-
-  Grid& getGrid()
-  {
-    return *grid;
+    return grid;
   }
 
 private:
-  Grid* grid;
+  std::shared_ptr<Grid> grid;
 };
 
 /** An IniGridFactory for equidistant YaspGrid with non-zero offset
@@ -145,8 +143,9 @@ public:
     try
     {
       if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = Dune::BackupRestoreFacility < Grid
-            > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
+        grid = std::shared_ptr < Grid
+            > (Dune::BackupRestoreFacility<Grid>::restore(
+                params.get<std::string>("yaspgrid.loadFromFile")));
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
     }
@@ -191,12 +190,14 @@ public:
 
       // build the actual grid
       if (default_lb)
-        grid = new Grid(lowerleft, upperright, cells, periodic, overlap);
+        grid = std::make_shared < Grid
+            > (lowerleft, upperright, cells, periodic, overlap);
       else
       {
         typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
-        grid = new Grid(lowerleft, upperright, cells, periodic, overlap,
-            typename Grid::CollectiveCommunicationType(), &lb);
+        grid =
+            std::make_shared < Grid
+                > (lowerleft, upperright, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
       }
 
       bool keepPhysicalOverlap = params.get<bool>(
@@ -208,20 +209,14 @@ public:
     }
   }
 
-  ~IniGridFactory()
+  std::shared_ptr<Grid> getGrid()
   {
-    delete grid;
-  }
-
-  Grid& getGrid()
-  {
-    return *grid;
+    return grid;
   }
 
 private:
-  Grid* grid;
+  std::shared_ptr<Grid> grid;
 };
-
 
 /** An IniGridFactory for a tensorproduct YaspGrid
  *
@@ -247,8 +242,9 @@ public:
     try
     {
       if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = Dune::BackupRestoreFacility < Grid
-            > ::restore(params.get<std::string>("yaspgrid.loadFromFile"));
+        grid = std::shared_ptr < Grid
+            > (Dune::BackupRestoreFacility<Grid>::restore(
+                params.get<std::string>("yaspgrid.loadFromFile")));
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
     }
@@ -281,12 +277,13 @@ public:
 
       // build the actual grid
       if (default_lb)
-        grid = new Grid(coordinates, periodic, overlap);
+        grid = std::make_shared < Grid > (coordinates, periodic, overlap);
       else
       {
         typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
-        grid = new Grid(coordinates, periodic, overlap,
-            typename Grid::CollectiveCommunicationType(), &lb);
+        grid =
+            std::make_shared < Grid
+                > (coordinates, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
       }
 
       bool keepPhysicalOverlap = params.get<bool>(
