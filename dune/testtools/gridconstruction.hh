@@ -9,6 +9,10 @@
 #include<dune/common/exceptions.hh>
 #include<dune/common/parametertree.hh>
 #include<dune/common/parallel/collectivecommunication.hh>
+#include<dune/grid/common/backuprestore.hh>
+#include<dune/grid/io/file/gmshreader.hh>
+#include<dune/grid/uggrid.hh>
+#include<dune/grid/utility/structuredgridfactory.hh>
 #include<dune/grid/yaspgrid.hh>
 #include<dune/grid/yaspgrid/backuprestore.hh>
 
@@ -295,19 +299,110 @@ public:
     }
   }
 
-  ~IniGridFactory()
+  std::shared_ptr<Grid> getGrid()
   {
-    delete grid;
-  }
-
-  Grid& getGrid()
-  {
-    return *grid;
+    return grid;
   }
 
 private:
-  Grid* grid;
+  std::shared_ptr<Grid> grid;
 };
 
+template<int dim>
+class IniGridFactory<Dune::UGGrid<dim> >
+{
+public:
+  typedef typename Dune::UGGrid<dim> Grid;
+  typedef typename Grid::ctype ct;
+
+  IniGridFactory(const Dune::ParameterTree& params)
+  {
+    // try building an ug grid by taking a gmshfile from the ini file
+    try
+    {
+      if (params.hasKey("ug.gmshFile"))
+      {
+        std::string gmshfile = params.get<std::string>("ug.gmshFile");
+
+        // TODO maybe read verbosity from the ini file too.
+        bool verbose = false;
+        // TODO find out what exactly the insert_boundary_segments stuff is doing
+        bool insert_boundary_segments = true;
+
+        Dune::GridFactory<Grid> factory;
+        Dune::GmshReader<Grid>::read(factory, gmshfile, verbose,
+            insert_boundary_segments);
+        grid = std::shared_ptr < Grid > (factory.createGrid());
+      }
+      else
+        DUNE_THROW(Dune::Exception, "Execute catch in that case");
+    }
+    // otherwise, try other methods
+    catch (...)
+    {
+      // try building an ug grid by taking a dgf file from the ini file
+      try
+      {
+        if (params.hasKey("ug.dgfFile"))
+        {
+          std::string dgffile = params.get<std::string>("ug.dgfFile");
+
+          // TODO dgf construction
+          // DGFGridFactory<Grid> dgfFactory(dgffile, typename Grid::CollectiveCommuncationType());
+        }
+        else
+          DUNE_THROW(Dune::Exception, "Execute catch in that case");
+      }
+      // otherwise, try other methods
+      catch (...)
+      {
+        // TODO construct a structured grid with the given geometry type and extensions:
+
+        Dune::FieldVector<ct, dim> lowerleft = params.get<
+            Dune::FieldVector<ct, dim> >("ug.lowerleft",
+            Dune::FieldVector<ct, dim>(0.0));
+        Dune::FieldVector<ct, dim> upperright = params.get<
+            Dune::FieldVector<ct, dim> >("ug.upperright");
+
+        std::array<unsigned int, dim> elements;
+        std::fill(elements.begin(), elements.end(), 1);
+        if (params.hasKey("ug.elements"))
+          elements = params.get<std::array<unsigned int, dim> >("ug.elements");
+
+        std::string elemType = params.get<std::string>("ug.elementType",
+            "quadrilateral");
+
+        Dune::StructuredGridFactory<Grid> factory;
+        // TODO maybe add some synonymous descriptions of quadrilateral grids here.
+        if (elemType == "quadrilateral")
+          grid = factory.createCubeGrid(lowerleft, upperright, elements);
+        else
+        {
+          if (elemType == "simplical")
+            grid = factory.createSimplexGrid(lowerleft, upperright, elements);
+          else
+            DUNE_THROW(Dune::GridError,
+                "Specified an invalid element type in ini file.");
+        }
+      }
+    }
+
+    // given we have successfully created a grid, maybe perform some operations on it
+    // TODO what are suitable such operations for an unstructured grid.
+    if (grid != NULL)
+    {
+      int refinement = params.get<int>("ug.refinement", 0);
+      grid->globalRefine(refinement);
+    }
+  }
+
+  std::shared_ptr<Grid> getGrid()
+  {
+    return grid;
+  }
+
+private:
+  std::shared_ptr<Grid> grid;
+};
 
 #endif
