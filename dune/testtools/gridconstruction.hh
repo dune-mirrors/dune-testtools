@@ -16,6 +16,26 @@
 #include<dune/grid/yaspgrid.hh>
 #include<dune/grid/yaspgrid/backuprestore.hh>
 
+/**
+ * \file A factory class combining all methods of grid construction under
+ *       the umbrella of ini file construction.
+ *
+ *  There are many ways to construct dune-grids. In automated testing we want
+ *  to control those ways through one mechanism - ini files. All grids only
+ *  take into account key/value pairs within their group. See the factory specialization
+ *  documentation to see how grids of that types can be customized through
+ *  the ini files.
+ *
+ *  TODO:
+ *  - It is currently impossible to construct multiple grids of one type.
+ *    This should be possible by taking a subtree to construct the grid.
+ *    => The main program can control multiple groups within the ini file.
+ *  - The include list of this file could cause dependency trouble. So it either
+ *    needs to know through the preprocessor, which grids are actually used or
+ *    the specialization need to be split into grid specific headers and be
+ *    included in the main program iff the grid is used.
+ */
+
 /** Default Implementation of factory class constructing grids from ini
  *
  *  throws an exception upon construction.
