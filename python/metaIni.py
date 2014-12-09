@@ -266,6 +266,8 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
             if conf["__name"] in name_dict:
                 conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
                 name_dict[conf["__name"]] += 1
+            # remove the special key from the resulting file
+            del conf["__name"]
         else:
             conffile = base + str(counter).zfill(4)
             counter = counter + 1
