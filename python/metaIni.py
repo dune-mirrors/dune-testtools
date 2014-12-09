@@ -224,8 +224,12 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
                     while ("{" in value) and ("}" in value):
                         rest, dkey = value.split("{", 1)
                         dkey, rest = dkey.split("}", 1)
-                        processdict[key] = value.replace("{" + dkey + "}", dotkey(fulldict, dkey))
-                        value = processdict[key]
+                        if dkey == "__delete":
+                            del processdict[key]
+                            value = ""
+                        else:
+                            processdict[key] = value.replace("{" + dkey + "}", dotkey(fulldict, dkey))
+                            value = processdict[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
