@@ -10,11 +10,18 @@
 #include<dune/common/parametertree.hh>
 #include<dune/common/parallel/collectivecommunication.hh>
 #include<dune/grid/common/backuprestore.hh>
+#include<dune/grid/io/file/dgfparser/dgfparser.hh>
 #include<dune/grid/io/file/gmshreader.hh>
-#include<dune/grid/uggrid.hh>
 #include<dune/grid/utility/structuredgridfactory.hh>
+
+// YaspGrid specific includes
 #include<dune/grid/yaspgrid.hh>
 #include<dune/grid/yaspgrid/backuprestore.hh>
+#include<dune/grid/io/file/dgfparser/dgfyasp.hh>
+
+// UGGrid specific includes
+#include<dune/grid/uggrid.hh>
+#include<dune/grid/io/file/dgfparser/dgfug.hh>
 
 /**
  * \file A factory class combining all methods of grid construction under
