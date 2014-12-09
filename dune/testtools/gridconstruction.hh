@@ -370,6 +370,8 @@ private:
  * - elements : number of elements in a structured grid
  * - elementType : "quadrialteral" or "simplical" to be used for structured grids
  * - refinement : the number of global refines to perform
+ * - verbose : whether the grid construction should output to standard out
+ * - boundarySegments : whether to insert boundary segments into the grid
  */
 template<int dim>
 class IniGridFactory<Dune::UGGrid<dim> >
@@ -387,15 +389,13 @@ public:
       {
         std::string gmshfile = params.get<std::string>("ug.gmshFile");
 
-        // TODO maybe read verbosity from the ini file too.
-        bool verbose = false;
-        // TODO find out what exactly the insert_boundary_segments stuff is doing
-        bool insert_boundary_segments = true;
+        bool verbose = params.get<bool>("ug.verbose", false);
+        bool boundarySegments = params.get<bool>("ug.boundarySegments", false);
 
-        Dune::GridFactory<Grid> factory;
-        Dune::GmshReader<Grid>::read(factory, gmshfile, verbose,
-            insert_boundary_segments);
-        grid = std::shared_ptr < Grid > (factory.createGrid());
+        grid =
+            std::shared_ptr < Grid
+                > (Dune::GmshReader<Grid>::read(gmshfile, verbose,
+                    boundarySegments));
       }
       else
         DUNE_THROW(Dune::Exception, "Execute catch in that case");
@@ -409,9 +409,8 @@ public:
         if (params.hasKey("ug.dgfFile"))
         {
           std::string dgffile = params.get<std::string>("ug.dgfFile");
-
-          // TODO dgf construction
-          // DGFGridFactory<Grid> dgfFactory(dgffile, typename Grid::CollectiveCommuncationType());
+          Dune::GridPtr<Grid> gridptr(dgffile);
+          grid = std::shared_ptr < Grid > (gridptr.release());
         }
         else
           DUNE_THROW(Dune::Exception, "Execute catch in that case");
