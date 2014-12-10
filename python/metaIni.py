@@ -222,13 +222,30 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
                     resolve_key_dependencies(fulldict, value)
                 else:
                     while ("{" in value) and ("}" in value):
+                        # split the contents form the innermost curly brackets from the rest
                         begin, dkey = value.rsplit("{", 1)
                         dkey, end = dkey.split("}", 1)
+                        
+                        # check for the special key that deletes the entire key.
                         if dkey == "__delete":
                             del processdict[key]
                             value = ""
                         else:
-                            processdict[key] = begin + dotkey(fulldict,dkey) + end
+                            newvalue = ""
+                            # check for and apply the special key __lower
+                            if dkey.startswith("__lower"):
+                                rest, dkey = dkey.split(".", 1)
+                                newvalue = dotkey(fulldict, dkey).lower()
+                            # check for and apply the special key __upper
+                            if dkey.startswith("__upper"):
+                                rest, dkey =  dkey.split(".", 1)
+                                newvalue = dotkey(fulldict, dkey).upper()
+                            # if none of the above happened:
+                            if newvalue is "":
+                                newvalue = dotkey(fulldict, dkey)
+
+                            # substitute the key by the correct value
+                            processdict[key] = begin + newvalue + end
                             value = processdict[key]
 
         # values might depend on keys, whose value also depend on other keys.
