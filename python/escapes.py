@@ -11,15 +11,19 @@ TODO:
   an afternoon in escape hell.
 """
 
-def exists_unescaped(str, char):
+def count_unescaped(str, char):
     if len(str) is 0:
-        return False
+        return 0
+    count = 0
     if str[0] is char:
-        return True
+        count = count + 1
     for i in range(1, len(str)):
         if (str[i] is char) and (str[i - 1] != "\\"):
-            return True
-    return False
+            count = count + 1
+    return count
+
+def exists_unescaped(str, char):
+    return count_unescaped(str, char) != 0
 
 def strip_escapes(str, char):
     return  str.replace("\\" + char, char)
@@ -36,7 +40,6 @@ def escaped_split(str, delimiter=" ", maxsplit=-1):
     for item in normal:
         # check whether the delimiter after this item was escaped
         if item.endswith("\\"):
-            print "item[:-1] : {}".format(item[:-1])
             concat = concat + item[:-1] + delimiter
         else:
             result.append(concat + item)
@@ -45,5 +48,4 @@ def escaped_split(str, delimiter=" ", maxsplit=-1):
     if not concat is "":
         result.append(concat)
 
-    print "returning {}".format(result)
     return result
