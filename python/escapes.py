@@ -30,7 +30,12 @@ def strip_escapes(str, char):
 
 def escaped_split(str, delimiter=" ", maxsplit=-1):
     # perform an ordinary split without taking into account escaping
-    normal = str.split(delimiter, maxsplit)
+    if (len(delimiter) is 1):
+        normal = str.split(delimiter, maxsplit)
+    else:
+        # the re split was needed here, it might crash with characters that need escaping themself
+        # within the delimiter...
+        normal = re.split(delimiter, line)
 
     # define the resulting list
     result = []
