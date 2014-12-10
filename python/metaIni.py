@@ -222,13 +222,13 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
                     resolve_key_dependencies(fulldict, value)
                 else:
                     while ("{" in value) and ("}" in value):
-                        rest, dkey = value.split("{", 1)
-                        dkey, rest = dkey.split("}", 1)
+                        begin, dkey = value.rsplit("{", 1)
+                        dkey, end = dkey.split("}", 1)
                         if dkey == "__delete":
                             del processdict[key]
                             value = ""
                         else:
-                            processdict[key] = value.replace("{" + dkey + "}", dotkey(fulldict, dkey))
+                            processdict[key] = begin + dotkey(fulldict,dkey) + end
                             value = processdict[key]
 
         # values might depend on keys, whose value also depend on other keys.
