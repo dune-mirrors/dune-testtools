@@ -6,6 +6,8 @@ TODO:
 
 # inspired by http://www.decalage.info/fr/python/configparser
 
+from escapes import *
+
 def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False, conversionList=(int, float,), subgroups=True):
     """ parse Dune style .ini files into a dictionary
 
@@ -40,23 +42,25 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
 
         # strip comments from the line
         for char in commentChar:
-            if char in line:
-                line, comment = line.split(char, 1)
+            if exists_unescaped(line, char):
+                line, comment = escaped_split(line, char, 1)
+            # all other occurences can be handled normally now
+            line = strip_escapes(line, char)
 
         # check whether this line specifies a group
-        if ("[" in line) and ("]" in line):
+        if (exists_unescaped(line,"[")) and (exists_unescaped(line,"]")):
             # reset the current dictionary
             current_dict = result_dict
 
             # isolate the group name
-            group, bracket = line.split("]", 1)
-            bracket, group = group.split("[", 1)
+            group, bracket = escaped_split(line, "]", 1)
+            bracket, group = escaped_split(group, "[", 1)
             group = group.strip(" ")
 
             # process the stack of subgroups given
             if subgroups is True:
-                while "." in group:
-                    subgroup, group = group.split(".", 1)
+                while exists_unescaped(group,"."):
+                    subgroup, group = escaped_split(group, ".", 1)
                     if subgroup not in current_dict:
                         current_dict[subgroup] = {}
                     current_dict = current_dict[subgroup]
@@ -67,6 +71,12 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
             current_dict = current_dict[group]
             continue
 
+        # We dont care about [ and ] from now on, remove the escape characters
+        line = strip_escapes(line, "[")
+        line = strip_escapes(line, "]")
+
+        print "Line after group detection: {}".format(line)
+
         # save the current_dict to reset it after each key/value pair evaluation
         # this is necessary to have some subgroup definitions in keys instead of in square brackets.
         group_dict = current_dict
@@ -74,17 +84,19 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
         # check whether this line defines a key/value pair
         # only process if the assignment string is found exactly once
         # 0 => no relevant assignment 2=> this is actually an assignment with a more complicated operator
-        if (line.count(assignment) is 1) or ((assignment is " ") and (line.count(assignment) is not 0)):
+        if (count_unescaped(line, assignment) is 1) or ((assignment is " ") and (line.count(assignment) is not 0)):
             # split key from value
             if assignment is " ":
                 key, value = line.split(" ", 1)
             else:
-                import re
-                key, value = re.split(assignment, line)
+                key, value = escaped_split(line, assignment)
+
+            print "Key, value: {} {}".format(key, value)
 
             # look for additional groups in the key
             key = key.strip()
             if subgroups is True:
+                # dots in group names cannot be escaped. Otherwise, we will end up in HELL.
                 while "." in key:
                     group, key = key.split(".")
                     if group not in current_dict:
@@ -93,6 +105,8 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
 
             # strip blanks from the value
             value = value.strip()
+            for c in assignment:
+                value = strip_escapes(value, c)
 
             # set the dictionary entry for this pair to the default string
             if key is not "":
