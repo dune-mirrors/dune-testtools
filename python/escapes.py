@@ -11,22 +11,16 @@ TODO:
   an afternoon in escape hell.
 """
 
+import re
+
 def count_unescaped(str, char):
-    if len(str) is 0:
-        return 0
-    count = 0
-    if str[0] is char:
-        count = count + 1
-    for i in range(1, len(str)):
-        if (str[i] is char) and (str[i - 1] != "\\"):
-            count = count + 1
-    return count
+    return len(re.findall("{}(?!{})".format(re.escape(char),"\\\\"), str))
 
 def exists_unescaped(str, char):
     return count_unescaped(str, char) != 0
 
 def strip_escapes(str, char):
-    return  str.replace("\\" + char, char)
+    return str.replace("\\" + char, char)
 
 def escaped_split(str, delimiter=" ", maxsplit=-1):
     # perform an ordinary split without taking into account escaping
@@ -35,7 +29,8 @@ def escaped_split(str, delimiter=" ", maxsplit=-1):
     else:
         # the re split was needed here, it might crash with characters that need escaping themself
         # within the delimiter...
-        normal = re.split(delimiter, line)
+        import re
+        normal = re.split(delimiter, str)
 
     # define the resulting list
     result = []
