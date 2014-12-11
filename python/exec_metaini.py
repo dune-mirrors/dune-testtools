@@ -1,3 +1,4 @@
+from compile_definitions import extract_compile_definitions
 from metaIni import expand_meta_ini
 from writeIni import write_dict_to_ini
 import sys
@@ -8,6 +9,7 @@ if (len(sys.argv) is 2):
 
     # here, we can modify the configurations, look for special keys,
     # extract information and do all sorts of weird stuff.
+    static_confs, indices = extract_compile_definitions(configurations)
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
