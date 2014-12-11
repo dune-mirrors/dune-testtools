@@ -56,35 +56,6 @@ from escapes import *
 from parseIni import parse_ini_file
 from copy import deepcopy
 
-def write_dict_to_ini(d, filename, assignment):
-    with open(filename, 'w') as f:
-
-        def traverse_dict(file, d, prefix):
-            # first traverse all non-group values (they would otherwise be considered part of a group)
-            for key, value in sorted(d.items()):
-                if type(value) is not dict:
-                    file.write("{} {} {}\n".format(key, assignment, value))
-
-            # now go into subgroups
-            for key, value in sorted(d.items()):
-                if type(value) is dict:
-                    pre = prefix + [key]
-
-                    def groupname(prefixlist):
-                        prefix = ""
-                        for p in prefixlist:
-                            if prefix is not "":
-                                prefix = prefix + "."
-                            prefix = prefix + p
-                        return prefix
-
-                    file.write("\n[{}]\n".format(groupname(pre)))
-                    traverse_dict(file, value, pre)
-
-        prefix = []
-        traverse_dict(f, d, prefix)
-
-
 def expand_meta_ini(filename, assignment="=", subgroups=True):
     """ take a meta ini file and construct the set of ini files it defines
 
@@ -287,9 +258,10 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
             if conf["__name"] in name_dict:
                 conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
                 name_dict[conf["__name"]] += 1
-            # remove the special key from the resulting file
-            del conf["__name"]
+            # update the name key in the configuration dictionary
+            conf["__name"] = conffile + ".ini"
         else:
-            conffile = base + str(counter).zfill(4)
+            conf["__name"] = base + str(counter).zfill(4)+ ".ini"
             counter = counter + 1
-        write_dict_to_ini(conf, conffile + ".ini", assignment)
+
+    return configurations
