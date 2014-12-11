@@ -52,6 +52,7 @@ subgroup is not used elsewhere. THe reason is that the dictionary "normal" doesn
 correctly.
 """
 
+from escapes import *
 from parseIni import parse_ini_file
 from copy import deepcopy
 
@@ -96,6 +97,8 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
     ------------------
     assignment : string
         The standard assignment operator
+    subgroups : bool
+        Whether the meta ini file interprets dots in groups as subgroups
     """
 
     # one dictionary to hold the results from several parser runs
@@ -109,13 +112,13 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
     # look into the file to determine the set of assignment operators used
     file = open(filename)
     for line in file:
-        if line.count("=") is 2:
-            key, assignChar, value = line.split("=")
+        if count_unescaped(line, assignment) is 2:
+            key, assignChar, value = escaped_split(line, assignment)
             result[assignChar] = {}
 
     # get dictionaries for all sorts of assignments
     for key in result:
-        assignChar = "={}=".format(key)
+        assignChar = "{}{}{}".format(assignment, key, assignment)
         result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True, subgroups=subgroups)
 
     # start combining dictionaries - there is always the normal dict
@@ -137,7 +140,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
                 pref = prefix + [key]
                 configurations = generate_configs(values, configurations, pref)
             else:
-                values = [v.strip() for v in values.split(',')]
+                values = escaped_split(values, ',')
                 configurations = configs_for_key(key, values, configurations, prefix)
 
         for config in configurations:
@@ -155,7 +158,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
                 pref = prefix + [key]
                 output = expand_dict(values, output, pref)
             else:
-                values = [v.strip() for v in values.split(',')]
+                values = escaped_split(values, ',')
                 if output is None:
                     output = [{} for i in range(len(values))]
                 for index, val in enumerate(values):
@@ -221,11 +224,12 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
                 if type(value) is dict:
                     resolve_key_dependencies(fulldict, value)
                 else:
-                    while ("{" in value) and ("}" in value):
+                    while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
                         # split the contents form the innermost curly brackets from the rest
+                        # TODO use regexp and escaping here. This would require a regexp for this rsplit... ugly!!!
                         begin, dkey = value.rsplit("{", 1)
                         dkey, end = dkey.split("}", 1)
-                        
+
                         # check for the special key that deletes the entire key.
                         if dkey == "__delete":
                             del processdict[key]
