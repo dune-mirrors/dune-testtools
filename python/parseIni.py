@@ -75,8 +75,6 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
         line = strip_escapes(line, "[")
         line = strip_escapes(line, "]")
 
-        print "Line after group detection: {}".format(line)
-
         # save the current_dict to reset it after each key/value pair evaluation
         # this is necessary to have some subgroup definitions in keys instead of in square brackets.
         group_dict = current_dict
@@ -90,8 +88,6 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
                 key, value = line.split(" ", 1)
             else:
                 key, value = escaped_split(line, assignment)
-
-            print "Key, value: {} {}".format(key, value)
 
             # look for additional groups in the key
             key = key.strip()
