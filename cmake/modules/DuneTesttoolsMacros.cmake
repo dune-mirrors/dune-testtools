@@ -17,7 +17,7 @@
 
 find_package(PythonInterp)
 
-include(MetaIniTests)
+include(MetaIniMacros)
 include(ConditionalIncludes)
 
 function(add_dune_system_test)
