@@ -42,11 +42,7 @@ macro(resolve_conditional_includes target definitions)
   foreach(def ${definitions})
     # check whether that definition exists on the target
     list(FIND target_defs ${def} ${def}_FOUND)
-    message("target_defs: ${target_defs}")
-    message("def: ${def}")
-    message("def_found: ${${def}_FOUND}")
     if(NOT ${${def}_FOUND} EQUAL -1)
-      message("Found ${def}")
       # the definition is found: Define the macro as identity for both CMake Parser and C preprocessor
       set_property(TARGET ${target} APPEND PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM "${def}_CONDITIONAL_INCLUDE(%)=<%>")
       # appending to the compile flags property is buggy in CMake: it produces semicolons in the output
@@ -54,7 +50,6 @@ macro(resolve_conditional_includes target definitions)
       set(flags "${flags} -D\"${def}_CONDITIONAL_INCLUDE\(h\)=<h>\"")
       set_property(TARGET ${target} PROPERTY COMPILE_FLAGS ${flags})
     else(NOT ${${def}_FOUND} EQUAL -1)
-      message("Did not find ${def}")
       # the definition is not found: Ignore this line in the CMake Parser and include some trivial macro in C preprocessor
       set_property(TARGET ${target} APPEND PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM "${def}_CONDITIONAL_INCLUDE(%)=")
       # appending to the compile flags property is buggy in CMake: it produces semicolons in the output
