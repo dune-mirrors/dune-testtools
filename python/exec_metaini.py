@@ -31,7 +31,9 @@ if (len(sys.argv) is 2):
     for sc in static_confs:
         if returndef != "":
             returndef = returndef + "\n"
-        returndef = returndef + exec_suffix[sc] + ";" + sc
+        # TODO make this nicer!
+        # using '&' as a separator is hopefully helpful with cmake list hell!
+        returndef = returndef + exec_suffix[sc] + "&" + sc
 
     # write the configurations to the file specified in the name key.
     for c in configurations:

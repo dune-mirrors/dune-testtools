@@ -13,7 +13,9 @@ def def_string(d, groupkey="__STATIC"):
         for key, value in s.items():
             # if there is already stuff, first append the cmake list delimiter
             if len(definition) > 0:
-                definition = definition + ";"
+                # TODO make this nicer
+                # using '&' as a separator is hopefully helpful with cmake list hell!
+                definition = definition + "&"
             # TODO find out what needs to escaped in order to correctly get this
             # through cmake and the c preprocessor
             definition = definition + key.upper() + "=" + value
