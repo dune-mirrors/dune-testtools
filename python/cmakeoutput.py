@@ -12,42 +12,76 @@ but it is very helpful anyway:
   would be a pain.
 - All values in the dict must either be lists or values convertible to a string.
 - All items in such lists must themselves be convertible to a string (no lists).
-- Having semicolons in the data would be a PAIN (cmake hell + escape hell = a hell of a hell)
+
+Semicolons in the data pose a major problem here: CMake uses semicolons as a list
+delimiter. The naive attempt to escape them did not work. They are therefore
+substituted by a different character which is not present in the data and that
+character is passed to CMake too. Any better ideas to do this are welcome, it feels
+like a hack.
 """
 
 def printForCMake(d):
+    # Do all the error checking in the beginning and forget about it later
     if type(d) is not dict:
         raise ValueError("Expected a dict")
+    def check_str(x):
+        try:
+            str(x)
+        except ValueError:
+            print "All data elements must be convertible to a string"
+    for val in d:
+        if type(val) is list:
+            for i in val:
+                check_str(i)
+        else:
+            check_str(val)
 
-    # CMake expects a list and CMake lists use semicolons as delimiters
+    # Treat the general problem of semicolons being list separators in CMake.
+    # set a delimiter for the tokens of our output (there is probably non solution but ";")
     delimiter = ";"
+    # find a character that is ASCII, has no special meaning in CMake and does not appear in the data
+    specialChars = ["&", "#", "!", "?", "/"]
+    def does_not_appear(d, c):
+        for val in d:
+            if type(val) is list:
+                for i in val:
+                    if c in str(i):
+                        return False
+            else:
+                if c in str(val):
+                    return False
+        return True
+
+    replacement = ""
+    for c in specialChars:
+        if does_not_appear(d, c):
+            replacement = c
+            break
+        raise ValueError("Did not find a proper replacement for the semicolon in the data")
 
     singlekeys = "__SINGLE" + delimiter
     multikeys = "__MULTI" + delimiter
     data = "__DATA" + delimiter
 
+    def prepare_val(s):
+        return str(s).replace(";", replacement)
+
     for key, value in d.items():
-        if type(value) is dict:
-            raise ValueError("Nested dicts are not supported")
         if type(value) is list:
-            multikeys = multikeys + str(key) + delimiter
-            data = data + str(key) + delimiter
+            multikeys = multikeys + prepare_val(key) + delimiter
+            data = data + prepare_val(key) + delimiter
             for item in value:
                 if (type(item) is dict) or (type(item) is list):
                     raise ValueError("Nesting of complex types not supported")
-                data = data + str(item) + delimiter
+                data = data + prepare_val(item) + delimiter
         else:
-            singlekeys = singlekeys + str(key) + delimiter
-            data = data + str(key) + delimiter + str(value) + delimiter
+            singlekeys = singlekeys + prepare_val(key) + delimiter
+            data = data + prepare_val(key) + delimiter + prepare_val(value) + delimiter
 
     output = singlekeys + multikeys + data
+    if replacement != "":
+        output = output + "__SEMICOLON" + delimiter + replacement + delimiter
 
     # this is necessary because python will always add a newline character on program exit
     import sys
     sys.stdout.write(output[:-1])
-
-d = {}
-d["bla"] = "mafai"
-d["bli"] = [1, 2, 3]
-printForCMake(d)
-

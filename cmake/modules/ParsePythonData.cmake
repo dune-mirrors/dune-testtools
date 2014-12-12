@@ -11,10 +11,10 @@ function(parse_python_data prefix input)
   # these keys are an agreement between the python and the cmake module
   # they can be changed to whatever keys, as long as they are updated on
   # both ends.
+  set(SINGLEKEY __SEMICOLON)
   set(MULTIKEYS __SINGLE __MULTI __DATA)
-
   # first parsing: What keys are present in the data
-  cmake_parse_arguments(KEYS "" "" "${MULTIKEYS}" ${input})
+  cmake_parse_arguments(KEYS "" "${SINGLEKEY}" "${MULTIKEYS}" ${input})
 
   # second parsing: What data is associated with the keys
   cmake_parse_arguments(${prefix} "" "${KEYS___SINGLE}" "${KEYS___MULTI}" ${KEYS___DATA})
@@ -25,7 +25,12 @@ function(parse_python_data prefix input)
   # ones from this script. Especially w.r.t. to multiple calls of this macro
   # that should be avoided!
   foreach(key in ${KEYS___SINGLE} ${KEYS___MULTI})
-    set(${prefix}_${key} ${${prefix}_${key}} PARENT_SCOPE)
+    set(output ${${prefix}_${key}})
+    # replace semicolons if necessary
+    if(DEFINED KEYS___SEMICOLON)
+      string(REPLACE "${KEYS___SEMICOLON}" ";" output "${output}")
+    endif(DEFINED KEYS___SEMICOLON)
+    set(${prefix}_${key} ${output} PARENT_SCOPE)
   endforeach(key in ${KEYS___SINGLE} ${KEYS___MULTI})
 
 endfunction(parse_python_data prefix inputstr)
