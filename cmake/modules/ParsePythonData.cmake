@@ -17,20 +17,16 @@ function(parse_python_data prefix input)
   cmake_parse_arguments(KEYS "" "${SINGLEKEY}" "${MULTIKEYS}" ${input})
 
   # second parsing: What data is associated with the keys
-  cmake_parse_arguments(${prefix} "" "${KEYS___SINGLE}" "${KEYS___MULTI}" ${KEYS___DATA})
+  cmake_parse_arguments(DATA "" "${KEYS___SINGLE}" "${KEYS___MULTI}" ${KEYS___DATA})
 
   # set the variables in the parent scope!
   # Note: Having this function as a macro would inline it into the outer
   # scope and thus setting all variables correctly - but also the temporary
   # ones from this script. Especially w.r.t. to multiple calls of this macro
   # that should be avoided!
-  foreach(key in ${KEYS___SINGLE} ${KEYS___MULTI})
-    set(output ${${prefix}_${key}})
-    # replace semicolons if necessary
-    if(DEFINED KEYS___SEMICOLON)
-      string(REPLACE "${KEYS___SEMICOLON}" ";" output "${output}")
-    endif(DEFINED KEYS___SEMICOLON)
-    set(${prefix}_${key} ${output} PARENT_SCOPE)
-  endforeach(key in ${KEYS___SINGLE} ${KEYS___MULTI})
-
-endfunction(parse_python_data prefix inputstr)
+  foreach(key ${KEYS___SINGLE} ${KEYS___MULTI})
+    # restore any semicolons in the data
+    string(REPLACE "${KEYS___SEMICOLON}" ";" output "${DATA_${key}}")
+    set(${PYPARSE_PREFIX}_${key} ${output} PARENT_SCOPE)
+  endforeach(key ${KEYS___SINGLE} ${KEYS___MULTI})
+endfunction(parse_python_data)

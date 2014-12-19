@@ -71,21 +71,27 @@ def printForCMake(d):
     def prepare_val(s):
         return str(s).replace(";", replacement)
 
-    for key, value in d.items():
-        if type(value) is list:
-            multikeys = multikeys + prepare_val(key) + delimiter
-            data = data + prepare_val(key) + delimiter
-            for item in value:
-                if (type(item) is dict) or (type(item) is list):
-                    raise ValueError("Nesting of complex types not supported")
-                data = data + prepare_val(item) + delimiter
-        else:
-            singlekeys = singlekeys + prepare_val(key) + delimiter
-            data = data + prepare_val(key) + delimiter + prepare_val(value) + delimiter
+    def add_dictionary_to_keys(dic, singlekeys, multikeys, data, prefix=""):
+        # add a dictionary to the keys
+        for key, value in dic.items():
+            if type(value) is dict:
+                singlekeys, multikeys, data = add_dictionary_to_keys(value, singlekeys, multikeys, data, prefix + str(key).upper() + "_")
+                continue
+            if type(value) is list:
+                multikeys = multikeys + prefix + prepare_val(key).upper() + delimiter
+                data = data + prefix + prepare_val(key).upper() + delimiter
+                for item in value:
+                    if (type(item) is dict) or (type(item) is list):
+                        raise ValueError("Nesting of complex types not supported")
+                    data = data + prepare_val(item) + delimiter
+                continue
+            singlekeys = singlekeys + prefix + prepare_val(key).upper() + delimiter
+            data = data + prefix + prepare_val(key).upper() + delimiter + prepare_val(value) + delimiter
+        return [singlekeys, multikeys, data]
 
+    singlekeys, multikeys, data = add_dictionary_to_keys(d, singlekeys, multikeys, data)
     output = singlekeys + multikeys + data
-    if replacement != "":
-        output = output + "__SEMICOLON" + delimiter + replacement + delimiter
+    output = output + "__SEMICOLON" + delimiter + replacement + delimiter
 
     # this is necessary because python will always add a newline character on program exit
     import sys
