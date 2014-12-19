@@ -21,18 +21,25 @@ to undo the replacement.
 def printForCMake(d):
     # Do all the error checking in the beginning and forget about it later
     if type(d) is not dict:
-        raise ValueError("Expected a dict")
+        raise ValueError("Expected a dictionary for the Python-CMake interface")
     def check_str(x):
         try:
             str(x)
         except ValueError:
             print "All data elements must be convertible to a string"
-    for val in d:
-        if type(val) is list:
-            for i in val:
-                check_str(i)
-        else:
+    def check_dict(a):
+        for val in a:
+            if type(val) is dict:
+                check_dict(val)
+                continue
+            if type(val) is list:
+                for i in val:
+                    if type(i) is dict:
+                        raise ValueError("No dictionaries in lists allowed for the Python-CMake interface")
+                    check_str(i)
+                continue
             check_str(val)
+    check_dict(d)
 
     # Treat the general problem of semicolons being list separators in CMake.
     # set a delimiter for the tokens of our output (there is probably non solution but ";")
