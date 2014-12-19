@@ -3,6 +3,8 @@ set(TESTPROGS outputtreetest constructiontest triggertest)
 add_directory_test_target(_test_target)
 add_dependencies(${_test_target} ${TESTPROGS})
 
+add_subdirectory(cmakepython)
+
 add_executable("outputtreetest" outputtreetest.cc)
 add_executable("constructiontest" constructiontest.cc)
 add_dune_ug_flags(constructiontest)
