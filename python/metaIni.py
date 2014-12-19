@@ -56,7 +56,7 @@ from escapes import *
 from parseIni import parse_ini_file
 from copy import deepcopy
 
-def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None):
+def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -74,6 +74,11 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None):
         Only apply the algorithm to a set of keys given.
         Defaults to None, which means that all groups are taken into account.
         This is white list filtering (explicitly give the keys you want).
+    addNameKey : bool
+        Whether a key __name should be in the output. Defaults to true, where
+        a unique name key is generated from the given name key and added to the
+        file (even when no generation pattern is given). If set to false, no
+        name key will be in the output, whether a scheme was given or not.
     """
 
     # one dictionary to hold the results from several parser runs
@@ -248,38 +253,43 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None):
         while needs_resolution(c) is True:
             resolve_key_dependencies(c, c)
 
-    # write the configurations to disk
+    # Implement the naming scheme through the special key __name
+    if addNameKey is True:
+        # count the number of occurences of __name keys in the data set
+        name_dict = {}
+        for c in configurations:
+            if "__name" in c:
+                if c["__name"] not in name_dict:
+                    name_dict[c["__name"]] = 1
+                else:
+                    name_dict[c["__name"]] += 1
 
-    # count the number of occurences of __name keys in the data set
-    name_dict = {}
-    for c in configurations:
-        if "__name" in c:
-            if c["__name"] not in name_dict:
-                name_dict[c["__name"]] = 1
+        # now delete all those keys that occure once and reset all others to a counter
+        for key, value in name_dict.items():
+            if value is 1:
+                del name_dict[key]
             else:
-                name_dict[c["__name"]] += 1
+                name_dict[key] = 0
 
-    # now delete all those keys that occure once and reset all others to a counter
-    for key, value in name_dict.items():
-        if value is 1:
-            del name_dict[key]
-        else:
-            name_dict[key] = 0
-
-    # initialize a counter in the case of number only file name generation
-    counter = 0
-    base, extension = filename.split(".", 1)
-    for conf in configurations:
-        # check whether a custom name has been provided by the user
-        if "__name" in conf:
-            conffile = conf["__name"]
-            if conf["__name"] in name_dict:
-                conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
-                name_dict[conf["__name"]] += 1
-            # update the name key in the configuration dictionary
-            conf["__name"] = conffile + ".ini"
-        else:
-            conf["__name"] = base + str(counter).zfill(4)+ ".ini"
-            counter = counter + 1
+        # initialize a counter in the case of number only file name generation
+        counter = 0
+        base, extension = filename.split(".", 1)
+        for conf in configurations:
+            # check whether a custom name has been provided by the user
+            if "__name" in conf:
+                conffile = conf["__name"]
+                if conf["__name"] in name_dict:
+                    conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
+                    name_dict[conf["__name"]] += 1
+                # update the name key in the configuration dictionary
+                conf["__name"] = conffile + ".ini"
+            else:
+                conf["__name"] = base + str(counter).zfill(4) + ".ini"
+                counter = counter + 1
+    # if no naming scheme is to be implemented, remove all __name keys
+    else:
+        for c in configurations:
+            if "__name" in c:
+                del c["__name"]
 
     return configurations
