@@ -56,20 +56,23 @@ from escapes import *
 from parseIni import parse_ini_file
 from copy import deepcopy
 
-def expand_meta_ini(filename, assignment="=", subgroups=True):
+def expand_meta_ini(filename, assignment="=", subgroups=True, filterGroup=None):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
     ----------
     filename : string
         The filename of the meta ini file
-        
+
     Keyword Arguments:
     ------------------
     assignment : string
         The standard assignment operator
     subgroups : bool
         Whether the meta ini file interprets dots in groups as subgroups
+    filterGroup : string
+        Only apply the algorithm to one subgroup contained in the input data.
+        Defaults to None, which means that all groups are taken into account.
     """
 
     # one dictionary to hold the results from several parser runs
@@ -91,6 +94,20 @@ def expand_meta_ini(filename, assignment="=", subgroups=True):
     for key in result:
         assignChar = "{}{}{}".format(assignment, key, assignment)
         result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True, subgroups=subgroups)
+
+    # apply the filtering of groups if needed
+    if filterGroup is not None:
+        if ("__STATIC" in normal) and (len(normal["__STATIC"]) >= 1):
+            print "Non-Empty normal section found "
+            normal = normal["__STATIC"]
+        else:
+            normal = {}
+        for char, assignType in result.items():
+            if ("__STATIC" in assignType) and (len(assignType["__STATIC"]) >= 1):
+                print("Non-empty Static section found for assignment {}".format(char))
+                result[char] = assignType["__STATIC"]
+            else:
+                del result[char]
 
     # start combining dictionaries - there is always the normal dict
     configurations = [normal]
