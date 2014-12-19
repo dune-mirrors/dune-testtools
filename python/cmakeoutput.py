@@ -75,18 +75,18 @@ def printForCMake(d):
         # add a dictionary to the keys
         for key, value in dic.items():
             if type(value) is dict:
-                singlekeys, multikeys, data = add_dictionary_to_keys(value, singlekeys, multikeys, data, prefix + str(key).upper() + "_")
+                singlekeys, multikeys, data = add_dictionary_to_keys(value, singlekeys, multikeys, data, prefix + str(key) + "_")
                 continue
             if type(value) is list:
-                multikeys = multikeys + prefix + prepare_val(key).upper() + delimiter
-                data = data + prefix + prepare_val(key).upper() + delimiter
+                multikeys = multikeys + prefix + prepare_val(key) + delimiter
+                data = data + prefix + prepare_val(key) + delimiter
                 for item in value:
                     if (type(item) is dict) or (type(item) is list):
                         raise ValueError("Nesting of complex types not supported")
                     data = data + prepare_val(item) + delimiter
                 continue
-            singlekeys = singlekeys + prefix + prepare_val(key).upper() + delimiter
-            data = data + prefix + prepare_val(key).upper() + delimiter + prepare_val(value) + delimiter
+            singlekeys = singlekeys + prefix + prepare_val(key) + delimiter
+            data = data + prefix + prepare_val(key) + delimiter + prepare_val(value) + delimiter
         return [singlekeys, multikeys, data]
 
     singlekeys, multikeys, data = add_dictionary_to_keys(d, singlekeys, multikeys, data)
