@@ -5,19 +5,17 @@ data in CMake. This module formats python data in a way to have it
 recognized by CMakeParseArguments through the macro parse_python_data
 from dune-testtools/cmake/modules/ParsePythonData.cmake .
 
-Currently the assumptions on the data given to printForCMake are strong,
-but it is very helpful anyway:
+Currently the following assumptions on the data are made:
 
 - The data is considered to be a dict. Otherwise naming of the cmake variables
   would be a pain.
-- All values in the dict must either be lists or values convertible to a string.
-- All items in such lists must themselves be convertible to a string (no lists).
+- The dictionary can contain dictionaries itself (arbitrarily nested). The keys
+  in CMake are appended with an underscore inbetween
+- All keys and values must be convertible to strings.
 
-Semicolons in the data pose a major problem here: CMake uses semicolons as a list
-delimiter. The naive attempt to escape them did not work. They are therefore
-substituted by a different character which is not present in the data and that
-character is passed to CMake too. Any better ideas to do this are welcome, it feels
-like a hack.
+Semicolons in the data need to be replaced by a different character, because
+CMake does use semicolons as list separators. The replacement is passed to CMake
+to undo the replacement.
 """
 
 def printForCMake(d):
