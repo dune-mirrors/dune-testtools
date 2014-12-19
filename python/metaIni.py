@@ -73,6 +73,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None):
     filterKeys : string
         Only apply the algorithm to a set of keys given.
         Defaults to None, which means that all groups are taken into account.
+        This is white list filtering (explicitly give the keys you want).
     """
 
     # one dictionary to hold the results from several parser runs
@@ -100,6 +101,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None):
         # check whether a single filter has been given and make a list if so
         if type(filterKeys) is not list:
             filterKeys = [filterKeys]
+        # remove all keys that do not match the given filtering
         for key, value in normal.items():
             if key not in filterKeys:
                 del normal[key]
