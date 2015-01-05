@@ -1,32 +1,32 @@
 import argparse
-from xml.dom import minidom
+import xml.etree.ElementTree as ET
+from operator import attrgetter
 
 # fuzzy compare XML tree from XML strings
-def isFuzzyEqualXml(xml1, xml2, absolute, relative):
-    dom1 = minidom.parseString(xml1)
-    dom2 = minidom.parseString(xml2)
-    return isFuzzyEqualNode(dom1.documentElement, dom2.documentElement, absolute, relative)
+def isFuzzyEqualXml(root1, root2, absolute, relative):
+    return isFuzzyEqualNode(root1, root2, absolute, relative)
 
 # fuzzy compare of XML nodes
 def isFuzzyEqualNode(node1, node2, absolute, relative):
-    if node1.tagName != node2.tagName:
-        print 'The name of the node differs in ', node1.tagName, ' and ', node2.tagName
-        return False
-    if sorted(node1.attributes.items()) != sorted(node2.attributes.items()):
-        print 'Attributes differ in node ', node1.tagName
-        return False
-    if len(node1.childNodes) != len(node2.childNodes):
-        print 'Number of children differs in node ', node1.tagName
-        return False
-    for node1child, node2child in zip(node1.childNodes, node2.childNodes):
-        if node1child.nodeType != node2child.nodeType:
-            print 'Node type differs in ', node1.tagName
+    
+    for node1child, node2child in zip(node1.iter(), node2.iter()):
+        if node1.tag != node2.tag:
+            print 'The name of the node differs in ', node1.tag, ' and ', node2.tag
             return False
-        if node1child.nodeType == node1child.TEXT_NODE and not isFuzzyEqualText(node1child.data, node2child.data, absolute, relative):
-            print 'Data differs in parameter ', node2.attributes.items(), ' at node ', node2child.nodeType
+        if node1.attrib.items() != node2.attrib.items():
+            print 'Attributes differ in node ', node1.tag
             return False
-        if node1child.nodeType == node1child.ELEMENT_NODE and not isFuzzyEqualNode(node1child, node2child, absolute, relative):
+        if len(list(node1.iter())) != len(list(node2.iter())):
+            print 'Number of children differs in node ', node1.tag
             return False
+        if node1child.text or node2child.text:
+            if not isFuzzyEqualText(node1child.text, node2child.text, absolute, relative):
+                if(node1child.attrib["Name"] == node2child.attrib["Name"]):
+                    print 'Data differs in parameter ', node1child.attrib["Name"]
+                    return False
+                else:
+                    print 'Comparing different parameters', node1child.attrib["Name"], ' and ', node2child.attrib["Name"]
+                    return False
     return True
 
 # fuzzy compare of text consisting of whitespace separated numbers
@@ -46,6 +46,65 @@ def isFuzzyEqualText(text1, text2, absolute, relative):
             return False
     return True
 
+def sortByName(elem):
+    name = elem.get('Name')
+    if name:
+        try: 
+            return str(name)
+        except ValueError:
+            return ''
+    return ''
+
+# sorts attributes of an item and returns a sorted item
+def sortAttrs(item, sorteditem):
+    attrkeys = sorted(item.keys())
+    for key in attrkeys:
+        sorteditem.set(key, item.get(key)) 
+
+def sortElements(items, newroot):
+    items = sorted(items, key=sortByName)
+    items = sorted(items, key=attrgetter('tag'))
+ 
+    # Once sorted, we sort each of the items
+    for item in items:
+        # Create a new item to represent the sorted version
+        # of the next item, and copy the tag name and contents
+        newitem = ET.Element(item.tag)
+        if item.text and item.text.isspace() == False:
+            newitem.text = item.text
+ 
+        # Copy the attributes (sorted by key) to the new item
+        sortAttrs(item, newitem)
+ 
+        # Copy the children of item (sorted) to the new item
+        sortElements(list(item), newitem)
+ 
+        # Append this sorted item to the sorted root
+        newroot.append(newitem) 
+
+# has to sort all Cell and Point Data after the attribute "Name"!
+def sortXML(root):
+    if(root.tag != "VTKFile"):
+        print 'Format is not a VTKFile. Sorting will most likely fail!'
+    # create a new root for the sorted tree
+    newroot = ET.Element(root.tag)
+    # create the sorted copy
+    sortAttrs(root, newroot)
+    sortElements(list(root), newroot)
+    # return the sorted element tree
+    return newroot 
+
+# sorts the data by point coordinates so that it is independent of index numbering
+# TODO implement me
+def orderGrid(root):
+    return root
+
+# TODO implement me
+def isDifferentGridOrdering(root1, root2):
+    points1 = root1.find("Points")
+    points2 = root2.find("Points")
+    return False
+
 # main program
 # handle arguments and print help message
 parser = argparse.ArgumentParser(description='Fuzzy compare of two VTK\
@@ -62,10 +121,29 @@ parser.add_argument('-a', '--absolute', type=float, default=1e-9,
     help='maximum relative error (default=1e-9)')
 args = parser.parse_args()
 
-# fuzzy compare
-if (isFuzzyEqualXml(args.vtu_file_1.read(), args.vtu_file_2.read(), args.absolute, args.relative)):
-    exit
+# construct element tree from XML file
+root1 = ET.fromstring(args.vtu_file_1.read())
+root2 = ET.fromstring(args.vtu_file_2.read())
+
+# sort the vtu file in case nodes appear in different positions
+# (minor changes in the output code) returns an element tree
+# after the idea of Dale Lane's xmldiff.py
+sortedroot1 = sortXML(root1)
+sortedroot2 = sortXML(root2)
+
+# sort the vtu file so that the comparison is independent of the
+# index numbering (coming e.g. from different grid managers)
+if (isDifferentGridOrdering(sortedroot1, sortedroot2)):
+    orderedroot1 = orderGrid(sortedroot1)
+    orderedroot2 = orderGrid(sortedroot2)
 else:
-    exit(1)
+    orderedroot1 = sortedroot1
+    orderedroot2 = sortedroot2
+
+# do the fuzzy compare (of the sorted and ordered root)
+if (isFuzzyEqualXml(orderedroot1, orderedroot2, args.absolute, args.relative)):
+   exit
+else:
+   exit(1)
 
 
