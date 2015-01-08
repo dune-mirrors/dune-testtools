@@ -28,13 +28,15 @@
 #   COMPILE_DEFINITIONS
 #
 # add_system_test_per_target(TARGET target1 [, target2 ..]
-#                            INIFILE inifile)
+#                            INIFILE inifile
+#                            [TARGETBASENAME basename])
 #
 # For a preconfigured set of targets, test targets are created. The inifile
 # for the test is expanded into the build tree. The number of tests is
 # the product of the number of executable targets and inifiles defined by
 # the metainifile. The same meta inifile is used for all targets. Call
-# multiple times for different behaviour.
+# multiple times for different behaviour. The TARGETBASENAME parameter is
+# used internally, to check whether an ini file is matching a given executable.
 #
 # add_dune_system_test(TARGET target)
 
@@ -86,7 +88,7 @@ endfunction(add_static_variants)
 function(add_system_test_per_target)
   # parse arguments to function call
   set(OPTION DEBUG)
-  set(SINGLE INIFILE)
+  set(SINGLE INIFILE TARGETBASENAME)
   set(MULTI TARGET)
   cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
@@ -94,13 +96,14 @@ function(add_system_test_per_target)
   execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/metaIni.py ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
+
   parse_python_data(PREFIX iniinfo INPUT "${output}")
 
   # add the tests for all targets
   foreach(target ${TARGVAR_TARGET})
     foreach(inifile ${iniinfo_names})
       if (${TARGVAR_DEBUG})
-        message("Adding a target with executable ${target} and inifile ${inifile}")
+        message("  Adding a target with executable ${target} and inifile ${inifile}...")
       endif (${TARGVAR_DEBUG})
 
       # Somehow the test have to be named, although the naming scheme is not relevant for
@@ -108,50 +111,52 @@ function(add_system_test_per_target)
       # executable target name with the ini file name.
       get_filename_component(ininame ${inifile} NAME)
 
-      add_test(${target}_${ininame} ${target} "${inifile}.ini")
+      # check whether something needs to be done. This is either when our target is matching
+      # the given suffix, or when TARGETBASENAME isnt given (this indicates stand-alone usage)
+      set(DOSOMETHING FALSE)
+      if("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
+        set(DOSOMETHING TRUE)
+      endif("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
+      if(NOT DEFINED TARGVAR_TARGETBASENAME)
+        set(DOSOMETHING TRUE)
+      endif(NOT DEFINED TARGVAR_TARGETBASENAME)
+
+      if (${TARGVAR_DEBUG})
+        message("${DOSOMETHING}")
+      endif (${TARGVAR_DEBUG})
+
+      if(${DOSOMETHING})
+        add_test(${target}_${ininame} ${target} "${inifile}.ini")
+      endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})
 endfunction(add_system_test_per_target)
 
 function(add_dune_system_test)
-  # define what kind of parameters can be given to this function
-  # options don't take any arguments
-  set(options)
-  # parameters that are followed by exactly one argument
-  set(oneValueArgs METAFILE BASENAME)
-  # parameters that are followed by mutiple arguments
-  set(multiValueArgs SOURCE)
-  # the call that parses the arguments and sets variables
-  # all set variables start with the prefix DUNE_SYSTEM_TEST
-  # and are followed by an underscore and the above parameter name
-  cmake_parse_arguments(DUNE_SYSTEM_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  # parse arguments
+  set(OPTION DEBUG)
+  set(SINGLE INIFILE BASENAME)
+  set(MULTI SOURCE)
+  cmake_parse_arguments(SYSTEMTEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
-  # expand the given meta ini file
-  expand_meta_ini(METAFILE ${DUNE_SYSTEM_TEST_METAFILE} RETURNSTR output)
+  # construct a string containg DEBUG to pass the debug flag to the other macros
+  set(DEBUG "")
+  if (${SYSTEMTEST_DEBUG})
+    set(DEBUG "DEBUG")
+  endif (${SYSTEMTEST_DEBUG})
 
-  # process the information obtained from the pyhton script.
-  # first: escape all semicolons!
-  message("output: ${output}")
-  string(REGEX MATCHALL "[^\n]+" outputlist ${output})
-  #string(REPLACE ";" "\;" output ${output})
-  message("output: ${outputlist}")
+  # The above macros have been written in a way that allows us to use them
+  # combined. The TARGETBASENAME parameter is introduced for that.
 
-  foreach(config ${outputlist})
-    # turn the item into a list
-   # message("Input: ${config}")
-    string(REGEX MATCHALL "[^&]+" deflist ${config})
-   # message("List: ${deflist}")
-    #string(REPLACE "&" ";" config ${config})
-   # message("Replaced: ${config}")
-   # set(suffix "")
-    list(GET deflist 0 suffix)
-    #message("The suffix ${suffix}")
-    list(REMOVE_ITEM deflist 0)
-    set(target "${DUNE_SYSTEM_TEST_BASENAME}${suffix}")
-    message("Generating target ${target}")
+  add_static_variants(SOURCE ${SYSTEMTEST_SOURCE}
+                      BASENAME ${SYSTEMTEST_BASENAME}
+                      INIFILE ${SYSTEMTEST_INIFILE}
+                      TARGETS targetlist
+                      ${DEBUG})
 
-    # generate the actual target
-    add_executable(${target} ${DUNE_SYSTEM_TEST_SOURCE})
-    set_property(TARGET ${target} PROPERTY COMPILE_DEFINITIONS ${deflist})
-  endforeach(config ${outputlist})
+  add_system_test_per_target(INIFILE ${SYSTEMTEST_INIFILE}
+                             TARGET ${targetlist}
+                             ${DEBUG}
+                             TARGETBASENAME ${SYSTEMTEST_BASENAME})
+
 endfunction(add_dune_system_test)

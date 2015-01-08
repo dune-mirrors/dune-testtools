@@ -306,12 +306,15 @@ if __name__ == "__main__":
 
         # initialize a data structure to pass the list of generated ini files to cmake
         metaini = {}
-        metaini["names"] = []
+        metaini["names"] = [] # TODO this should  have underscores!
 
         # write the configurations to the file specified in the name key.
         for c in configurations:
             fn = c["__name"]
+            # append the ini file name to the names list...
             metaini["names"].append(fn)
+            # ... and connect it to a exec_suffix
+            metaini[fn + "_suffix"] = c.get("__exec_suffix","")
             del c["__name"]
             write_dict_to_ini(c, fn + ".ini")
 
