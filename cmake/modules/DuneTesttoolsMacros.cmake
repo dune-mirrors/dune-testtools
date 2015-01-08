@@ -107,9 +107,8 @@ function(add_system_test_per_target)
       # the selection of tests to run on the server side. For the moment we combine the
       # executable target name with the ini file name.
       get_filename_component(ininame ${inifile} NAME)
-      string(REGEX REPLACE "\\..*" "" ininame ${ininame})
 
-      add_test(${target}_${ininame} ${target} ${inifile})
+      add_test(${target}_${ininame} ${target} "${inifile}.ini")
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})
 endfunction(add_system_test_per_target)

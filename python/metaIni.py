@@ -286,7 +286,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
                 # update the name key in the configuration dictionary
                 conf["__name"] = conffile + ".ini"
             else:
-                conf["__name"] = base + str(counter).zfill(4) + ".ini"
+                conf["__name"] = base + str(counter).zfill(4)
                 counter = counter + 1
     # if no naming scheme is to be implemented, remove all __name keys
     else:
@@ -313,7 +313,7 @@ if __name__ == "__main__":
             fn = c["__name"]
             metaini["names"].append(fn)
             del c["__name"]
-            write_dict_to_ini(c, fn)
+            write_dict_to_ini(c, fn + ".ini")
 
         from cmakeoutput import printForCMake
         printForCMake(metaini)
