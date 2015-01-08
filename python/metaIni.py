@@ -54,7 +54,9 @@ correctly.
 
 from escapes import *
 from parseIni import parse_ini_file
+from writeIni import write_dict_to_ini
 from copy import deepcopy
+import sys
 
 def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -293,3 +295,19 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
                 del c["__name"]
 
     return configurations
+
+
+# if this module is run as a script, expand a given meta ini file
+# TODO think about an option parser here
+if __name__ is "__main__":
+    if (len(sys.argv) is 2):
+        # expand the meta ini files into a list of configurations
+        configurations = expand_meta_ini(sys.argv[1])
+
+        # write the configurations to the file specified in the name key.
+        for c in configurations:
+            fn = c["__name"]
+            del c["__name"]
+            write_dict_to_ini(c, fn)
+    else:
+        print "exec_metaIni expects exactly one command line parameter: the meta ini file"
