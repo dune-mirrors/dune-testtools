@@ -42,7 +42,7 @@ macro(add_static_variants)
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/exec_metaini.py ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/static_metaini.py ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
