@@ -27,6 +27,15 @@
 # subgroups in the static section is:
 #   COMPILE_DEFINITIONS
 #
+# add_system_test_per_target(TARGET target1 [, target2 ..]
+#                            INIFILE inifile)
+#
+# For a preconfigured set of targets, test targets are created. The inifile
+# for the test is expanded into the build tree. The number of tests is
+# the product of the number of executable targets and inifiles defined by
+# the metainifile. The same meta inifile is used for all targets. Call
+# multiple times for different behaviour.
+#
 # add_dune_system_test(TARGET target)
 
 find_package(PythonInterp)
@@ -73,6 +82,38 @@ function(add_static_variants)
   # export the list of created targets
   set(${STATVAR_TARGETS} "${targetlist}" PARENT_SCOPE)
 endfunction(add_static_variants)
+
+function(add_system_test_per_target)
+  # parse arguments to function call
+  set(OPTION DEBUG)
+  set(SINGLE INIFILE)
+  set(MULTI TARGET)
+  cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  message("comand: ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/metaIni.py ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}")
+  # expand the given meta ini file into the build tree
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/metaIni.py ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                  OUTPUT_VARIABLE output)
+  parse_python_data(PREFIX iniinfo INPUT "${output}")
+
+  # add the tests for all targets
+  foreach(target ${TARGVAR_TARGET})
+    foreach(inifile ${iniinfo_names})
+      if (${TARGVAR_DEBUG})
+        message("Adding a target with executable ${target} and inifile ${inifile}")
+      endif (${TARGVAR_DEBUG})
+
+      # Somehow the test have to be named, although the naming scheme is not relevant for
+      # the selection of tests to run on the server side. For the moment we combine the
+      # executable target name with the ini file name.
+      get_filename_component(ininame ${inifile} NAME)
+      string(REGEX REPLACE "\\..*" "" ininame ${ininame})
+
+      add_test(${target}_${ininame} ${target} ${inifile})
+    endforeach(inifile ${iniinfo_names})
+  endforeach(target ${TARGVAR_TARGET})
+endfunction(add_system_test_per_target)
 
 function(add_dune_system_test)
   # define what kind of parameters can be given to this function
