@@ -296,18 +296,26 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
 
     return configurations
 
-
 # if this module is run as a script, expand a given meta ini file
 # TODO think about an option parser here
-if __name__ is "__main__":
+if __name__ == "__main__":
+
     if (len(sys.argv) is 2):
         # expand the meta ini files into a list of configurations
         configurations = expand_meta_ini(sys.argv[1])
 
+        # initialize a data structure to pass the list of generated ini files to cmake
+        metaini = {}
+        metaini["names"] = []
+
         # write the configurations to the file specified in the name key.
         for c in configurations:
             fn = c["__name"]
+            metaini["names"].append(fn)
             del c["__name"]
             write_dict_to_ini(c, fn)
+
+        from cmakeoutput import printForCMake
+        printForCMake(metaini)
     else:
         print "exec_metaIni expects exactly one command line parameter: the meta ini file"
