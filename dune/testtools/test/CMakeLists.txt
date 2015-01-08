@@ -5,6 +5,7 @@ add_dependencies(${_test_target} ${TESTPROGS})
 
 add_subdirectory(cmakepython)
 add_subdirectory(staticvariants)
+add_subdirectory(dynamicvariants)
 
 add_executable("outputtreetest" outputtreetest.cc)
 add_executable("constructiontest" constructiontest.cc)

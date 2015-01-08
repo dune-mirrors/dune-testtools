@@ -1,0 +1,6 @@
+add_executable(dyntest1 source.cc)
+add_executable(dyntest2 source.cc)
+set_property(TARGET dyntest2 APPEND PROPERTY COMPILE_DEFINITIONS "SWITCH=ON")
+
+message("Performing tests for the macro add_system_test_per_target")
+add_system_test_per_target(TARGET dyntest1 dyntest2 INIFILE dynamictest.mini DEBUG)
