@@ -33,7 +33,7 @@ find_package(PythonInterp)
 
 include(ParsePythonData)
 
-macro(add_static_variants)
+function(add_static_variants)
   # parse the parameter list
   set(OPTION DEBUG)
   set(SINGLE BASENAME INIFILE TARGETS)
@@ -51,7 +51,7 @@ macro(add_static_variants)
   foreach(conf ${STATINFO___CONFIGS})
     # add the executable with that configurations
     add_executable(${STATVAR_BASENAME}_${conf} "${STATVAR_SOURCE}")
-    list(APPEND ${STATVAR_TARGETS} "${STATVAR_BASENAME}_${conf}")
+    list(APPEND targetlist "${STATVAR_BASENAME}_${conf}")
 
     # TODO all groups to be recognized in the static section must be implemented here
     # similar to the compile definitions group.
@@ -70,10 +70,9 @@ macro(add_static_variants)
     endif(${STATVAR_DEBUG})
   endforeach(conf ${STATINFO___CONFIGS})
 
-  if(${STATVAR_DEBUG})
-    message("The list of generated targets for this macro call: ${${STATVAR_TARGETS}}")
-  endif(${STATVAR_DEBUG})
-endmacro(add_static_variants)
+  # export the list of created targets
+  set(${STATVAR_TARGETS} "${targetlist}" PARENT_SCOPE)
+endfunction(add_static_variants)
 
 function(add_dune_system_test)
   # define what kind of parameters can be given to this function
