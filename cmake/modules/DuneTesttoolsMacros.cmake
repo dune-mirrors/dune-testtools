@@ -10,15 +10,70 @@
 # number of tests with the correct labels and wrappers scripts
 # applied.
 #
-# the synopsis should be kept up to date.
-# SYNOPSIS:
+# add_static_variants(SOURCE src1 [, src2 ..]
+#                     BASENAME base
+#                     INIFILE ini
+#                     TARGETS output
+#                    [DEBUG]
+#                    )
+# Given a meta ini file with a static section, add a set of
+# executables representing all possible configurations. The naming
+# scheme for the executable targets is: The given basename, followed
+# by an underscore, followed by the special __exec_suffix key from
+# the meta ini file. The sources for the targets (which for a system
+# test are considered to be the same for all variants) can be given
+# via the source parameter. The list of generated targets is stored in
+# the given variable for further use. The list of currently handled
+# subgroups in the static section is:
+#   COMPILE_DEFINITIONS
 #
 # add_dune_system_test(TARGET target)
 
 find_package(PythonInterp)
 
-include(MetaIniMacros)
-include(ConditionalIncludes)
+include(ParsePythonData)
+
+macro(add_static_variants)
+  # parse the parameter list
+  set(OPTION DEBUG)
+  set(SINGLE BASENAME INIFILE TARGETS)
+  set(MULTI SOURCE)
+  cmake_parse_arguments(STATVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  # get the static information from the ini file
+  # TODO maybe check whether an absolute path has been given for a mini file
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/exec_metaini.py ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                  OUTPUT_VARIABLE output)
+  parse_python_data(PREFIX STATINFO INPUT "${output}")
+
+  # iterate over the static configurations
+  foreach(conf ${STATINFO___CONFIGS})
+    # add the executable with that configurations
+    add_executable(${STATVAR_BASENAME}_${conf} "${STATVAR_SOURCE}")
+    list(APPEND ${STATVAR_TARGETS} "${STATVAR_BASENAME}_${conf}")
+
+    # TODO all groups to be recognized in the static section must be implemented here
+    # similar to the compile definitions group.
+
+    # treat compile definitions
+    foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+      set_property(TARGET ${STATVAR_BASENAME}_${conf} APPEND PROPERTY
+                   COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
+    endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
+
+    # maybe output debug information
+    if(${STATVAR_DEBUG})
+      message("Generated target ${STATVAR_BASENAME}_${conf}")
+      get_property(cd TARGET ${STATVAR_BASENAME}_${conf} PROPERTY COMPILE_DEFINITIONS)
+      message("  with COMPILE_DEFINITIONS: ${cd}")
+    endif(${STATVAR_DEBUG})
+  endforeach(conf ${STATINFO___CONFIGS})
+
+  if(${STATVAR_DEBUG})
+    message("The list of generated targets for this macro call: ${${STATVAR_TARGETS}}")
+  endif(${STATVAR_DEBUG})
+endmacro(add_static_variants)
 
 function(add_dune_system_test)
   # define what kind of parameters can be given to this function
