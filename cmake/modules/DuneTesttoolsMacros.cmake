@@ -53,7 +53,7 @@ function(add_static_variants)
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/static_metaini.py ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/static_metaini.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
@@ -93,8 +93,7 @@ function(add_system_test_per_target)
   cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/metaIni.py ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/metaIni.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")

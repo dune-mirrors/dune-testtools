@@ -56,7 +56,6 @@ from escapes import *
 from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from copy import deepcopy
-import sys
 
 def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -299,26 +298,32 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
 # if this module is run as a script, expand a given meta ini file
 # TODO think about an option parser here
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
+    parser.add_argument('-d', '--dir', help='The directory to put the output in')
+    args = vars(parser.parse_args())
 
-    if (len(sys.argv) is 2):
-        # expand the meta ini files into a list of configurations
-        configurations = expand_meta_ini(sys.argv[1])
+    # expand the meta ini files into a list of configurations
+    configurations = expand_meta_ini(args["ini"])
 
-        # initialize a data structure to pass the list of generated ini files to cmake
-        metaini = {}
-        metaini["names"] = [] # TODO this should  have underscores!
+    # initialize a data structure to pass the list of generated ini files to cmake
+    metaini = {}
+    metaini["names"] = []  # TODO this should  have underscores!
 
-        # write the configurations to the file specified in the name key.
-        for c in configurations:
-            fn = c["__name"]
-            # append the ini file name to the names list...
-            metaini["names"].append(fn)
-            # ... and connect it to a exec_suffix
-            metaini[fn + "_suffix"] = c.get("__exec_suffix","")
-            del c["__name"]
-            write_dict_to_ini(c, fn + ".ini")
+    # write the configurations to the file specified in the name key.
+    for c in configurations:
+        fn = c["__name"]
+        # append the ini file name to the names list...
+        metaini["names"].append(fn)
+        # ... and connect it to a exec_suffix
+        metaini[fn + "_suffix"] = c.get("__exec_suffix", "")
+        del c["__name"]
+        # maybe add an absolute path to the filename
+        if "dir" in args:
+            path, fn = fn.rsplit("/",1)
+            fn = args["dir"] + "/" + fn
+        write_dict_to_ini(c, fn + ".ini")
 
-        from cmakeoutput import printForCMake
-        printForCMake(metaini)
-    else:
-        print "exec_metaIni expects exactly one command line parameter: the meta ini file"
+    from cmakeoutput import printForCMake
+    printForCMake(metaini)
