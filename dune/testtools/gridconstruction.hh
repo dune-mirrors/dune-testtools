@@ -137,7 +137,7 @@ public:
               > (extension, cells, periodic, overlap);
         else
         {
-          typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
+          typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
           grid =
               std::make_shared < Grid
                   > (extension, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
@@ -242,7 +242,7 @@ public:
             > (lowerleft, upperright, cells, periodic, overlap);
       else
       {
-        typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
+        typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
         grid =
             std::make_shared < Grid
                 > (lowerleft, upperright, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
@@ -328,7 +328,7 @@ public:
         grid = std::make_shared < Grid > (coordinates, periodic, overlap);
       else
       {
-        typename Dune::YLoadBalanceBackup<dim> lb(partitioning);
+        typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
         grid =
             std::make_shared < Grid
                 > (coordinates, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
