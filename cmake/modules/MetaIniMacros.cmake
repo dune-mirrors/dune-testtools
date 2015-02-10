@@ -22,7 +22,7 @@ function(expand_meta_ini)
   endif(NOT PYTHONINTERP_FOUND)
 
   # call the python script doing a meta ini expanding
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/exec_metaini.py" "${CMAKE_CURRENT_SOURCE_DIR}/${EXPANDER_METAFILE}"
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} "${DUNE_TESTTOOLS_PATH}/python/exec_metaini.py" "${CMAKE_CURRENT_SOURCE_DIR}/${EXPANDER_METAFILE}"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE expander_output
                  )
