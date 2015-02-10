@@ -108,7 +108,7 @@ function(add_system_test_per_target)
       # Somehow the test have to be named, although the naming scheme is not relevant for
       # the selection of tests to run on the server side. For the moment we combine the
       # executable target name with the ini file name.
-      get_filename_component(ininame ${inifile} NAME)
+      get_filename_component(ininame ${inifile} NAME_WE)
 
       # check whether something needs to be done. This is either when our target is matching
       # the given suffix, or when TARGETBASENAME isnt given (this indicates stand-alone usage)
@@ -124,8 +124,15 @@ function(add_system_test_per_target)
         message("${DOSOMETHING}")
       endif (${TARGVAR_DEBUG})
 
+      if (${TARGVAR_DEBUG} AND ${DOSOMETHING})
+        message("Adding a test with executable ${target} and inifile ${inifile}...")
+      endif (${TARGVAR_DEBUG} AND ${DOSOMETHING})
+
+      # get the extension of the ini file (can be user defined)
+      get_filename_component(iniext ${inifile} EXT)
+
       if(${DOSOMETHING})
-        add_test(${target}_${ininame} ${target} "${inifile}.ini")
+        add_test(${target}_${ininame} ${target} "${inifile}.${iniext}")
       endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})

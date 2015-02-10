@@ -265,7 +265,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
                 else:
                     name_dict[c["__name"]] += 1
 
-        # now delete all those keys that occure once and reset all others to a counter
+        # now delete all those keys that occur once and reset all others to a counter
         for key, value in name_dict.items():
             if value is 1:
                 del name_dict[key]
@@ -278,12 +278,12 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
         for conf in configurations:
             # check whether a custom name has been provided by the user
             if "__name" in conf:
-                conffile = conf["__name"]
+                conffile = "_" + conf["__name"]
                 if conf["__name"] in name_dict:
                     conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
                     name_dict[conf["__name"]] += 1
                 # update the name key in the configuration dictionary
-                conf["__name"] = conffile + ".ini"
+                conf["__name"] = base + conffile
             else:
                 conf["__name"] = base + str(counter).zfill(4)
                 counter = counter + 1
@@ -314,16 +314,24 @@ if __name__ == "__main__":
     # write the configurations to the file specified in the name key.
     for c in configurations:
         fn = c["__name"]
+
+        # check if a special inifile extension was given
+        if "__inifile_extension" in c:
+            extension = c["__inifile_extension"].strip(".")
+        else:
+            # othwise default to .ini
+            extension = "ini"
+
         # append the ini file name to the names list...
-        metaini["names"].append(fn)
+        metaini["names"].append(fn + "." + extension)
         # ... and connect it to a exec_suffix
-        metaini[fn + "_suffix"] = c.get("__exec_suffix", "")
+        metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
         del c["__name"]
         # maybe add an absolute path to the filename
         if "dir" in args:
             path, fn = fn.rsplit("/",1)
             fn = args["dir"] + "/" + fn
-        write_dict_to_ini(c, fn + ".ini")
+        write_dict_to_ini(c, fn + "." + extension)
 
     from cmakeoutput import printForCMake
     printForCMake(metaini)
