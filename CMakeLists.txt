@@ -24,5 +24,10 @@ add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("cmake/modules")
 
+# Use a custom section to export testtool module path for downstream modules.
+set(DUNE_CUSTOM_PKG_CONFIG_SECTION "
+set(DUNE_TESTTOOLS_PATH \"${PROJECT_SOURCE_DIR}\")
+")
+
 # finalize the dune project, e.g. generating config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
