@@ -1,0 +1,8 @@
+__exec_suffix =1= 1,2
+
+something == 1, 2
+
+someother =1= bla, bli
+
+[__STATIC.COMPILE_DEFINITIONS]
+SOMEVAR =1= 1,2
