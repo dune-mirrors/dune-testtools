@@ -133,7 +133,7 @@ function(add_system_test_per_target)
       get_filename_component(iniext ${inifile} EXT)
 
       if(${DOSOMETHING})
-        add_test(${target}_${ininame} ${target} "${inifile}.${iniext}")
+        add_test(${target}_${ininame} ${target} "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
       endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})
