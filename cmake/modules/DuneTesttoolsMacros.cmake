@@ -43,6 +43,7 @@
 find_package(PythonInterp)
 
 include(ParsePythonData)
+include(AddFolderLinkOrCopy)
 
 function(add_static_variants)
   # parse the parameter list
@@ -136,6 +137,11 @@ function(add_system_test_per_target)
       endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})
+
+  # in case of user provided external grid files (have to be in a "grids" folder in the
+  # source dir) copy the grids folder
+  add_folder_copy(grids)
+
 endfunction(add_system_test_per_target)
 
 function(add_dune_system_test)
