@@ -90,12 +90,22 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
     # we always have normal assignment
     normal = parse_ini_file(filename, assignment=assignment, asStrings=True, subgroups=subgroups)
 
+    def get_assignment_operators(filename, result, commentChar=("#",)):
+        file = open(filename)
+        for line in file:
+            # strip comments from the line
+            for char in commentChar:
+                if exists_unescaped(line, char):
+                    line, comment = escaped_split(line, char, 1)
+                # all other occurences can be handled normally now
+                line = strip_escapes(line, char)
+            # get the assignment operators
+            if count_unescaped(line, assignment) is 2:
+                key, assignChar, value = escaped_split(line, assignment)
+                result[assignChar] = {}
+
     # look into the file to determine the set of assignment operators used
-    file = open(filename)
-    for line in file:
-        if count_unescaped(line, assignment) is 2:
-            key, assignChar, value = escaped_split(line, assignment)
-            result[assignChar] = {}
+    get_assignment_operators(filename, result)
 
     # get dictionaries for all sorts of assignments
     for key in result:
