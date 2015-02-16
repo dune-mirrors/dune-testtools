@@ -57,7 +57,7 @@ from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from copy import deepcopy
 
-def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, addNameKey=True):
+def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -69,6 +69,9 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
     ------------------
     assignment : string
         The standard assignment operator
+    commentChar: list
+        A list of characters that define comments. Everything on a line
+        after such character is ignored during the parsing process.
     subgroups : bool
         Whether the meta ini file interprets dots in groups as subgroups
     filterKeys : string
@@ -90,12 +93,22 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
     # we always have normal assignment
     normal = parse_ini_file(filename, assignment=assignment, asStrings=True, subgroups=subgroups)
 
+    def get_assignment_operators(filename, result):
+        file = open(filename)
+        for line in file:
+            # strip comments from the line
+            for char in commentChar:
+                if exists_unescaped(line, char):
+                    line, comment = escaped_split(line, char, 1)
+                # all other occurences can be handled normally now
+                line = strip_escapes(line, char)
+            # get the assignment operators
+            if count_unescaped(line, assignment) is 2:
+                key, assignChar, value = escaped_split(line, assignment)
+                result[assignChar] = {}
+
     # look into the file to determine the set of assignment operators used
-    file = open(filename)
-    for line in file:
-        if count_unescaped(line, assignment) is 2:
-            key, assignChar, value = escaped_split(line, assignment)
-            result[assignChar] = {}
+    get_assignment_operators(filename, result)
 
     # get dictionaries for all sorts of assignments
     for key in result:
