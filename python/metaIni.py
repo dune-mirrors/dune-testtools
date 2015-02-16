@@ -69,6 +69,9 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     ------------------
     assignment : string
         The standard assignment operator
+    commentChar: list
+        A list of characters that define comments. Everything on a line
+        after such character is ignored during the parsing process.
     subgroups : bool
         Whether the meta ini file interprets dots in groups as subgroups
     filterKeys : string
