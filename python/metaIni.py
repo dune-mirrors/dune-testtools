@@ -129,8 +129,20 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
                 if key not in filterKeys:
                     del result[char][key]
 
-    # start combining dictionaries - there is always the normal dict
+     # start combining dictionaries - there is always the normal dict...
     configurations = [normal]
+
+    # ...except we deleted all keys with the filter. If all dictionaries are empty
+    # because of the filtering, we are done and return the configurations
+    all_dictionaries_empty = True
+    for char, assignType in result.items():
+        if assignType.items():
+            all_dictionaries_empty = False
+    if normal:
+        all_dictionaries_empty = False
+
+    if all_dictionaries_empty:
+        return configurations
 
     def generate_configs(d, configurations, prefix=[]):
         def configs_for_key(key, vals, configs, prefix):
