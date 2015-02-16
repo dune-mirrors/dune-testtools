@@ -57,7 +57,7 @@ from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from copy import deepcopy
 
-def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, addNameKey=True):
+def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -90,7 +90,7 @@ def expand_meta_ini(filename, assignment="=", subgroups=True, filterKeys=None, a
     # we always have normal assignment
     normal = parse_ini_file(filename, assignment=assignment, asStrings=True, subgroups=subgroups)
 
-    def get_assignment_operators(filename, result, commentChar=("#",)):
+    def get_assignment_operators(filename, result):
         file = open(filename)
         for line in file:
             # strip comments from the line
