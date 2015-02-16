@@ -359,10 +359,23 @@ if __name__ == "__main__":
         # append the ini file name to the names list...
         metaini["names"].append(fn + "." + extension)
         # ... and connect it to a exec_suffix
-        # get returns no suffix when __exec_suffix was not set
-        # TODO this has to be a more complicated call when __exec_suffix is not set
-        # but static variations are there (generic numbering is default)
-        metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
+        # get static variants to determine executable suffix
+        static_section = expand_meta_ini(args["ini"], filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
+        if not(len(static_section) > 1):
+            # no static variation. No suffix, target gets the basename
+            metaini[fn + "." + extension + "_suffix"] = None
+        elif "__exec_suffix" in c:
+            # exec_suffix specifies user defined target names
+            metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
+        else:
+            # target are generically numbered
+            generic_exec_suffix = 0
+            for conf in static_section:
+                #if the static sections are equal the right suffix is determined by the generic suffix
+                if conf["__STATIC"] == c["__STATIC"]:
+                    metaini[fn + "." + extension + "_suffix"] = str(generic_exec_suffix)
+                generic_exec_suffix += 1
+
         # ... and to an option key
         metaini[fn + "." + extension + "_optionkey"] = ini_optionkey
         del c["__name"]
