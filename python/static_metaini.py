@@ -49,7 +49,9 @@ if(len(static_section) > 1):
             static[conf["__exec_suffix"]] = conf["__STATIC"]
         else:
             # append an integer
-            # TODO this assumes either no suffixes are given or all. otherwise (rare) there could be name clashes
+            # TODO this assumes either NO suffixes are specified by the user with __exec_suffix
+            # or ALL suffixes are determined by __exec_suffix (different names for all occuring configurations).
+            # otherwise there are name clashes and targets get overwritten. This is a possible error source.
             static["__CONFIGS"].append(str(generic_exec_suffix))
             generic_exec_suffix += 1
 
