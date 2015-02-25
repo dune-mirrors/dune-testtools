@@ -129,8 +129,20 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
                 if key not in filterKeys:
                     del result[char][key]
 
-    # start combining dictionaries - there is always the normal dict
+     # start combining dictionaries - there is always the normal dict...
     configurations = [normal]
+
+    # ...except we deleted all keys with the filter. If all dictionaries are empty
+    # because of the filtering, we are done and return the configurations
+    all_dictionaries_empty = True
+    for char, assignType in result.items():
+        if assignType.items():
+            all_dictionaries_empty = False
+    if normal:
+        all_dictionaries_empty = False
+
+    if all_dictionaries_empty:
+        return configurations
 
     def generate_configs(d, configurations, prefix=[]):
         def configs_for_key(key, vals, configs, prefix):
@@ -331,13 +343,15 @@ if __name__ == "__main__":
         # check if a special inifile extension was given
         if "__inifile_extension" in c:
             extension = c["__inifile_extension"].strip(".")
+            del c["__inifile_extension"]
         else:
             # othwise default to .ini
             extension = "ini"
 
          # check if a special inifile option key was given
         if "__inifile_optionkey" in c:
-            ini_optionkey = c["__inifile_optionkey"].strip(".")
+            ini_optionkey = c["__inifile_optionkey"]
+            del c["__inifile_optionkey"]
         else:
             # othwise default to empty string
             ini_optionkey = ""
@@ -345,7 +359,23 @@ if __name__ == "__main__":
         # append the ini file name to the names list...
         metaini["names"].append(fn + "." + extension)
         # ... and connect it to a exec_suffix
-        metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
+        # get static variants to determine executable suffix
+        static_section = expand_meta_ini(args["ini"], filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
+        if not(len(static_section) > 1):
+            # no static variation. No suffix, target gets the basename
+            metaini[fn + "." + extension + "_suffix"] = None
+        elif "__exec_suffix" in c:
+            # exec_suffix specifies user defined target names
+            metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
+        else:
+            # target are generically numbered
+            generic_exec_suffix = 0
+            for conf in static_section:
+                #if the static sections are equal the right suffix is determined by the generic suffix
+                if conf["__STATIC"] == c["__STATIC"]:
+                    metaini[fn + "." + extension + "_suffix"] = str(generic_exec_suffix)
+                generic_exec_suffix += 1
+
         # ... and to an option key
         metaini[fn + "." + extension + "_optionkey"] = ini_optionkey
         del c["__name"]
@@ -353,6 +383,14 @@ if __name__ == "__main__":
         if "dir" in args:
             path, fn = fn.rsplit("/",1)
             fn = args["dir"] + "/" + fn
+
+        # before writing the expanded ini file delete the special keywords
+        # (TODO and static section?) to make it look like an ordinary ini file
+        if "__exec_suffix" in c:
+            del c["__exec_suffix"]
+        # if "__STATIC" in c:
+        #     del c["__STATIC"]
+
         write_dict_to_ini(c, fn + "." + extension)
 
     from cmakeoutput import printForCMake

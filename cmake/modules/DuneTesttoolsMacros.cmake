@@ -59,28 +59,39 @@ function(add_static_variants)
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
 
-  # iterate over the static configurations
-  foreach(conf ${STATINFO___CONFIGS})
-    # add the executable with that configurations
-    add_executable(${STATVAR_BASENAME}_${conf} "${STATVAR_SOURCE}")
-    list(APPEND targetlist "${STATVAR_BASENAME}_${conf}")
+  # if python script returned a dictionary of configurations
+  if(NOT "${output}" STREQUAL "")
+    # iterate over the static configurations
+    foreach(conf ${STATINFO___CONFIGS})
+      # add the executable with that configurations
+      add_executable(${STATVAR_BASENAME}_${conf} "${STATVAR_SOURCE}")
+      list(APPEND targetlist "${STATVAR_BASENAME}_${conf}")
 
-    # TODO all groups to be recognized in the static section must be implemented here
-    # similar to the compile definitions group.
+      # TODO all groups to be recognized in the static section must be implemented here
+      # similar to the compile definitions group.
 
-    # treat compile definitions
-    foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-      set_property(TARGET ${STATVAR_BASENAME}_${conf} APPEND PROPERTY
-                   COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
-    endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
+      # treat compile definitions
+      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+        set_property(TARGET ${STATVAR_BASENAME}_${conf} APPEND PROPERTY
+         COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
+      endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
 
-    # maybe output debug information
+      # maybe output debug information
+      if(${STATVAR_DEBUG})
+        message("Generated target ${STATVAR_BASENAME}_${conf}")
+        get_property(cd TARGET ${STATVAR_BASENAME}_${conf} PROPERTY COMPILE_DEFINITIONS)
+        message("  with COMPILE_DEFINITIONS: ${cd}")
+      endif(${STATVAR_DEBUG})
+    endforeach(conf ${STATINFO___CONFIGS})
+  # if the python script returned nothing there is only one target to build
+  else(NOT "${output}" STREQUAL "")
+    # add executable and append the only target to the targetlist
+    add_executable(${STATVAR_BASENAME} "${STATVAR_SOURCE}")
+    list(APPEND targetlist "${STATVAR_BASENAME}")
     if(${STATVAR_DEBUG})
-      message("Generated target ${STATVAR_BASENAME}_${conf}")
-      get_property(cd TARGET ${STATVAR_BASENAME}_${conf} PROPERTY COMPILE_DEFINITIONS)
-      message("  with COMPILE_DEFINITIONS: ${cd}")
+      message("Generated target ${STATVAR_BASENAME}")
     endif(${STATVAR_DEBUG})
-  endforeach(conf ${STATINFO___CONFIGS})
+  endif(NOT "${output}" STREQUAL "")
 
   # export the list of created targets
   set(${STATVAR_TARGETS} "${targetlist}" PARENT_SCOPE)
@@ -113,7 +124,12 @@ function(add_system_test_per_target)
 
       # check whether something needs to be done. This is either when our target is matching
       # the given suffix, or when TARGETBASENAME isnt given (this indicates stand-alone usage)
+      # or in case no suffix is given (we have only one target) when the target is matching the
+      # target basename
       set(DOSOMETHING FALSE)
+      if("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
+        set(DOSOMETHING TRUE)
+      endif("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
       if("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
         set(DOSOMETHING TRUE)
       endif("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
@@ -122,12 +138,8 @@ function(add_system_test_per_target)
       endif(NOT DEFINED TARGVAR_TARGETBASENAME)
 
       if (${TARGVAR_DEBUG})
-        message("${DOSOMETHING}")
+        message("  -- ${DOSOMETHING}")
       endif (${TARGVAR_DEBUG})
-
-      if (${TARGVAR_DEBUG} AND ${DOSOMETHING})
-        message("---> Adding a test with executable ${target} and inifile ${inifile}...")
-      endif (${TARGVAR_DEBUG} AND ${DOSOMETHING})
 
       # get the extension of the ini file (can be user defined)
       get_filename_component(iniext ${inifile} EXT)
