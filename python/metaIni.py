@@ -381,8 +381,10 @@ if __name__ == "__main__":
         del c["__name"]
         # maybe add an absolute path to the filename
         if "dir" in args:
-            path, fn = fn.rsplit("/",1)
-            fn = args["dir"] + "/" + fn
+            from os import path
+            fn = path.basename(fn)
+            dirname = args["dir"] or path.dirname(fn)
+            fn = path.join(dirname, fn)
 
         # before writing the expanded ini file delete the special keywords
         # (TODO and static section?) to make it look like an ordinary ini file
