@@ -22,6 +22,4 @@ def strip_escapes(str, char):
     return str.replace("\\" + char, char)
 
 def escaped_split(str, delimiter=" ", maxsplit=0):
-    #entirely new implementation
-    import re
     return [i.replace("\\{}".format(delimiter), delimiter).strip() for i in re.split("(?<!\\\\){}".format(re.escape(delimiter)), str, maxsplit)]
