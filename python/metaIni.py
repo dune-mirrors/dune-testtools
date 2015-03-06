@@ -26,6 +26,8 @@ follows.
   increasing number is appended to the basename.
 - You can also set a custom name for the generated ini file by setting the
   reserved key "__name" in your meta ini file and use the {} syntax for meaningful naming.
+- The characters '=', ',',' {','}','[' and ']' must be escaped with a backslash in order
+  to be used in keys or values. You are even better off avoiding them.
 
 This is an example aiming at showing the full power of the meta ini syntax:
 
@@ -43,7 +45,6 @@ parameters == simple, complex
 The example produces a total of 6 ini files.
 
 Known issues:
-- The characters '=', ',',' {','}','[' and ']' should neither appear in keys nor in values.
 - the code could use a lot more error checking
 
 Known bugs:
@@ -52,7 +53,7 @@ subgroup is not used elsewhere. THe reason is that the dictionary "normal" doesn
 correctly.
 """
 
-from escapes import *
+from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
 from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from copy import deepcopy
@@ -226,7 +227,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
                     if needs_resolution(value) is True:
                         return True
                 else:
-                    if ("{" in value) and ("}" in value):
+                    if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
                         return True
             return False
 
@@ -245,32 +246,17 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
                     resolve_key_dependencies(fulldict, value)
                 else:
                     while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
+                        # define a function that replaces the "identity access" d,k -> d[k] when we look for keys
+                        def treat_special_keys(d, key):
+                            if key.startswith("__lower."):
+                                return d[escaped_split(key, ".", maxsplit=1)[1]].lower()
+                            if key.startswith("__upper."):
+                                return d[escaped_split(key, ".", maxsplit=1)[1]].upper()
+                            return d[key]
+
                         # split the contents form the innermost curly brackets from the rest
-                        # TODO use regexp and escaping here. This would require a regexp for this rsplit... ugly!!!
-                        begin, dkey = value.rsplit("{", 1)
-                        dkey, end = dkey.split("}", 1)
-
-                        # check for the special key that deletes the entire key.
-                        if dkey == "__delete":
-                            del processdict[key]
-                            value = ""
-                        else:
-                            newvalue = ""
-                            # check for and apply the special key __lower
-                            if dkey.startswith("__lower"):
-                                rest, dkey = dkey.split(".", 1)
-                                newvalue = dotkey(fulldict, dkey).lower()
-                            # check for and apply the special key __upper
-                            if dkey.startswith("__upper"):
-                                rest, dkey =  dkey.split(".", 1)
-                                newvalue = dotkey(fulldict, dkey).upper()
-                            # if none of the above happened:
-                            if newvalue is "":
-                                newvalue = dotkey(fulldict, dkey)
-
-                            # substitute the key by the correct value
-                            processdict[key] = begin + newvalue + end
-                            value = processdict[key]
+                        processdict[key] = replace_delimited(value, fulldict, access_func=treat_special_keys)
+                        value = processdict[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
