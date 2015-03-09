@@ -20,37 +20,36 @@ for conf in static_section:
 
 # construct a dictionary from the static information. This can be passed to CMake
 static = {}
-# only pass a dictionary to CMake if there is more than one target to be build
-if(len(static_section) > 1):
-    # The special key __CONFIGS holds a list of configuration names
-    static["__CONFIGS"] = []
-    # introduce a special key for all subgroups
-    for group in static_groups:
-        static["__" + group] = []
 
-    generic_exec_suffix = 0
+# The special key __CONFIGS holds a list of configuration names
+static["__CONFIGS"] = []
+# introduce a special key for all subgroups
+for group in static_groups:
+    static["__" + group] = []
 
-    for conf in static_section:
-        # check for __exec_suffix keyword
-        if "__exec_suffix" in conf:
-            # take the configuration name and add it to the data
-            static["__CONFIGS"].append(conf["__exec_suffix"])
+generic_exec_suffix = 0
 
-            # check for key/value pairs in subgroups and add lists to the dictionary
-            for group in static_groups:
-                for key in conf["__STATIC"][group]:
-                    if key not in static["__" + group]:
-                        static["__" + group].append(key)
+for conf in static_section:
+    # check for __exec_suffix keyword
+    if "__exec_suffix" in conf:
+        # take the configuration name and add it to the data
+        static["__CONFIGS"].append(conf["__exec_suffix"])
 
-            # copy the entire data
-            static[conf["__exec_suffix"]] = conf["__STATIC"]
-        else:
-            # append an integer
-            # TODO this assumes either NO suffixes are specified by the user with __exec_suffix
-            # or ALL suffixes are determined by __exec_suffix (different names for all occuring configurations).
-            # otherwise there are name clashes and targets get overwritten. This is a possible error source.
-            static["__CONFIGS"].append(str(generic_exec_suffix))
-            generic_exec_suffix += 1
+        # check for key/value pairs in subgroups and add lists to the dictionary
+        for group in static_groups:
+            for key in conf["__STATIC"][group]:
+                if key not in static["__" + group]:
+                    static["__" + group].append(key)
 
-    # print to CMake
-    printForCMake(static)
+        # copy the entire data
+        static[conf["__exec_suffix"]] = conf["__STATIC"]
+    else:
+        # append an integer
+        # TODO this assumes either NO suffixes are specified by the user with __exec_suffix
+        # or ALL suffixes are determined by __exec_suffix (different names for all occuring configurations).
+        # otherwise there are name clashes and targets get overwritten. This is a possible error source.
+        static["__CONFIGS"].append(str(generic_exec_suffix))
+        generic_exec_suffix += 1
+
+# print to CMake
+printForCMake(static)
