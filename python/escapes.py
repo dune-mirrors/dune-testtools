@@ -31,3 +31,6 @@ def lookup_and_modify_key(d, af):
 
 def replace_delimited(s, d, leftdelimiter="{", rightdelimiter="}", access_func=lambda d,k: d[k]):
     return re.sub("{0}[^{0}{1}]+{1}".format(leftdelimiter, rightdelimiter), lookup_and_modify_key(d, access_func), s, count=1)
+
+def extract_delimited(s, leftdelimiter="[", rightdelimiter="]"):
+    return escaped_split(escaped_split(s, delimiter=leftdelimiter, maxsplit=1)[1], delimiter=rightdelimiter, maxsplit=1)[0]

@@ -234,7 +234,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
         def dotkey(d, key):
             """ Given a key containing dots, return the value from a nested dictionary """
             if "." in key:
-                group, key = key.split(".", 1)
+                group, key = escaped_split(key, ".", 1)
                 return dotkey(d[group], key)
             else:
                 return d[key]

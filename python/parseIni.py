@@ -6,7 +6,7 @@ TODO:
 
 # inspired by http://www.decalage.info/fr/python/configparser
 
-from escapes import *
+from escapes import escaped_split, exists_unescaped, strip_escapes
 
 def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False, conversionList=(int, float,), subgroups=True):
     """ parse Dune style .ini files into a dictionary
@@ -33,6 +33,10 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
     subgroups : bool
         Whether the file should be parsed as containing subgroups
     """
+    # check whether we have a good assignment character (some projects use spaces here). I drop support
+    # for that for the moment, because it makes the code uglier and less readable!
+    assert(assignment != " ")
+
     result_dict = {}
     f = open(filename)
     current_dict = result_dict
@@ -53,9 +57,7 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
             current_dict = result_dict
 
             # isolate the group name
-            group, bracket = escaped_split(line, "]", 1)
-            bracket, group = escaped_split(group, "[", 1)
-            group = group.strip(" ")
+            group = extract_delimited(line)
 
             # process the stack of subgroups given
             if subgroups is True:
@@ -82,25 +84,19 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
         # check whether this line defines a key/value pair
         # only process if the assignment string is found exactly once
         # 0 => no relevant assignment 2=> this is actually an assignment with a more complicated operator
-        if (count_unescaped(line, assignment) is 1) or ((assignment is " ") and (line.count(assignment) is not 0)):
+        if count_unescaped(line, assignment) is 1:
             # split key from value
-            if assignment is " ":
-                key, value = line.split(" ", 1)
-            else:
-                key, value = escaped_split(line, assignment)
+            key, value = escaped_split(line, assignment)
 
             # look for additional groups in the key
-            key = key.strip()
             if subgroups is True:
                 # dots in group names cannot be escaped. Otherwise, we will end up in HELL.
                 while "." in key:
-                    group, key = key.split(".")
+                    group, key = escaped_split(key, ".", maxsplit=1)
                     if group not in current_dict:
                         current_dict[group] = {}
                     current_dict = current_dict[group]
 
-            # strip blanks from the value
-            value = value.strip()
             for c in assignment:
                 value = strip_escapes(value, c)
 
