@@ -1,5 +1,6 @@
 from metaIni import expand_meta_ini
 from cmakeoutput import printForCMake
+from uniquenames import make_key_unique
 import sys
 
 import argparse
@@ -8,6 +9,9 @@ parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=T
 args = vars(parser.parse_args())
 
 static_section = expand_meta_ini(args["ini"], filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
+
+# make the found exec suffixes unique
+make_key_unique(static_section, "__exec_suffix")
 
 # determine a list of subgroups within the static section
 static_groups = []
@@ -27,29 +31,17 @@ static["__CONFIGS"] = []
 for group in static_groups:
     static["__" + group] = []
 
-generic_exec_suffix = 0
-
 for conf in static_section:
-    # check for __exec_suffix keyword
-    if "__exec_suffix" in conf:
-        # take the configuration name and add it to the data
-        static["__CONFIGS"].append(conf["__exec_suffix"])
+    static["__CONFIGS"].append(conf["__exec_suffix"])
 
-        # check for key/value pairs in subgroups and add lists to the dictionary
-        for group in static_groups:
-            for key in conf["__STATIC"][group]:
-                if key not in static["__" + group]:
-                    static["__" + group].append(key)
+    # check for key/value pairs in subgroups and add lists to the dictionary
+    for group in static_groups:
+        for key in conf["__STATIC"][group]:
+            if key not in static["__" + group]:
+                static["__" + group].append(key)
 
-        # copy the entire data
-        static[conf["__exec_suffix"]] = conf["__STATIC"]
-    else:
-        # append an integer
-        # TODO this assumes either NO suffixes are specified by the user with __exec_suffix
-        # or ALL suffixes are determined by __exec_suffix (different names for all occuring configurations).
-        # otherwise there are name clashes and targets get overwritten. This is a possible error source.
-        static["__CONFIGS"].append(str(generic_exec_suffix))
-        generic_exec_suffix += 1
+    # copy the entire data
+    static[conf["__exec_suffix"]] = conf["__STATIC"]
 
 # print to CMake
 printForCMake(static)
