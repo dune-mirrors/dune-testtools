@@ -18,6 +18,8 @@ include(DuneMacros)
 # start a dune project with information from dune.module
 dune_project()
 
+set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
+
 add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("cmake/modules")
