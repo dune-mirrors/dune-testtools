@@ -321,12 +321,12 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     return configurations
 
 # if this module is run as a script, expand a given meta ini file
-# TODO think about an option parser here
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
     parser.add_argument('-d', '--dir', help='The directory to put the output in')
+    parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from cmake and should return data to it')
     args = vars(parser.parse_args())
 
     # expand the meta ini files into a list of configurations
@@ -395,5 +395,6 @@ if __name__ == "__main__":
 
         write_dict_to_ini(c, fn + "." + extension)
 
-    from cmakeoutput import printForCMake
-    printForCMake(metaini)
+    if args["cmake"]:
+        from cmakeoutput import printForCMake
+        printForCMake(metaini)
