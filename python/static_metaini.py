@@ -17,9 +17,6 @@ for conf in static_section:
         for key in conf["__STATIC"]:
             if (type(conf["__STATIC"][key]) is dict) and (key not in static_groups):
                 static_groups.append(key)
-    else:
-        # debug output
-        sys.stderr.write("\n -- Static variant generation failed because no __STATIC section could be found in the meta-inifile!\n")
 
 # construct a dictionary from the static information. This can be passed to CMake
 static = {}
