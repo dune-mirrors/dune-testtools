@@ -344,9 +344,12 @@ if __name__ == "__main__":
         # This is done by looking through the list of available static configurations and looking for a match.
         # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
         # much larger set of static + dynamic variations.
-        for sc in static_info["__CONFIGS"]:
-            if static_info[sc] == c["__STATIC"]:
-                metaini[fn + "." + extension + "_suffix"] = sc
+        if "__STATIC" in c:
+            for sc in static_info["__CONFIGS"]:
+                if static_info[sc] == c["__STATIC"]:
+                    metaini[fn + "." + extension + "_suffix"] = sc
+        else:
+            metaini[fn + "." + extension + "_suffix"] = ""
 
         # ... and to an option key
         metaini[fn + "." + extension + "_optionkey"] = ini_optionkey

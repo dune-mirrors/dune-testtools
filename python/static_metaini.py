@@ -38,7 +38,8 @@ def extract_static_info(metaini):
                     static["__" + group].append(key)
 
         # copy the entire data
-        static[conf["__exec_suffix"]] = conf["__STATIC"]
+        if "__STATIC" in conf:
+            static[conf["__exec_suffix"]] = conf["__STATIC"]
 
     return static
 
