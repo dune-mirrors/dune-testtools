@@ -15,10 +15,13 @@ namespace Dune
    *  program information. For automated testing, the possibility
    *  to write information in a dict-style seems important.
    *
-   *  This class offers a feature to have a prefix that is appended to all
-   *  calls. These are managed in a stack-like fashion. Some remarks
-   *  - We should think about actually implementing it with a stack
-   *  - Maybe we should opt for inclusion of such feature in the parametertree itself
+   *  This class inherits from Dune::ParameterTree. It should implement
+   *  all functionality that is desirable for the ParameterTree to be
+   *  used as an output data structure. At some point, we should make
+   *  a feature request for dune-common of it.
+   *
+   *  A list of features:
+   *  * Constructor with a filename. Implicit writing to stream on destruction.
    */
   class OutputTree : public ParameterTree
   {
@@ -40,60 +43,8 @@ namespace Dune
       file.close();
     }
 
-    /** \brief append a subgroup to the current prefix
-     *  \param groupKey the name of the subgroup key to append to the prefix
-     *
-     *  The prefix will be appended to all keys given to tree operations.
-     */
-    void pushPrefix(const std::string& groupKey)
-    {
-      if (_subPrefix == "")
-      	_subPrefix = groupKey;
-      else
-      	_subPrefix = _subPrefix + "." + groupKey;
-    }
-
-    /** \brief delete one subgroup form the current prefix
-     *
-     */
-    void popPrefix()
-    {
-    	// find the index of the last occurence of the char '.'
-    	std::size_t pos = 0;
-    	std::size_t next = _subPrefix.find('.',0);
-    	while(next != std::string::npos)
-    	{
-    		pos = next;
-    		next = _subPrefix.find('.', pos+1);
-    	}
-
-    	// cut the appropriate prefix from the string
-    	_subPrefix = _subPrefix.substr(0, pos);
-    }
-
-    /** \brief set the group prefix to a new value
-     *  \param prefix the prefix to set to
-     *
-     *  This overrides any value currently stored for the prefix
-     */
-    void setPrefix(const std::string& prefix)
-    {
-    	_subPrefix = prefix;
-    }
-
-    std::string& operator[](const std::string& key)
-    {
-    	return ParameterTree::operator[]((_subPrefix.empty() ? "" : _subPrefix + ".") + key);
-    }
-
-    const std::string& operator[](const std::string& key) const
-    {
-    	return ParameterTree::operator[]((_subPrefix.empty() ? "" : _subPrefix + ".") + key);
-    }
-
   private:
     std::string _filename;
-    std::string _subPrefix;
   };
 
 } // namespace Dune
