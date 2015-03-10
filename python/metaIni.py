@@ -348,14 +348,6 @@ if __name__ == "__main__":
             # othwise default to .ini
             extension = "ini"
 
-         # check if a special inifile option key was given
-        if "__inifile_optionkey" in c:
-            ini_optionkey = c["__inifile_optionkey"]
-            del c["__inifile_optionkey"]
-        else:
-            # othwise default to empty string
-            ini_optionkey = ""
-
         # append the ini file name to the names list...
         metaini["names"].append(fn + "." + extension)
         # ... and connect it to a exec_suffix
@@ -376,8 +368,6 @@ if __name__ == "__main__":
                     metaini[fn + "." + extension + "_suffix"] = str(generic_exec_suffix)
                 generic_exec_suffix += 1
 
-        # ... and to an option key
-        metaini[fn + "." + extension + "_optionkey"] = ini_optionkey
         del c["__name"]
         # maybe add an absolute path to the filename
         if "dir" in args:

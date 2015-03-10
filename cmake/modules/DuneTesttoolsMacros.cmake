@@ -29,14 +29,20 @@
 #
 # add_system_test_per_target(TARGET target1 [, target2 ..]
 #                            INIFILE inifile
-#                            [TARGETBASENAME basename])
+#                           [SCRIPT script]
+#                           [TARGETBASENAME basename])
 #
 # For a preconfigured set of targets, test targets are created. The inifile
 # for the test is expanded into the build tree. The number of tests is
 # the product of the number of executable targets and inifiles defined by
 # the metainifile. The same meta inifile is used for all targets. Call
-# multiple times for different behaviour. The TARGETBASENAME parameter is
-# used internally, to check whether an ini file is matching a given executable.
+# multiple times for different behaviour.
+# The SCRIPT parameter is used to put a python wrapper script around the
+# C++ executable. This can for example be used to have the test result depend
+# on a vtk comparison. See dune-testtools/python/wrapper for predefined such
+# wrapper scripts.
+# The TARGETBASENAME parameter is used internally, to check whether an ini file
+# is matching a given executable.
 #
 # add_dune_system_test(TARGET target)
 
@@ -99,9 +105,15 @@ endfunction(add_static_variants)
 function(add_system_test_per_target)
   # parse arguments to function call
   set(OPTION DEBUG)
-  set(SINGLE INIFILE TARGETBASENAME)
+  set(SINGLE INIFILE SCRIPT TARGETBASENAME)
   set(MULTI TARGET)
   cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  # set a default for the script. call_executable.py just calls the executable.
+  # There, it is also possible to hook in things depending on the inifile
+  if(NOT ${TARGVAR_SCRIPT})
+    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+  endif()
 
   # expand the given meta ini file into the build tree
   execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/metaIni.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
@@ -144,11 +156,7 @@ function(add_system_test_per_target)
       get_filename_component(iniext ${inifile} EXT)
 
       if(${DOSOMETHING})
-        if("${iniinfo_${inifile}_optionkey}" STREQUAL "")
-          add_test(${target}_${ininame} ${target} "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
-        else("${iniinfo_${inifile}_optionkey}" STREQUAL "")
-          add_test(${target}_${ininame} ${target} ${iniinfo_${inifile}_optionkey} "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
-        endif("${iniinfo_${inifile}_optionkey}" STREQUAL "")
+        add_test(${target}_${ininame} ${PYTHON_EXECUTABLE} ${TARGVAR_SCRIPT} --exec ${target} --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
       endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})
@@ -158,7 +166,7 @@ endfunction(add_system_test_per_target)
 function(add_dune_system_test)
   # parse arguments
   set(OPTION DEBUG)
-  set(SINGLE INIFILE BASENAME)
+  set(SINGLE INIFILE BASENAME SCRIPT)
   set(MULTI SOURCE LIBRARIES)
   cmake_parse_arguments(SYSTEMTEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
@@ -167,6 +175,12 @@ function(add_dune_system_test)
   if (${SYSTEMTEST_DEBUG})
     set(DEBUG "DEBUG")
   endif (${SYSTEMTEST_DEBUG})
+
+  # set a default for the script. call_executable.py just calls the executable.
+  # There, it is also possible to hook in things depending on the inifile
+  if(NOT ${SYSTEMTEST_SCRIPT})
+    set(SYSTEMTEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+  endif()
 
   # The above macros have been written in a way that allows us to use them
   # combined. The TARGETBASENAME parameter is introduced for that.
@@ -238,6 +252,7 @@ function(add_dune_system_test)
 
   add_system_test_per_target(INIFILE ${SYSTEMTEST_INIFILE}
                              TARGET ${targetlist}
+                             SCRIPT ${SYSTEMTEST_SCRIPT}
                              ${DEBUG}
                              TARGETBASENAME ${SYSTEMTEST_BASENAME})
 
