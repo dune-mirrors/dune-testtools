@@ -18,13 +18,13 @@ def write_dict_to_ini(d, filename, assignment="="):
     with open(filename, 'w') as f:
         def traverse_dict(file, d, prefix):
             # first traverse all non-group values (they would otherwise be considered part of a group)
-            for key, value in sorted(d.items()):
-                if type(value) is not dict:
+            for key, value in sorted(dict.items(d)):
+                if not isinstance(value, dict):
                     file.write("{} {} {}\n".format(key, assignment, value))
 
             # now go into subgroups
-            for key, value in sorted(d.items()):
-                if type(value) is dict:
+            for key, value in sorted(dict.items(d)):
+                if isinstance(value, dict):
                     pre = prefix + [key]
 
                     def groupname(prefixlist):
