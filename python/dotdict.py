@@ -24,3 +24,12 @@ class DotDict(dict):
             dict.__getitem__(self, group).__setitem__(key, value)
         else:
             dict.__setitem__(self, key, value)
+
+    def __contains__(self, key):
+        if exists_unescaped(key, "."):
+            group, key = escaped_split(key, ".", maxsplit=1)
+            if not group in self:
+                return False
+            return dict.__getitem__(self, group).__contains__(key)
+        else:
+            return dict.__contains__(self, key)
