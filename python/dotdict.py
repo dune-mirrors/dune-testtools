@@ -33,3 +33,18 @@ class DotDict(dict):
             return dict.__getitem__(self, group).__contains__(key)
         else:
             return dict.__contains__(self, key)
+
+    def __iter__(self, prefix=[]):
+        for i in dict.__iter__(self):
+            if type(self[i]) is DotDict:
+                prefix.append(i)
+                for x in self[i].__iter__(prefix):
+                    yield x
+                prefix.pop()
+            else:
+                def groupname():
+                    result = ""
+                    for p in prefix:
+                        result = result + p + "."
+                    return result
+                yield groupname() + i
