@@ -48,3 +48,6 @@ class DotDict(dict):
                         result = result + p + "."
                     return result
                 yield groupname() + i
+
+    def items(self):
+        return [(k, self[k]) for k in self]
