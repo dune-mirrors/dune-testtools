@@ -56,6 +56,7 @@ correctly.
 from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
 from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
+from dotdict import DotDict
 from copy import deepcopy
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True, filterKeys=None, addNameKey=True):
@@ -85,6 +86,12 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
         file (even when no generation pattern is given). If set to false, no
         name key will be in the output, whether a scheme was given or not.
     """
+    
+    # choose the type of dictionary to be used depending on whether dots in keys should be interpreted as subgroups
+    if subgroups:
+        dicttype = DotDict
+    else:
+        dicttype = dict
 
     # one dictionary to hold the results from several parser runs
     # the keys are all the types of assignments occuring in the file
@@ -106,7 +113,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
             # get the assignment operators
             if count_unescaped(line, assignment) is 2:
                 key, assignChar, value = escaped_split(line, assignment)
-                result[assignChar] = {}
+                result[assignChar] = dicttype()
 
     # look into the file to determine the set of assignment operators used
     get_assignment_operators(filename, result)
@@ -145,24 +152,17 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     if all_dictionaries_empty:
         return configurations
 
-    def generate_configs(d, configurations, prefix=[]):
-        def configs_for_key(key, vals, configs, prefix):
+    def generate_configs(d, configurations):
+        def configs_for_key(key, vals, configs):
             for config in configs:
                 for val in vals:
                     c = deepcopy(config)
-                    pos = c
-                    for p in prefix:
-                        pos = pos[p]
-                    pos[key] = val
+                    c[key] = val
                     yield c
 
         for key, values in d.items():
-            if type(values) is dict:
-                pref = prefix + [key]
-                configurations = generate_configs(values, configurations, pref)
-            else:
-                values = escaped_split(values, ',')
-                configurations = configs_for_key(key, values, configurations, prefix)
+            values = escaped_split(values, ',')
+            configurations = configs_for_key(key, values, configurations)
 
         for config in configurations:
             yield config
@@ -170,52 +170,37 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     # do the all product part associated with the == assignment
     if "" in result:
         configurations = [l for l in generate_configs(result[""], configurations)]
+        del result[""]
 
-    def expand_dict(d, output=None, prefix=[]):
+    def expand_dict(d):
         """ expand the dictionary of one assignment operator into a set of dictionary
             containing the actual key value pairs of that assignment operator """
+        output = None
         for key, values in d.items():
-            if type(values) is dict:
-                pref = prefix + [key]
-                output = expand_dict(values, output, pref)
-            else:
-                values = escaped_split(values, ',')
-                if output is None:
-                    output = [{} for i in range(len(values))]
-                for index, val in enumerate(values):
-                    mydict = output[index]
-                    for p in prefix:
-                        if p not in mydict:
-                            mydict[p] = {}
-                        mydict = mydict[p]
-                    mydict[key] = val
-
+            values = escaped_split(values, ',')
+            # Determine how many dicts we need when we first split values
+            if output is None:
+                output = [dicttype() for i in range(len(values))]
+            for index, val in enumerate(values):
+                output[index][key] = val
         return output
 
     def join_nested_dicts(d1, d2):
         """ join two dictionaries recursively """
         for key, item in d2.items():
-            if type(item) is dict:
-                d1[key] = join_nested_dicts(d1[key], item)
-            else:
-                d1[key] = item
+            d1[key] = item
         return d1
 
     # do the part for all other assignment operators
     for assign, tree in result.items():
-        # ignore the one we already did above
-        if assign is not "":
-            expanded_dict = expand_dict(tree)
+        newconfigurations = []
 
-            newconfigurations = []
+        # combine the expanded dictionaries with the ones in configurations
+        for config in configurations:
+            for newpart in expand_dict(tree):
+                newconfigurations.append(join_nested_dicts(deepcopy(config), newpart))
 
-            # combine the expanded dictionaries with the ones in configurations
-            for config in configurations:
-                for newpart in expanded_dict:
-                    # newconfigurations.append(dict(config.items() + newpart.items()))
-                    newconfigurations.append(join_nested_dicts(deepcopy(config), newpart))
-
-            configurations = newconfigurations
+        configurations = newconfigurations
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:
@@ -223,40 +208,25 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
         def needs_resolution(d):
             """ whether curly brackets can be found somewhere in the dictionary d """
             for key, value in d.items():
-                if type(value) is dict:
-                    if needs_resolution(value) is True:
-                        return True
-                else:
-                    if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
-                        return True
+                if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
+                    return True
             return False
-
-        def dotkey(d, key):
-            """ Given a key containing dots, return the value from a nested dictionary """
-            if "." in key:
-                group, key = escaped_split(key, ".", 1)
-                return dotkey(d[group], key)
-            else:
-                return d[key]
 
         def resolve_key_dependencies(fulldict, processdict):
             """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
             for key, value in processdict.items():
-                if type(value) is dict:
-                    resolve_key_dependencies(fulldict, value)
-                else:
-                    while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
-                        # define a function that replaces the "identity access" d,k -> d[k] when we look for keys
-                        def treat_special_keys(d, key):
-                            if key.startswith("__lower."):
-                                return d[escaped_split(key, ".", maxsplit=1)[1]].lower()
-                            if key.startswith("__upper."):
-                                return d[escaped_split(key, ".", maxsplit=1)[1]].upper()
-                            return d[key]
+                while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
+                    # define a function that replaces the "identity access" d,k -> d[k] when we look for keys
+                    def treat_special_keys(d, key):
+                        if key.startswith("__lower."):
+                            return d[escaped_split(key, ".", maxsplit=1)[1]].lower()
+                        if key.startswith("__upper."):
+                            return d[escaped_split(key, ".", maxsplit=1)[1]].upper()
+                        return d[key]
 
-                        # split the contents form the innermost curly brackets from the rest
-                        processdict[key] = replace_delimited(value, fulldict, access_func=treat_special_keys)
-                        value = processdict[key]
+                    # split the contents form the innermost curly brackets from the rest
+                    processdict[key] = replace_delimited(value, fulldict, access_func=treat_special_keys)
+                    value = processdict[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
