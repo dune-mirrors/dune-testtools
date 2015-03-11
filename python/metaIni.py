@@ -135,7 +135,11 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
                 del normal[key]
         for char, assignType in result.items():
             for key,value in assignType.items():
-                if key not in filterKeys:
+                match = False
+                for filter in filterKeys:
+                    if key.startswith(filter):
+                        match = True
+                if not match:
                     del result[char][key]
 
      # start combining dictionaries - there is always the normal dict...
