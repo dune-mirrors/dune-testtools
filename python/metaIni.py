@@ -321,12 +321,13 @@ if __name__ == "__main__":
             dirname = args["dir"] or path.dirname(fn)
             fn = path.join(dirname, fn)
 
-        # before writing the expanded ini file delete the special keywords
-        # (TODO and static section?) to make it look like an ordinary ini file
-        if "__exec_suffix" in c:
+        # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
+        # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
+        # from the expansion process.
+        if ("__exec_suffix" in c) and (not args["cmake"]):
             del c["__exec_suffix"]
-        # if "__STATIC" in c:
-        #     del c["__STATIC"]
+        if ("__STATIC" in c) and (not args["cmake"]):
+            del c["__STATIC"]
 
         write_dict_to_ini(c, fn + "." + extension)
 
