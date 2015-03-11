@@ -58,6 +58,7 @@ from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from dotdict import DotDict
 from copy import deepcopy
+from uniquenames import make_key_unique
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -237,37 +238,14 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
 
     # Implement the naming scheme through the special key __name
     if addNameKey is True:
-        # count the number of occurences of __name keys in the data set
-        name_dict = {}
-        for c in configurations:
-            if "__name" in c:
-                if c["__name"] not in name_dict:
-                    name_dict[c["__name"]] = 1
-                else:
-                    name_dict[c["__name"]] += 1
-
-        # now delete all those keys that occur once and reset all others to a counter
-        for key, value in name_dict.items():
-            if value is 1:
-                del name_dict[key]
-            else:
-                name_dict[key] = 0
-
-        # initialize a counter in the case of number only file name generation
-        counter = 0
         base, extension = filename.split(".", 1)
+        make_key_unique(configurations, "__name")
         for conf in configurations:
-            # check whether a custom name has been provided by the user
-            if "__name" in conf:
-                conffile = "_" + conf["__name"]
-                if conf["__name"] in name_dict:
-                    conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
-                    name_dict[conf["__name"]] += 1
-                # update the name key in the configuration dictionary
-                conf["__name"] = base + conffile
-            else:
-                conf["__name"] = base + str(counter).zfill(4)
-                counter = counter + 1
+            conf["__name"] = base + "_" + conf["__name"]
+            # cut the underscore in the corner case of exactly one configuration
+            if conf["__name"][-1] == "_":
+                conf["__name"] = conf["__name"][:-1]
+
     # if no naming scheme is to be implemented, remove all __name keys
     else:
         for c in configurations:
@@ -292,6 +270,10 @@ if __name__ == "__main__":
     metaini = {}
     metaini["names"] = []  # TODO this should  have underscores!
 
+    # extract the static information from the meta ini file
+    from static_metaini import extract_static_info
+    static_info = extract_static_info(args["ini"])
+
     # write the configurations to the file specified in the name key.
     for c in configurations:
         fn = c["__name"]
@@ -315,22 +297,15 @@ if __name__ == "__main__":
         # append the ini file name to the names list...
         metaini["names"].append(fn + "." + extension)
         # ... and connect it to a exec_suffix
-        # get static variants to determine executable suffix
-        static_section = expand_meta_ini(args["ini"], filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
-        if not(len(static_section) > 1):
-            # no static variation. No suffix, target gets the basename
-            metaini[fn + "." + extension + "_suffix"] = None
-        elif "__exec_suffix" in c:
-            # exec_suffix specifies user defined target names
-            metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
+        # This is done by looking through the list of available static configurations and looking for a match.
+        # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
+        # much larger set of static + dynamic variations.
+        if "__STATIC" in c:
+            for sc in static_info["__CONFIGS"]:
+                if static_info[sc] == c["__STATIC"]:
+                    metaini[fn + "." + extension + "_suffix"] = sc
         else:
-            # target are generically numbered
-            generic_exec_suffix = 0
-            for conf in static_section:
-                #if the static sections are equal the right suffix is determined by the generic suffix
-                if conf["__STATIC"] == c["__STATIC"]:
-                    metaini[fn + "." + extension + "_suffix"] = str(generic_exec_suffix)
-                generic_exec_suffix += 1
+            metaini[fn + "." + extension + "_suffix"] = ""
 
         # ... and to an option key
         metaini[fn + "." + extension + "_optionkey"] = ini_optionkey

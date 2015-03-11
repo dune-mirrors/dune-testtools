@@ -1,59 +1,56 @@
 from metaIni import expand_meta_ini
 from cmakeoutput import printForCMake
+from uniquenames import make_key_unique
 import sys
-
 import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
-args = vars(parser.parse_args())
 
-static_section = expand_meta_ini(args["ini"], filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
+def extract_static_info(metaini):
+    static_section = expand_meta_ini(metaini, filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
 
-# determine a list of subgroups within the static section
-static_groups = []
-for conf in static_section:
-    # check for __STATIC section. Who knows who may call this without having the section in the metaini-file
-    if "__STATIC" in conf:
-        for key in conf["__STATIC"]:
-            if (type(conf["__STATIC"][key]) is dict) and (key not in static_groups):
-                static_groups.append(key)
-    else:
-        # debug output
-        sys.stderr.write("\n -- Static variant generation failed because no __STATIC section could be found in the meta-inifile!\n")
+    # make the found exec suffixes unique
+    make_key_unique(static_section, "__exec_suffix")
 
-# construct a dictionary from the static information. This can be passed to CMake
-static = {}
-# only pass a dictionary to CMake if there is more than one target to be build
-if(len(static_section) > 1):
+    # determine a list of subgroups within the static section
+    static_groups = []
+    for conf in static_section:
+        # check for __STATIC section. Who knows who may call this without having the section in the metaini-file
+        if "__STATIC" in conf:
+            for key in conf["__STATIC"]:
+                if (type(conf["__STATIC"][key]) is dict) and (key not in static_groups):
+                    static_groups.append(key)
+
+    # construct a dictionary from the static information. This can be passed to CMake
+    static = {}
+
     # The special key __CONFIGS holds a list of configuration names
     static["__CONFIGS"] = []
     # introduce a special key for all subgroups
     for group in static_groups:
         static["__" + group] = []
 
-    generic_exec_suffix = 0
-
     for conf in static_section:
-        # check for __exec_suffix keyword
-        if "__exec_suffix" in conf:
-            # take the configuration name and add it to the data
-            static["__CONFIGS"].append(conf["__exec_suffix"])
+        static["__CONFIGS"].append(conf["__exec_suffix"])
 
-            # check for key/value pairs in subgroups and add lists to the dictionary
-            for group in static_groups:
-                for key in conf["__STATIC"][group]:
-                    if key not in static["__" + group]:
-                        static["__" + group].append(key)
+        # check for key/value pairs in subgroups and add lists to the dictionary
+        for group in static_groups:
+            for key in conf["__STATIC"][group]:
+                if key not in static["__" + group]:
+                    static["__" + group].append(key)
 
-            # copy the entire data
+        # copy the entire data
+        if "__STATIC" in conf:
             static[conf["__exec_suffix"]] = conf["__STATIC"]
-        else:
-            # append an integer
-            # TODO this assumes either NO suffixes are specified by the user with __exec_suffix
-            # or ALL suffixes are determined by __exec_suffix (different names for all occuring configurations).
-            # otherwise there are name clashes and targets get overwritten. This is a possible error source.
-            static["__CONFIGS"].append(str(generic_exec_suffix))
-            generic_exec_suffix += 1
+
+    return static
+
+if __name__ == "__main__":
+    # read command line options
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
+    args = vars(parser.parse_args())
+
+    # call the macro
+    static = extract_static_info(args["ini"])
 
     # print to CMake
     printForCMake(static)
