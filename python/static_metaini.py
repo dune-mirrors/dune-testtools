@@ -15,8 +15,8 @@ def extract_static_info(metaini):
     for conf in static_section:
         # check for __STATIC section. Who knows who may call this without having the section in the metaini-file
         if "__STATIC" in conf:
-            for key in conf["__STATIC"]:
-                if (type(conf["__STATIC"][key]) is dict) and (key not in static_groups):
+            for key in dict.__iter__(conf["__STATIC"]):
+                if (isinstance(conf["__STATIC"][key], dict)) and (key not in static_groups):
                     static_groups.append(key)
 
     # construct a dictionary from the static information. This can be passed to CMake
