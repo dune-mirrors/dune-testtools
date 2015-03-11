@@ -34,6 +34,13 @@ class DotDict(dict):
         else:
             return dict.__contains__(self, key)
 
+    def __delitem__(self, key):
+        if exists_unescaped(key, "."):
+            group, key = escaped_split(key, ".", maxsplit=1)
+            dict.__getitem__(self, group).__delitem__(key)
+        else:
+            dict.__delitem__(self, key)
+
     def __iter__(self, prefix=[]):
         for i in dict.__iter__(self):
             if type(self[i]) is DotDict:
