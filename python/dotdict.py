@@ -45,6 +45,9 @@ class DotDict(dict):
         else:
             dict.__delitem__(self, key)
 
+    def __len__(self):
+        return sum([1 for i in self])
+
     def __iter__(self, prefix=[]):
         for i in dict.__iter__(self):
             if type(self[i]) is DotDict:
