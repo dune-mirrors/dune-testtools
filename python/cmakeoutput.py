@@ -69,7 +69,10 @@ def printForCMake(d):
     data = "__DATA" + delimiter
 
     def prepare_val(s):
-        return str(s).replace(";", replacement)
+        if s == '':
+            return '__empty'
+        else:
+            return str(s).replace(";", replacement)
 
     def add_dictionary_to_keys(dic, singlekeys, multikeys, data, prefix=""):
         # add a dictionary to the keys

@@ -58,39 +58,33 @@ function(add_static_variants)
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
 
-  # if python script returned a dictionary of configurations
-  if(NOT "${output}" STREQUAL "")
-    # iterate over the static configurations
-    foreach(conf ${STATINFO___CONFIGS})
-      # add the executable with that configurations
-      add_executable(${STATVAR_BASENAME}_${conf} "${STATVAR_SOURCE}")
-      list(APPEND targetlist "${STATVAR_BASENAME}_${conf}")
+  # iterate over the static configurations
+  foreach(conf ${STATINFO___CONFIGS})
+    # determine the target name: in case of only one config, omit the underscore.
+    set(tname ${STATVAR_BASENAME})
+    if(NOT ${conf} STREQUAL "__empty")
+      set(tname ${tname}_${conf})
+    endif(NOT ${conf} STREQUAL "__empty")
+    # add the executable with that configurations
+    add_executable(${tname} "${STATVAR_SOURCE}")
+    list(APPEND targetlist "${tname}")
 
-      # TODO all groups to be recognized in the static section must be implemented here
-      # similar to the compile definitions group.
+    # TODO all groups to be recognized in the static section must be implemented here
+    # similar to the compile definitions group.
 
-      # treat compile definitions
-      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-        set_property(TARGET ${STATVAR_BASENAME}_${conf} APPEND PROPERTY
-         COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
-      endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
+    # treat compile definitions
+    foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+      set_property(TARGET ${tname} APPEND PROPERTY
+        COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
+    endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
 
-      # maybe output debug information
-      if(${STATVAR_DEBUG})
-        message("Generated target ${STATVAR_BASENAME}_${conf}")
-        get_property(cd TARGET ${STATVAR_BASENAME}_${conf} PROPERTY COMPILE_DEFINITIONS)
-        message("  with COMPILE_DEFINITIONS: ${cd}")
-      endif(${STATVAR_DEBUG})
-    endforeach(conf ${STATINFO___CONFIGS})
-  # if the python script returned nothing there is only one target to build
-  else(NOT "${output}" STREQUAL "")
-    # add executable and append the only target to the targetlist
-    add_executable(${STATVAR_BASENAME} "${STATVAR_SOURCE}")
-    list(APPEND targetlist "${STATVAR_BASENAME}")
+    # maybe output debug information
     if(${STATVAR_DEBUG})
-      message("Generated target ${STATVAR_BASENAME}")
+      message("Generated target ${tname}")
+      get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
+      message("  with COMPILE_DEFINITIONS: ${cd}")
     endif(${STATVAR_DEBUG})
-  endif(NOT "${output}" STREQUAL "")
+  endforeach(conf ${STATINFO___CONFIGS})
 
   # export the list of created targets
   set(${STATVAR_TARGETS} ${targetlist} PARENT_SCOPE)
