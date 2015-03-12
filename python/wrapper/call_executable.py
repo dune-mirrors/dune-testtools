@@ -10,7 +10,7 @@ def call(executable, inifile=None):
         iniargument = inifile
         iniinfo = parse_ini_file(inifile)
         if "__inifile_optionkey" in iniinfo:
-            optionkey = " " + iniifile["__inifile_optionkey"] + " " + iniargument
+            optionkey = " " + iniinfo["__inifile_optionkey"] + " " + iniargument
 
     return os.system("./" + executable + " " + iniargument)
 
