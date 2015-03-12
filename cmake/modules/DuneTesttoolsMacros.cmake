@@ -111,7 +111,7 @@ function(add_system_test_per_target)
 
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
-  if(NOT ${TARGVAR_SCRIPT})
+  if(NOT TARGVAR_SCRIPT)
     set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
   endif()
 
@@ -156,7 +156,7 @@ function(add_system_test_per_target)
       get_filename_component(iniext ${inifile} EXT)
 
       if(${DOSOMETHING})
-        add_test(${target}_${ininame} ${PYTHON_EXECUTABLE} ${TARGVAR_SCRIPT} --exec ${target} --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
+        add_test(${target}_${ininame} env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} ${TARGVAR_SCRIPT} --exec ${target} --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
       endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})

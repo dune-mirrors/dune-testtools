@@ -1,6 +1,6 @@
 """ A module that manages the call to C++ executables """
 
-from .parseIni import parse_ini_file
+from parseIni import parse_ini_file
 import os
 
 def call(executable, inifile=None):
@@ -12,7 +12,7 @@ def call(executable, inifile=None):
         if "__inifile_optionkey" in iniinfo:
             optionkey = " " + iniifile["__inifile_optionkey"] + " " + iniargument
 
-    return os.system(executable + iniargument)
+    return os.system("./" + executable + " " + iniargument)
 
 # This is also used as the standard wrapper by cmake
 if __name__ == "__main__":
