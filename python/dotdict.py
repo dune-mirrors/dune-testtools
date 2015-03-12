@@ -10,6 +10,7 @@ class DotDict(dict):
         dict.__init__(self, *args, **kwargs)
 
     def __getitem__(self, key):
+        key = str(key)
         if exists_unescaped(key, "."):
             group, key = escaped_split(key, ".", maxsplit=1)
             return dict.__getitem__(self, group)[key]
@@ -17,6 +18,7 @@ class DotDict(dict):
             return dict.__getitem__(self, key)
 
     def __setitem__(self, key, value):
+        key = str(key)
         if exists_unescaped(key, "."):
             group, key = escaped_split(key, ".", maxsplit=1)
             if not group in self:
@@ -26,6 +28,7 @@ class DotDict(dict):
             dict.__setitem__(self, key, value)
 
     def __contains__(self, key):
+        key = str(key)
         if exists_unescaped(key, "."):
             group, key = escaped_split(key, ".", maxsplit=1)
             if not group in self:
@@ -35,6 +38,7 @@ class DotDict(dict):
             return dict.__contains__(self, key)
 
     def __delitem__(self, key):
+        key = str(key)
         if exists_unescaped(key, "."):
             group, key = escaped_split(key, ".", maxsplit=1)
             dict.__getitem__(self, group).__delitem__(key)
