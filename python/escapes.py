@@ -23,3 +23,14 @@ def strip_escapes(str, char):
 
 def escaped_split(str, delimiter=" ", maxsplit=0):
     return [i.replace("\\{}".format(delimiter), delimiter).strip() for i in re.split("(?<!\\\\){}".format(re.escape(delimiter)), str, maxsplit)]
+
+def lookup_and_modify_key(d, af):
+    def _lookup_and_modify_key(matchobj):
+        return af(d, matchobj.group(0)[1:-1])
+    return _lookup_and_modify_key
+
+def replace_delimited(s, d, leftdelimiter="{", rightdelimiter="}", access_func=lambda d,k: d[k]):
+    return re.sub("{0}[^{0}{1}]+{1}".format(leftdelimiter, rightdelimiter), lookup_and_modify_key(d, access_func), s, count=1)
+
+def extract_delimited(s, leftdelimiter="[", rightdelimiter="]"):
+    return escaped_split(escaped_split(s, delimiter=leftdelimiter, maxsplit=1)[1], delimiter=rightdelimiter, maxsplit=1)[0]

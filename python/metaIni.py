@@ -26,6 +26,8 @@ follows.
   increasing number is appended to the basename.
 - You can also set a custom name for the generated ini file by setting the
   reserved key "__name" in your meta ini file and use the {} syntax for meaningful naming.
+- The characters '=', ',',' {','}','[' and ']' must be escaped with a backslash in order
+  to be used in keys or values. You are even better off avoiding them.
 
 This is an example aiming at showing the full power of the meta ini syntax:
 
@@ -43,7 +45,6 @@ parameters == simple, complex
 The example produces a total of 6 ini files.
 
 Known issues:
-- The characters '=', ',',' {','}','[' and ']' should neither appear in keys nor in values.
 - the code could use a lot more error checking
 
 Known bugs:
@@ -52,10 +53,12 @@ subgroup is not used elsewhere. THe reason is that the dictionary "normal" doesn
 correctly.
 """
 
-from escapes import *
+from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
 from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
+from dotdict import DotDict
 from copy import deepcopy
+from uniquenames import make_key_unique
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True, filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -84,6 +87,12 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
         file (even when no generation pattern is given). If set to false, no
         name key will be in the output, whether a scheme was given or not.
     """
+    
+    # choose the type of dictionary to be used depending on whether dots in keys should be interpreted as subgroups
+    if subgroups:
+        dicttype = DotDict
+    else:
+        dicttype = dict
 
     # one dictionary to hold the results from several parser runs
     # the keys are all the types of assignments occuring in the file
@@ -105,7 +114,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
             # get the assignment operators
             if count_unescaped(line, assignment) is 2:
                 key, assignChar, value = escaped_split(line, assignment)
-                result[assignChar] = {}
+                result[assignChar] = dicttype()
 
     # look into the file to determine the set of assignment operators used
     get_assignment_operators(filename, result)
@@ -126,7 +135,11 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
                 del normal[key]
         for char, assignType in result.items():
             for key,value in assignType.items():
-                if key not in filterKeys:
+                match = False
+                for filter in filterKeys:
+                    if key.startswith(filter):
+                        match = True
+                if not match:
                     del result[char][key]
 
      # start combining dictionaries - there is always the normal dict...
@@ -144,24 +157,17 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     if all_dictionaries_empty:
         return configurations
 
-    def generate_configs(d, configurations, prefix=[]):
-        def configs_for_key(key, vals, configs, prefix):
+    def generate_configs(d, configurations):
+        def configs_for_key(key, vals, configs):
             for config in configs:
                 for val in vals:
                     c = deepcopy(config)
-                    pos = c
-                    for p in prefix:
-                        pos = pos[p]
-                    pos[key] = val
+                    c[key] = val
                     yield c
 
         for key, values in d.items():
-            if type(values) is dict:
-                pref = prefix + [key]
-                configurations = generate_configs(values, configurations, pref)
-            else:
-                values = escaped_split(values, ',')
-                configurations = configs_for_key(key, values, configurations, prefix)
+            values = escaped_split(values, ',')
+            configurations = configs_for_key(key, values, configurations)
 
         for config in configurations:
             yield config
@@ -169,52 +175,37 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     # do the all product part associated with the == assignment
     if "" in result:
         configurations = [l for l in generate_configs(result[""], configurations)]
+        del result[""]
 
-    def expand_dict(d, output=None, prefix=[]):
+    def expand_dict(d):
         """ expand the dictionary of one assignment operator into a set of dictionary
             containing the actual key value pairs of that assignment operator """
+        output = None
         for key, values in d.items():
-            if type(values) is dict:
-                pref = prefix + [key]
-                output = expand_dict(values, output, pref)
-            else:
-                values = escaped_split(values, ',')
-                if output is None:
-                    output = [{} for i in range(len(values))]
-                for index, val in enumerate(values):
-                    mydict = output[index]
-                    for p in prefix:
-                        if p not in mydict:
-                            mydict[p] = {}
-                        mydict = mydict[p]
-                    mydict[key] = val
-
+            values = escaped_split(values, ',')
+            # Determine how many dicts we need when we first split values
+            if output is None:
+                output = [dicttype() for i in range(len(values))]
+            for index, val in enumerate(values):
+                output[index][key] = val
         return output
 
     def join_nested_dicts(d1, d2):
         """ join two dictionaries recursively """
         for key, item in d2.items():
-            if type(item) is dict:
-                d1[key] = join_nested_dicts(d1[key], item)
-            else:
-                d1[key] = item
+            d1[key] = item
         return d1
 
     # do the part for all other assignment operators
     for assign, tree in result.items():
-        # ignore the one we already did above
-        if assign is not "":
-            expanded_dict = expand_dict(tree)
+        newconfigurations = []
 
-            newconfigurations = []
+        # combine the expanded dictionaries with the ones in configurations
+        for config in configurations:
+            for newpart in expand_dict(tree):
+                newconfigurations.append(join_nested_dicts(deepcopy(config), newpart))
 
-            # combine the expanded dictionaries with the ones in configurations
-            for config in configurations:
-                for newpart in expanded_dict:
-                    # newconfigurations.append(dict(config.items() + newpart.items()))
-                    newconfigurations.append(join_nested_dicts(deepcopy(config), newpart))
-
-            configurations = newconfigurations
+        configurations = newconfigurations
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:
@@ -222,55 +213,25 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
         def needs_resolution(d):
             """ whether curly brackets can be found somewhere in the dictionary d """
             for key, value in d.items():
-                if type(value) is dict:
-                    if needs_resolution(value) is True:
-                        return True
-                else:
-                    if ("{" in value) and ("}" in value):
-                        return True
+                if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
+                    return True
             return False
-
-        def dotkey(d, key):
-            """ Given a key containing dots, return the value from a nested dictionary """
-            if "." in key:
-                group, key = key.split(".", 1)
-                return dotkey(d[group], key)
-            else:
-                return d[key]
 
         def resolve_key_dependencies(fulldict, processdict):
             """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
             for key, value in processdict.items():
-                if type(value) is dict:
-                    resolve_key_dependencies(fulldict, value)
-                else:
-                    while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
-                        # split the contents form the innermost curly brackets from the rest
-                        # TODO use regexp and escaping here. This would require a regexp for this rsplit... ugly!!!
-                        begin, dkey = value.rsplit("{", 1)
-                        dkey, end = dkey.split("}", 1)
+                while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
+                    # define a function that replaces the "identity access" d,k -> d[k] when we look for keys
+                    def treat_special_keys(d, key):
+                        if key.startswith("__lower."):
+                            return d[escaped_split(key, ".", maxsplit=1)[1]].lower()
+                        if key.startswith("__upper."):
+                            return d[escaped_split(key, ".", maxsplit=1)[1]].upper()
+                        return d[key]
 
-                        # check for the special key that deletes the entire key.
-                        if dkey == "__delete":
-                            del processdict[key]
-                            value = ""
-                        else:
-                            newvalue = ""
-                            # check for and apply the special key __lower
-                            if dkey.startswith("__lower"):
-                                rest, dkey = dkey.split(".", 1)
-                                newvalue = dotkey(fulldict, dkey).lower()
-                            # check for and apply the special key __upper
-                            if dkey.startswith("__upper"):
-                                rest, dkey =  dkey.split(".", 1)
-                                newvalue = dotkey(fulldict, dkey).upper()
-                            # if none of the above happened:
-                            if newvalue is "":
-                                newvalue = dotkey(fulldict, dkey)
-
-                            # substitute the key by the correct value
-                            processdict[key] = begin + newvalue + end
-                            value = processdict[key]
+                    # split the contents form the innermost curly brackets from the rest
+                    processdict[key] = replace_delimited(value, fulldict, access_func=treat_special_keys)
+                    value = processdict[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
@@ -281,37 +242,14 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
 
     # Implement the naming scheme through the special key __name
     if addNameKey is True:
-        # count the number of occurences of __name keys in the data set
-        name_dict = {}
-        for c in configurations:
-            if "__name" in c:
-                if c["__name"] not in name_dict:
-                    name_dict[c["__name"]] = 1
-                else:
-                    name_dict[c["__name"]] += 1
-
-        # now delete all those keys that occur once and reset all others to a counter
-        for key, value in name_dict.items():
-            if value is 1:
-                del name_dict[key]
-            else:
-                name_dict[key] = 0
-
-        # initialize a counter in the case of number only file name generation
-        counter = 0
         base, extension = filename.split(".", 1)
+        make_key_unique(configurations, "__name")
         for conf in configurations:
-            # check whether a custom name has been provided by the user
-            if "__name" in conf:
-                conffile = "_" + conf["__name"]
-                if conf["__name"] in name_dict:
-                    conffile += "_" + str(name_dict[conf["__name"]]).zfill(4)
-                    name_dict[conf["__name"]] += 1
-                # update the name key in the configuration dictionary
-                conf["__name"] = base + conffile
-            else:
-                conf["__name"] = base + str(counter).zfill(4)
-                counter = counter + 1
+            conf["__name"] = base + "_" + conf["__name"]
+            # cut the underscore in the corner case of exactly one configuration
+            if conf["__name"][-1] == "_":
+                conf["__name"] = conf["__name"][:-1]
+
     # if no naming scheme is to be implemented, remove all __name keys
     else:
         for c in configurations:
@@ -321,12 +259,12 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     return configurations
 
 # if this module is run as a script, expand a given meta ini file
-# TODO think about an option parser here
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
     parser.add_argument('-d', '--dir', help='The directory to put the output in')
+    parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from cmake and should return data to it')
     args = vars(parser.parse_args())
 
     # expand the meta ini files into a list of configurations
@@ -335,6 +273,10 @@ if __name__ == "__main__":
     # initialize a data structure to pass the list of generated ini files to cmake
     metaini = {}
     metaini["names"] = []  # TODO this should  have underscores!
+
+    # extract the static information from the meta ini file
+    from static_metaini import extract_static_info
+    static_info = extract_static_info(args["ini"])
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
@@ -351,22 +293,15 @@ if __name__ == "__main__":
         # append the ini file name to the names list...
         metaini["names"].append(fn + "." + extension)
         # ... and connect it to a exec_suffix
-        # get static variants to determine executable suffix
-        static_section = expand_meta_ini(args["ini"], filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
-        if not(len(static_section) > 1):
-            # no static variation. No suffix, target gets the basename
-            metaini[fn + "." + extension + "_suffix"] = None
-        elif "__exec_suffix" in c:
-            # exec_suffix specifies user defined target names
-            metaini[fn + "." + extension + "_suffix"] = c.get("__exec_suffix", "")
+        # This is done by looking through the list of available static configurations and looking for a match.
+        # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
+        # much larger set of static + dynamic variations.
+        if "__STATIC" in c:
+            for sc in static_info["__CONFIGS"]:
+                if static_info[sc] == c["__STATIC"]:
+                    metaini[fn + "." + extension + "_suffix"] = sc
         else:
-            # target are generically numbered
-            generic_exec_suffix = 0
-            for conf in static_section:
-                #if the static sections are equal the right suffix is determined by the generic suffix
-                if conf["__STATIC"] == c["__STATIC"]:
-                    metaini[fn + "." + extension + "_suffix"] = str(generic_exec_suffix)
-                generic_exec_suffix += 1
+            metaini[fn + "." + extension + "_suffix"] = ""
 
         del c["__name"]
         # maybe add an absolute path to the filename
@@ -376,14 +311,16 @@ if __name__ == "__main__":
             dirname = args["dir"] or path.dirname(fn)
             fn = path.join(dirname, fn)
 
-        # before writing the expanded ini file delete the special keywords
-        # (TODO and static section?) to make it look like an ordinary ini file
-        if "__exec_suffix" in c:
+        # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
+        # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
+        # from the expansion process.
+        if ("__exec_suffix" in c) and (not args["cmake"]):
             del c["__exec_suffix"]
-        # if "__STATIC" in c:
-        #     del c["__STATIC"]
+        if ("__STATIC" in c) and (not args["cmake"]):
+            del c["__STATIC"]
 
         write_dict_to_ini(c, fn + "." + extension)
 
-    from cmakeoutput import printForCMake
-    printForCMake(metaini)
+    if args["cmake"]:
+        from cmakeoutput import printForCMake
+        printForCMake(metaini)

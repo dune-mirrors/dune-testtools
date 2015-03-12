@@ -64,42 +64,36 @@ function(add_static_variants)
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
 
-  # if python script returned a dictionary of configurations
-  if(NOT "${output}" STREQUAL "")
-    # iterate over the static configurations
-    foreach(conf ${STATINFO___CONFIGS})
-      # add the executable with that configurations
-      add_executable(${STATVAR_BASENAME}_${conf} "${STATVAR_SOURCE}")
-      list(APPEND targetlist "${STATVAR_BASENAME}_${conf}")
+  # iterate over the static configurations
+  foreach(conf ${STATINFO___CONFIGS})
+    # determine the target name: in case of only one config, omit the underscore.
+    set(tname ${STATVAR_BASENAME})
+    if(NOT ${conf} STREQUAL "__empty")
+      set(tname ${tname}_${conf})
+    endif(NOT ${conf} STREQUAL "__empty")
+    # add the executable with that configurations
+    add_executable(${tname} "${STATVAR_SOURCE}")
+    list(APPEND targetlist "${tname}")
 
-      # TODO all groups to be recognized in the static section must be implemented here
-      # similar to the compile definitions group.
+    # TODO all groups to be recognized in the static section must be implemented here
+    # similar to the compile definitions group.
 
-      # treat compile definitions
-      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-        set_property(TARGET ${STATVAR_BASENAME}_${conf} APPEND PROPERTY
-         COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
-      endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
+    # treat compile definitions
+    foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+      set_property(TARGET ${tname} APPEND PROPERTY
+        COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
+    endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
 
-      # maybe output debug information
-      if(${STATVAR_DEBUG})
-        message("Generated target ${STATVAR_BASENAME}_${conf}")
-        get_property(cd TARGET ${STATVAR_BASENAME}_${conf} PROPERTY COMPILE_DEFINITIONS)
-        message("  with COMPILE_DEFINITIONS: ${cd}")
-      endif(${STATVAR_DEBUG})
-    endforeach(conf ${STATINFO___CONFIGS})
-  # if the python script returned nothing there is only one target to build
-  else(NOT "${output}" STREQUAL "")
-    # add executable and append the only target to the targetlist
-    add_executable(${STATVAR_BASENAME} "${STATVAR_SOURCE}")
-    list(APPEND targetlist "${STATVAR_BASENAME}")
+    # maybe output debug information
     if(${STATVAR_DEBUG})
-      message("Generated target ${STATVAR_BASENAME}")
+      message("Generated target ${tname}")
+      get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
+      message("  with COMPILE_DEFINITIONS: ${cd}")
     endif(${STATVAR_DEBUG})
-  endif(NOT "${output}" STREQUAL "")
+  endforeach(conf ${STATINFO___CONFIGS})
 
   # export the list of created targets
-  set(${STATVAR_TARGETS} "${targetlist}" PARENT_SCOPE)
+  set(${STATVAR_TARGETS} ${targetlist} PARENT_SCOPE)
 endfunction(add_static_variants)
 
 function(add_system_test_per_target)
@@ -116,7 +110,7 @@ function(add_system_test_per_target)
   endif()
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/metaIni.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/metaIni.py --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")
@@ -167,7 +161,7 @@ function(add_dune_system_test)
   # parse arguments
   set(OPTION DEBUG)
   set(SINGLE INIFILE BASENAME SCRIPT)
-  set(MULTI SOURCE LIBRARIES)
+  set(MULTI SOURCE TARGETS)
   cmake_parse_arguments(SYSTEMTEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
@@ -191,68 +185,11 @@ function(add_dune_system_test)
                       TARGETS targetlist
                       ${DEBUG})
 
-  # link the given libraries to all targets in this systemtest
-  if (${DEBUG})
-    message("linking libraries...")
-  endif (${DEBUG})
-  # TODO maybe it is possible to specify libraries for specific tests within a systemtest
-  foreach(_target ${targetlist})
-    # always add the DUNE libaries
-    target_link_libraries(${_target} ${DUNE_LIBS})
-    if (${DEBUG})
-      message("  linked the target ${_target} to the DUNE libraries")
-    endif (${DEBUG})
-    # link user specific libraries (partly reusing the dune macros)
-    foreach(_library ${SYSTEMTEST_LIBRARIES})
-      if(${_library} STREQUAL "all")
-        # add all libraries, convinience keyword for test using a lot of the predefined library macros
-        add_dune_all_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to all libraries (add_dune_all_flags)")
-        endif (${DEBUG})
-      elseif(${_library} STREQUAL "mpi")
-        add_dune_mpi_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to the MPI libraries")
-        endif (${DEBUG})
-      elseif(${_library} STREQUAL "alugrid")
-        add_dune_alugrid_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to the ALUGrid libraries")
-        endif (${DEBUG})
-      elseif(${_library} STREQUAL "parmetis")
-        add_dune_parmetis_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to the ParMETIS libraries")
-        endif (${DEBUG})
-      elseif(${_library} STREQUAL "ug")
-        add_dune_ug_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to the UG libraries")
-        endif (${DEBUG})
-      elseif(${_library} STREQUAL "umfpack")
-        add_dune_umfpack_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to the UMFPack libraries")
-        endif (${DEBUG})
-      elseif(${_library} STREQUAL "superlu")
-        add_dune_superlu_flags(${_target})
-        if (${DEBUG})
-          message("  linked the target ${_target} to the SuperLU libraries")
-        endif (${DEBUG})
-      else(${_library} STREQUAL "all")
-        # libaries not without dune macro
-        target_link_libraries(${_target} ${_library})
-        if (${DEBUG})
-          message("  linked the target ${_target} to ${_library}")
-        endif (${DEBUG})
-      endif(${_library} STREQUAL "all")
-    endforeach(_library ${SYSTEMTEST_LIBRARIES})
-  endforeach(_target ${targetlist})
+  # export the targetlist generated by add_static_variants
+  set(${SYSTEMTEST_TARGETS} ${targetlist} PARENT_SCOPE)
 
   add_system_test_per_target(INIFILE ${SYSTEMTEST_INIFILE}
                              TARGET ${targetlist}
-                             SCRIPT ${SYSTEMTEST_SCRIPT}
                              ${DEBUG}
                              TARGETBASENAME ${SYSTEMTEST_BASENAME})
 

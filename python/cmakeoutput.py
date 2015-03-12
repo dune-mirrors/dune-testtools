@@ -20,7 +20,7 @@ to undo the replacement.
 
 def printForCMake(d):
     # Do all the error checking in the beginning and forget about it later
-    if type(d) is not dict:
+    if not isinstance(d, dict):
         raise ValueError("Expected a dictionary for the Python-CMake interface")
     def check_str(x):
         try:
@@ -29,12 +29,12 @@ def printForCMake(d):
             print "All data elements must be convertible to a string"
     def check_dict(a):
         for val in a:
-            if type(val) is dict:
+            if isinstance(val, dict):
                 check_dict(val)
                 continue
-            if type(val) is list:
+            if isinstance(val, list):
                 for i in val:
-                    if type(i) is dict:
+                    if isinstance(i, dict):
                         raise ValueError("No dictionaries in lists allowed for the Python-CMake interface")
                     check_str(i)
                 continue
@@ -48,7 +48,7 @@ def printForCMake(d):
     specialChars = ["&", "#", "!", "?", "/"]
     def does_not_appear(d, c):
         for val in d:
-            if type(val) is list:
+            if isinstance(val, list):
                 for i in val:
                     if c in str(i):
                         return False
@@ -69,19 +69,22 @@ def printForCMake(d):
     data = "__DATA" + delimiter
 
     def prepare_val(s):
-        return str(s).replace(";", replacement)
+        if s == '':
+            return '__empty'
+        else:
+            return str(s).replace(";", replacement)
 
     def add_dictionary_to_keys(dic, singlekeys, multikeys, data, prefix=""):
         # add a dictionary to the keys
-        for key, value in dic.items():
-            if type(value) is dict:
+        for key, value in dict.items(dic):
+            if isinstance(value, dict):
                 singlekeys, multikeys, data = add_dictionary_to_keys(value, singlekeys, multikeys, data, prefix + str(key) + "_")
                 continue
-            if type(value) is list:
+            if isinstance(value, list):
                 multikeys = multikeys + prefix + prepare_val(key) + delimiter
                 data = data + prefix + prepare_val(key) + delimiter
                 for item in value:
-                    if (type(item) is dict) or (type(item) is list):
+                    if (isinstance(item, dict)) or (isinstance(item, list)):
                         raise ValueError("Nesting of complex types not supported")
                     data = data + prepare_val(item) + delimiter
                 continue
