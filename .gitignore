@@ -1,6 +1,4 @@
 build-cmake
 *.pyc
-*.ini
-*.mini
 *~
 #*#
