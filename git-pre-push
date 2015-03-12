@@ -3,7 +3,7 @@
 # It is recommended to install this hook when developing dune-testtools.
 # It will run the python test suite on any push attempt.
 # Type the following to do so:
-#   cp git-pre-push ./git/hooks/
+#   cp git-pre-push ./.git/hooks/pre-push
 
 cd python
 env PYTHONPATH=$PYTHONPATH:. py.test
