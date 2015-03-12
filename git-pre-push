@@ -4,6 +4,7 @@
 # It will run the python test suite on any push attempt.
 # Type the following to do so:
 #   cp git-pre-push ./.git/hooks/pre-push
+# If it does not work make sure to install pytest (debian: python-pytest)
 
 cd python
 env PYTHONPATH=$PYTHONPATH:. py.test
