@@ -131,10 +131,14 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
             filterKeys = [filterKeys]
         # remove all keys that do not match the given filtering
         for key, value in normal.items():
-            if key not in filterKeys:
+            match = False
+            for filter in filterKeys:
+                if key.startswith(filter):
+                    match = True
+            if not match:
                 del normal[key]
         for char, assignType in result.items():
-            for key,value in assignType.items():
+            for key, value in assignType.items():
                 match = False
                 for filter in filterKeys:
                     if key.startswith(filter):
