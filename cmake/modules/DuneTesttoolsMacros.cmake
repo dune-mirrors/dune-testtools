@@ -215,3 +215,148 @@ function(add_dune_system_test)
                              TARGETBASENAME ${SYSTEMTEST_BASENAME})
 
 endfunction(add_dune_system_test)
+
+function(add_convergence_test_per_target)
+  # parse arguments to function call
+  set(OPTION DEBUG)
+  set(SINGLE INIFILE SCRIPT TARGETBASENAME)
+  set(MULTI TARGET)
+  cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  # set a default for the script. call_executable.py just calls the executable.
+  # There, it is also possible to hook in things depending on the inifile
+  if(NOT TARGVAR_SCRIPT)
+    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+  endif()
+
+  # expand the given meta ini file into the build tree
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/convergencetest_metaini.py 
+                    --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
+                    OUTPUT_VARIABLE output)
+
+  parse_python_data(PREFIX iniinfo INPUT "${output}")
+
+  # add the tests for all targets
+  foreach(target ${TARGVAR_TARGET})
+    foreach(test ${iniinfo_tests})
+      # initialize variable holding ini files
+      set(convergence_test_inis "")
+      # loop over ini files needed for one test
+      foreach(inifile ${iniinfo_names})
+        # Somehow the test have to be named, although the naming scheme is not relevant for
+        # the selection of tests to run on the server side. For the moment we combine the
+        # executable target name with the ini file name.
+        get_filename_component(ininame ${inifile} NAME_WE)
+
+        if (${TARGVAR_DEBUG})
+          message("  Adding a target to test ${test} with executable ${target} and inifile ${ininame}...")
+        endif (${TARGVAR_DEBUG})
+
+        # check whether something needs to be done. This is either when our target is matching
+        # the given suffix, or when TARGETBASENAME isnt given (this indicates stand-alone usage)
+        # or in case no suffix is given (we have only one target) when the target is matching the
+        # target basename
+        set(DOSOMETHING FALSE)
+        if("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
+          set(DOSOMETHING TRUE)
+        endif("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
+        if("${TARGVAR_TARGETBASENAME}_${iniinfo_${test}_${inifile}_suffix}" STREQUAL "${target}")
+          set(DOSOMETHING TRUE)
+        endif("${TARGVAR_TARGETBASENAME}_${iniinfo_${test}_${inifile}_suffix}" STREQUAL "${target}")
+        if(NOT DEFINED TARGVAR_TARGETBASENAME)
+          set(DOSOMETHING TRUE)
+        endif(NOT DEFINED TARGVAR_TARGETBASENAME)
+
+        if (${TARGVAR_DEBUG})
+          message("  -- ${DOSOMETHING}")
+        endif (${TARGVAR_DEBUG})
+
+        # get the extension of the ini file (can be user defined)
+        get_filename_component(iniext ${inifile} EXT)
+
+        if(${DOSOMETHING})
+          # add the inifile to the list of ini files for this target
+          list(APPEND convergence_test_inis "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
+        endif(${DOSOMETHING})
+      endforeach(inifile ${iniinfo_names})
+      # convert list to plus seperated string
+      # trick to hand over list as an argument that cmake expands by default to a set of single strings
+      string(REPLACE ";" "+" inis "${convergence_test_inis}")
+      # add the test
+      add_test(NAME "convergence_test_${target}_${test}" COMMAND "${CMAKE_COMMAND}"
+                                      -DCONVERGENCE_TEST_TARGET=${target}
+                                      -DCONVERGENCE_TEST_INIS=${inis}
+                                      -DCONVERGENCE_TEST_SCRIPT=${TARGVAR_SCRIPT}
+                                      -P "${DUNE_TESTTOOLS_PATH}/cmake/modules/RunConvergenceTest.cmake"
+                                      )
+
+    endforeach(test ${iniinfo_tests})
+  endforeach(target ${TARGVAR_TARGET})
+endfunction(add_convergence_test_per_target)
+
+function(add_dune_convergence_test)
+  # parse arguments
+  set(OPTION DEBUG)
+  set(SINGLE INIFILE BASENAME SCRIPT)
+  set(MULTI SOURCE TARGET OUTPUT_TARGETS)
+  cmake_parse_arguments(CONVERGENCETEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  # construct a string containg DEBUG to pass the debug flag to the other macros
+  set(DEBUG "")
+  if (${CONVERGENCETEST_DEBUG})
+    set(DEBUG "DEBUG")
+  endif (${CONVERGENCETEST_DEBUG})
+
+  # set a default for the script. call_executable.py just calls the executable.
+  # There, it is also possible to hook in things depending on the inifile
+  if(NOT ${CONVERGENCETEST_SCRIPT})
+    set(CONVERGENCETEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+  endif()
+
+  # check if we have a source or a target given
+  set(HAVE_SOURCE FALSE)
+  set(HAVE_TARGET FALSE)
+  if(NOT ${CONVERGENCETEST_SOURCE} STREQUAL "")
+    set(HAVE_SOURCE TRUE)
+  endif(NOT ${CONVERGENCETEST_SOURCE} STREQUAL "")
+  if(NOT ${CONVERGENCETEST_TARGET} STREQUAL "")
+    set(HAVE_TARGET TRUE)
+  endif(NOT ${CONVERGENCETEST_TARGET} STREQUAL "")
+
+  # throw an error if we have none
+  if(NOT ${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+    message(FATAL_ERROR "Please specify either a SOURCE or a TARGET.")
+  endif(NOT ${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+
+  # we either expect a source/sources OR a target/targetlist
+  if(${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+    add_static_variants(SOURCE ${CONVERGENCETEST_SOURCE}
+                        BASENAME ${CONVERGENCETEST_BASENAME}
+                        INIFILE ${CONVERGENCETEST_INIFILE}
+                        TARGETS targets
+                        ${DEBUG})
+
+    # export the targetlist generated by add_static_variants
+    set(${CONVERGENCETEST_OUTPUT_TARGETS} "" PARENT_SCOPE)
+    set(${CONVERGENCETEST_OUTPUT_TARGETS} ${targets} PARENT_SCOPE)
+
+    add_convergence_test_per_target(INIFILE ${CONVERGENCETEST_INIFILE}
+                                    TARGET ${targets}
+                                    ${DEBUG}
+                                    TARGETBASENAME ${CONVERGENCETEST_BASENAME}
+                                    SCRIPT ${CONVERGENCETEST_SCRIPT})
+
+  elseif(${HAVE_TARGET} AND NOT ${HAVE_SOURCE})
+    # export the targetlist to have the full interface functionality
+    set(${CONVERGENCETEST_OUTPUT_TARGETS} ${CONVERGENCETEST_TARGET} PARENT_SCOPE)
+
+    add_convergence_test_per_target(INIFILE ${CONVERGENCETEST_INIFILE}
+                                    TARGET ${CONVERGENCETEST_TARGET}
+                                    ${DEBUG}
+                                    TARGETBASENAME ${CONVERGENCETEST_BASENAME}
+                                    SCRIPT ${CONVERGENCETEST_SCRIPT})
+
+  else(${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+    message(FATAL_ERROR "Both SOURCE and TARGET was specified. Ambiguous input.")
+  endif(${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+endfunction(add_dune_system_test)
