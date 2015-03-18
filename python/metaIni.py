@@ -199,7 +199,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
     # apply the filtering of groups if needed
     if filterKeys:
         # check whether a single filter has been given and make a list if so
-        if isinstance(filterKeys, list):
+        if not isinstance(filterKeys, list):
             filterKeys = [filterKeys]
         # remove all keys that do not match the given filtering
         for c in configurations:
