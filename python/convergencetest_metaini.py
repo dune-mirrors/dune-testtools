@@ -117,7 +117,7 @@ if __name__ == "__main__":
                 extension = "ini"
 
             # append the ini file name to the names list...
-            metaini["names"].append(str(index)+ "_" + fn + "." + extension)
+            metaini["names"].append(fn + "." + extension)
             # ... and connect it to a exec_suffix
             # This is done by looking through the list of available static configurations and looking for a match.
             # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
