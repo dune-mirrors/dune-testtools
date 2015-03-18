@@ -110,42 +110,8 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         assignChar = "{}{}{}".format(assignment, key, assignment)
         result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True)
 
-    # apply the filtering of groups if needed
-    if filterKeys is not None:
-        # check whether a single filter has been given and make a list if so
-        if type(filterKeys) is not list:
-            filterKeys = [filterKeys]
-        # remove all keys that do not match the given filtering
-        for key, value in normal.items():
-            match = False
-            for filter in filterKeys:
-                if key.startswith(filter):
-                    match = True
-            if not match:
-                del normal[key]
-        for char, assignType in result.items():
-            for key, value in assignType.items():
-                match = False
-                for filter in filterKeys:
-                    if key.startswith(filter):
-                        match = True
-                if not match:
-                    del result[char][key]
-
      # start combining dictionaries - there is always the normal dict...
     configurations = [normal]
-
-    # ...except we deleted all keys with the filter. If all dictionaries are empty
-    # because of the filtering, we are done and return the configurations
-    all_dictionaries_empty = True
-    for char, assignType in result.items():
-        if assignType.items():
-            all_dictionaries_empty = False
-    if normal:
-        all_dictionaries_empty = False
-
-    if all_dictionaries_empty:
-        return configurations
 
     def generate_configs(d, configurations):
         def configs_for_key(key, vals, configs):
@@ -229,6 +195,24 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         # That is why we need to do this until all dependencies are resolved.
         while needs_resolution(c) is True:
             resolve_key_dependencies(c, c)
+
+    # apply the filtering of groups if needed
+    if filterKeys:
+        # check whether a single filter has been given and make a list if so
+        if isinstance(filterKeys, list):
+            filterKeys = [filterKeys]
+        # remove all keys that do not match the given filtering
+        for c in configurations:
+            for key, value in c.items():
+                match = False
+                for filter in filterKeys:
+                    if key.startswith(filter):
+                        match = True
+                if not match:
+                    del c[key]
+        # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
+        import ast
+        configurations = [DotDict(ast.literal_eval(s)) for s in set([str(c) for c in configurations])]
 
     # Implement the naming scheme through the special key __name
     if addNameKey is True:
