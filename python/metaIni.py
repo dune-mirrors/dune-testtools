@@ -46,11 +46,6 @@ The example produces a total of 6 ini files.
 
 Known issues:
 - the code could use a lot more error checking
-
-Known bugs:
-- Having special assignment and a subgrouping by keyname in the same line is broken, if that
-subgroup is not used elsewhere. THe reason is that the dictionary "normal" doesnt pick it up
-correctly.
 """
 
 from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
@@ -60,7 +55,7 @@ from dotdict import DotDict
 from copy import deepcopy
 from uniquenames import make_key_unique
 
-def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True, filterKeys=None, addNameKey=True):
+def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -75,8 +70,6 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     commentChar: list
         A list of characters that define comments. Everything on a line
         after such character is ignored during the parsing process.
-    subgroups : bool
-        Whether the meta ini file interprets dots in groups as subgroups
     filterKeys : string
         Only apply the algorithm to a set of keys given.
         Defaults to None, which means that all groups are taken into account.
@@ -87,20 +80,13 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
         file (even when no generation pattern is given). If set to false, no
         name key will be in the output, whether a scheme was given or not.
     """
-    
-    # choose the type of dictionary to be used depending on whether dots in keys should be interpreted as subgroups
-    if subgroups:
-        dicttype = DotDict
-    else:
-        dicttype = dict
-
     # one dictionary to hold the results from several parser runs
     # the keys are all the types of assignments occuring in the file
     # except for normal assignment, which is treated differently.
     result = {}
 
     # we always have normal assignment
-    normal = parse_ini_file(filename, assignment=assignment, asStrings=True, subgroups=subgroups)
+    normal = parse_ini_file(filename, assignment=assignment, asStrings=True)
 
     def get_assignment_operators(filename, result):
         file = open(filename)
@@ -114,7 +100,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
             # get the assignment operators
             if count_unescaped(line, assignment) is 2:
                 key, assignChar, value = escaped_split(line, assignment)
-                result[assignChar] = dicttype()
+                result[assignChar] = DotDict()
 
     # look into the file to determine the set of assignment operators used
     get_assignment_operators(filename, result)
@@ -122,7 +108,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
     # get dictionaries for all sorts of assignments
     for key in result:
         assignChar = "{}{}{}".format(assignment, key, assignment)
-        result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True, subgroups=subgroups)
+        result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True)
 
     # apply the filtering of groups if needed
     if filterKeys is not None:
@@ -189,7 +175,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), subgroups=True
             values = escaped_split(values, ',')
             # Determine how many dicts we need when we first split values
             if output is None:
-                output = [dicttype() for i in range(len(values))]
+                output = [DotDict() for i in range(len(values))]
             for index, val in enumerate(values):
                 output[index][key] = val
         return output
