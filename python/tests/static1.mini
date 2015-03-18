@@ -1,0 +1,12 @@
+__exec_suffix = {__STATIC.COMPILE_DEFINITIONS.GRID}
+
+[__STATIC]
+gridtype =1= structured, structured, unstructured
+
+[__STATIC.sol]
+structured == Solver1a, Solver1b
+unstructured = Solver2
+
+[__STATIC.COMPILE_DEFINITIONS]
+GRID =1= G1, G2, G3
+SOLVER = {__STATIC.sol.{__STATIC.gridtype}}
