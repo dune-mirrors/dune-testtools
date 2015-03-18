@@ -294,7 +294,9 @@ function(add_convergence_test_per_target)
                                       -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
                                       -P "${DUNE_TESTTOOLS_PATH}/cmake/modules/RunConvergenceTest.cmake"
                                       )
-        message(STATUS "Added convergence test: convergence_test_${target}_${test}")
+        if (${TARGVAR_DEBUG})
+          message(STATUS "Added convergence test: convergence_test_${target}_${test}")
+        endif (${TARGVAR_DEBUG})
       endif(NOT "${convergence_test_inis}" STREQUAL "")
     endforeach(test ${iniinfo_tests})
   endforeach(target ${TARGVAR_TARGET})
