@@ -279,17 +279,23 @@ function(add_convergence_test_per_target)
           list(APPEND convergence_test_inis "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
         endif(${DOSOMETHING})
       endforeach(inifile ${iniinfo_names})
-      # convert list to plus seperated string
-      # trick to hand over list as an argument that cmake expands by default to a set of single strings
-      string(REPLACE ";" "+" inis "${convergence_test_inis}")
-      # add the test
-      add_test(NAME "convergence_test_${target}_${test}" COMMAND "${CMAKE_COMMAND}"
+
+      if(NOT "${convergence_test_inis}" STREQUAL "")
+        # convert list to plus seperated string
+        # trick to hand over list as an argument that cmake expands by default to a set of single strings
+        string(REPLACE ";" "+" inis "${convergence_test_inis}")
+        # add the test
+        # TODO why do I need to pass the testtools patch and the python executable?
+        add_test(NAME "convergence_test_${target}_${test}" COMMAND "${CMAKE_COMMAND}"
                                       -DCONVERGENCE_TEST_TARGET=${target}
                                       -DCONVERGENCE_TEST_INIS=${inis}
                                       -DCONVERGENCE_TEST_SCRIPT=${TARGVAR_SCRIPT}
+                                      -DDUNE_TESTTOOLS_PATH=${DUNE_TESTTOOLS_PATH}
+                                      -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
                                       -P "${DUNE_TESTTOOLS_PATH}/cmake/modules/RunConvergenceTest.cmake"
                                       )
-
+        message(STATUS "Added convergence test: convergence_test_${target}_${test}")
+      endif(NOT "${convergence_test_inis}" STREQUAL "")
     endforeach(test ${iniinfo_tests})
   endforeach(target ${TARGVAR_TARGET})
 endfunction(add_convergence_test_per_target)
