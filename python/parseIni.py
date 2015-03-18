@@ -9,7 +9,7 @@ TODO:
 from escapes import escaped_split, exists_unescaped, strip_escapes, count_unescaped, extract_delimited
 from dotdict import DotDict
 
-def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False, conversionList=(int, float,), subgroups=True):
+def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False, conversionList=(int, float,)):
     """ parse Dune style .ini files into a dictionary
 
     The parser behaviour can be customized by the keyword arguments of this function.
@@ -31,20 +31,12 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
         The order of the functions defines the priority of the conversion rules
         (highest priority first). All conversion rules are expected to raise
         a ValueError when they are not applicable.
-    subgroups : bool
-        Whether the file should be parsed as containing subgroups
     """
     # check whether we have a good assignment character (some projects use spaces here). I drop support
     # for that for the moment, because it makes the code uglier and less readable!
     assert(assignment != " ")
 
-    # choose the type of dictionary to be used depending on whether dots in keys should be interpreted as subgroups
-    if subgroups:
-        dicttype = DotDict
-    else:
-        dicttype = dict
-
-    result_dict = dicttype()
+    result_dict = DotDict()
 
     f = open(filename)
     current_dict = result_dict
@@ -66,7 +58,7 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
 
             # add a new dictionary for the group name and set the current dict to it
             if not group in result_dict:
-                result_dict[group] = dicttype()
+                result_dict[group] = DotDict()
             current_dict = result_dict[group]
             continue
 

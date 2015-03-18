@@ -6,10 +6,6 @@ def test_parse1():
     real = {'x': 5, 'y': 'str', 'group': {'y': 'str', 'x': 5, 'z': 1, 'subgroup': {'y': 'str', 'x': 5, 'z': 1}}}
     assert(parsed == real)
 
-    parsed = parse_ini_file("./tests/parse1.ini", subgroups=False)
-    real = {'y': 'str', 'x': 5, 'group.z': 1, 'group': {'y': 'str', 'x': 5, 'subgroup.z': 1}, 'group.subgroup': {'y': 'str', 'x': 5}}
-    assert(parsed == real)
-
     parsed = parse_ini_file("./tests/parse1.ini", asStrings=True)
     real = {'y': 'str', 'x': '5', 'group': {'y': 'str', 'x': '5', 'z': '1', 'subgroup': {'y': 'str', 'x': '5', 'z': '1'}}}
     assert(parsed == real)

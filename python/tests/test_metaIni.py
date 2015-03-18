@@ -3,10 +3,6 @@ from metaIni import *
 def test_metaini1():
     configs = expand_meta_ini("./tests/metaini1.mini")
     assert(len(configs) == 72)
-    
-# TODO fails, but I think it should not!
-#    configs = expand_meta_ini("./tests/metaini1.mini", subgroups=False)
-#    assert(len(configs) == 72)
 
     configs = expand_meta_ini("./tests/metaini1.mini", filterKeys=("g",))
     assert(len(configs) == 12)
