@@ -204,11 +204,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         # remove all keys that do not match the given filtering
         for c in configurations:
             for key, value in c.items():
-                match = False
-                for filter in filterKeys:
-                    if key.startswith(filter):
-                        match = True
-                if not match:
+                if not True in [key.startswith(f) for f in filterKeys]:
                     del c[key]
         # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
         import ast
