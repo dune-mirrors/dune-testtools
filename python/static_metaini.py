@@ -5,7 +5,7 @@ import sys
 import argparse
 
 def extract_static_info(metaini):
-    static_section = expand_meta_ini(metaini, filterKeys=["__STATIC", "__exec_suffix"], addNameKey=False)
+    static_section = expand_meta_ini(metaini, filterKeys=("__STATIC", "__exec_suffix"), addNameKey=False)
 
     # make the found exec suffixes unique
     make_key_unique(static_section, "__exec_suffix")
