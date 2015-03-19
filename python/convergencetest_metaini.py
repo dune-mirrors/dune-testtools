@@ -1,11 +1,7 @@
 from metaIni import expand_meta_ini, parse_meta_ini_file
-from escapes import escaped_split
 from writeIni import write_dict_to_ini
 from static_metaini import extract_static_info
 from cmakeoutput import printForCMake
-from copy import deepcopy
-from dotdict import DotDict
-import string
 import argparse
 import sys
 
