@@ -23,3 +23,9 @@ endforeach(ini ${inis})
 set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}/python:$ENV{PYTHONPATH}")
 execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/wrapper/test_convergence.py --ini ${CONVERGENCE_TEST_META_INI}
                   RESULT_VARIABLE result ERROR_VARIABLE output OUTPUT_VARIABLE output)
+
+# Check its return status
+if(result)
+  message(SEND_ERROR "${output}")
+  message(FATAL_ERROR "Test run with ${CONVERGENCE_TEST_TARGET} and inifile ${ini} failed")
+endif(result)
