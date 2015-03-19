@@ -235,6 +235,54 @@ def parse_meta_ini_file(filename, assignment="=", commentChar=("#",)):
 
     return (normal, result)
 
+def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
+    # get the unique ini name
+    fn = c["__name"]
+
+    # check if a special inifile extension was given
+    if "__inifile_extension" in c:
+        extension = c["__inifile_extension"].strip(".")
+        del c["__inifile_extension"]
+    else:
+        # othwise default to .ini
+        extension = "ini"
+
+    # append the ini file name to the names list...
+    metaini["names"].append(fn + "." + extension)
+    # ... and connect it to a exec_suffix
+    # This is done by looking through the list of available static configurations and looking for a match.
+    # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
+    # much larger set of static + dynamic variations.
+    if "__STATIC" in c:
+        for sc in static_info["__CONFIGS"]:
+            if static_info[sc] == c["__STATIC"]:
+                metaini[prefix + fn + "." + extension + "_suffix"] = sc
+    else:
+        metaini[prefix + fn + "." + extension + "_suffix"] = ""
+
+    # add an absolute path to the filename
+    # this is the folder where files are printed to
+    # and manipulate the __name key accordingly
+    # the __name key then consists of the path of the actual ini file and a unique name without extension
+    if "dir" in args:
+        from os import path
+        fn = path.basename(fn)
+        dirname = args["dir"] or path.dirname(fn)
+        fn = path.join(dirname, fn)
+
+    # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
+    # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
+    # from the expansion process.
+    if ("__name" in c) and (not args["cmake"]):
+        del c["__name"]
+    if ("__exec_suffix" in c) and (not args["cmake"]):
+        del c["__exec_suffix"]
+    if ("__STATIC" in c) and (not args["cmake"]):
+        del c["__STATIC"]
+
+    write_dict_to_ini(c, fn + "." + extension)
+
+
 # if this module is run as a script, expand a given meta ini file
 if __name__ == "__main__":
     import argparse
@@ -257,46 +305,7 @@ if __name__ == "__main__":
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
-        fn = c["__name"]
-
-        # check if a special inifile extension was given
-        if "__inifile_extension" in c:
-            extension = c["__inifile_extension"].strip(".")
-            del c["__inifile_extension"]
-        else:
-            # othwise default to .ini
-            extension = "ini"
-
-        # append the ini file name to the names list...
-        metaini["names"].append(fn + "." + extension)
-        # ... and connect it to a exec_suffix
-        # This is done by looking through the list of available static configurations and looking for a match.
-        # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
-        # much larger set of static + dynamic variations.
-        if "__STATIC" in c:
-            for sc in static_info["__CONFIGS"]:
-                if static_info[sc] == c["__STATIC"]:
-                    metaini[fn + "." + extension + "_suffix"] = sc
-        else:
-            metaini[fn + "." + extension + "_suffix"] = ""
-
-        del c["__name"]
-        # maybe add an absolute path to the filename
-        if "dir" in args:
-            from os import path
-            fn = path.basename(fn)
-            dirname = args["dir"] or path.dirname(fn)
-            fn = path.join(dirname, fn)
-
-        # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
-        # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
-        # from the expansion process.
-        if ("__exec_suffix" in c) and (not args["cmake"]):
-            del c["__exec_suffix"]
-        if ("__STATIC" in c) and (not args["cmake"]):
-            del c["__STATIC"]
-
-        write_dict_to_ini(c, fn + "." + extension)
+        write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
         from cmakeoutput import printForCMake
