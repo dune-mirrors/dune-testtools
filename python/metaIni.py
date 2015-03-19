@@ -269,6 +269,7 @@ def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
         fn = path.basename(fn)
         dirname = args["dir"] or path.dirname(fn)
         fn = path.join(dirname, fn)
+        c["__name"] = fn
 
     # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
     # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
