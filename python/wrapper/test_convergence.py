@@ -19,38 +19,38 @@ def call(metaini):
         for run in test:
             run["__name"] = os.path.basename(run["__name"])
 
+    def strip_quotes(dqstring):
+        from ast import literal_eval
+        return literal_eval(literal_eval(dqstring))
+
     output = []
     # read the outputted data in a dict
     for testIdx, test in enumerate(tests):
         output.append([])
         for run in test:
             # TODO specify the extension in the metaini file
-            outDict = parse_ini_file(run["__name"] + ".output")
+            outDict = parse_ini_file(run["__name"] + ".output", conversionList=(int, float, strip_quotes))
             outDict["testKey"] = run[testKey]
-            outDict["expectedRate"] = run["__CONVERGENCE_TEST.ExpectedRate"]
-            outDict["eps"] = run["__CONVERGENCE_TEST.AbsoluteDiff"]
+            outDict["expectedRate"] = float(run["__CONVERGENCE_TEST.ExpectedRate"])
+            outDict["eps"] = float(run["__CONVERGENCE_TEST.AbsoluteDiff"])
             output[testIdx].append(outDict)
 
     test_failed = False
     # calculate the rate according to the outputted data
 
-    def to_float(dqstring):
-        from ast import literal_eval
-        return float(literal_eval(dqstring))
-
     for testIdx, test in enumerate(tests):
         for runIdx in range(len(test)-1):
-            norm1 = to_float(output[testIdx][runIdx]["Norm"])
-            norm2 = to_float(output[testIdx][runIdx+1]["Norm"])
-            hmax1 = to_float(output[testIdx][runIdx]["HMax"])
-            hmax2 = to_float(output[testIdx][runIdx+1]["HMax"])
+            norm1 = output[testIdx][runIdx]["Norm"]
+            norm2 = output[testIdx][runIdx+1]["Norm"]
+            hmax1 = output[testIdx][runIdx]["HMax"]
+            hmax2 = output[testIdx][runIdx+1]["HMax"]
             rate = log(norm2/norm1)/log(hmax2/hmax1)
             # compare the rate to the expected rate
-            if abs(rate-to_float(output[testIdx][runIdx]["expectedRate"])) > to_float(output[testIdx][runIdx]["eps"]):
+            if abs(rate-output[testIdx][runIdx]["expectedRate"]) > output[testIdx][runIdx]["eps"]:
                 test_failed = True
                 sys.stderr.write("Test failed because the absolute difference between the \
                     calculated rate: " + str(rate) + " and the expected rate: " + \
-                    output[testIdx][runIdx]["expectedRate"] + " was too large.\n")
+                    str(output[testIdx][runIdx]["expectedRate"]) + " was too large.\n")
 
     # return appropriate returncode
     if test_failed:
