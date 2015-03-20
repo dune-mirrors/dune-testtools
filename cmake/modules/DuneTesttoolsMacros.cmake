@@ -223,6 +223,9 @@ function(add_convergence_test_per_target)
   set(MULTI TARGET)
   cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
+  if(TARGVAR_UNPARSED_ARGUMENTS)
+    message(WARNING "add_convergence_test_per_target: Encountered unparsed arguments: This often indicates typos in named arguments")
+  endif()
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
@@ -310,6 +313,10 @@ function(add_dune_convergence_test)
   set(SINGLE INIFILE BASENAME SCRIPT)
   set(MULTI SOURCE TARGET OUTPUT_TARGETS)
   cmake_parse_arguments(CONVERGENCETEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  if(CONVERGENCETEST_UNPARSED_ARGUMENTS)
+    message(WARNING "add_dune_convergence_test: Encountered unparsed arguments: This often indicates typos in named arguments")
+  endif()
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
   set(DEBUG "")
