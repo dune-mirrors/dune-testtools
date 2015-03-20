@@ -289,6 +289,7 @@ function(add_convergence_test_per_target)
         add_test(NAME "convergence_test_${target}_${test}" COMMAND "${CMAKE_COMMAND}"
                                       -DCONVERGENCE_TEST_TARGET=${target}
                                       -DCONVERGENCE_TEST_INIS=${inis}
+                                      -DCONVERGENCE_TEST_ID=${test}
                                       -DCONVERGENCE_TEST_META_INI=${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}
                                       -DCONVERGENCE_TEST_SCRIPT=${TARGVAR_SCRIPT}
                                       -DDUNE_TESTTOOLS_PATH=${DUNE_TESTTOOLS_PATH}
