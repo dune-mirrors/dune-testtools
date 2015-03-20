@@ -44,7 +44,16 @@
 # The TARGETBASENAME parameter is used internally, to check whether an ini file
 # is matching a given executable.
 #
-# add_dune_system_test(TARGET target)
+# add_dune_system_test(SOURCE src1 [, src2 ..]
+#                      BASENAME base
+#                      INIFILE ini
+#                      TARGETS output
+#                     [SCRIPT script]
+#                     [DEBUG]
+#                     )
+# Offers a one-macro solution to both static and dynamic variants. All the parameters
+# are a combination of the parameters of above two macros (TODO write again for clarity,
+# once the interface is fixed).
 
 find_package(PythonInterp)
 
