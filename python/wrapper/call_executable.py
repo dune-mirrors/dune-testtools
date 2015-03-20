@@ -22,7 +22,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--exec', help='The executable', required=True)
-    parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
+    parser.add_argument('-i', '--ini', help='The inifile', required=True)
     args = vars(parser.parse_args())
 
     sys.exit(call(args["exec"], args["ini"]))
