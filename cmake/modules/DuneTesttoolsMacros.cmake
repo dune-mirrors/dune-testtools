@@ -57,6 +57,10 @@ function(add_static_variants)
   set(MULTI SOURCE)
   cmake_parse_arguments(STATVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
+  if(STATVAR_UNPARSED_ARGUMENTS)
+    message(WARNING "add_static_variants: Encountered unparsed arguments: This often indicates typos in named arguments")
+  endif()
+
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
   execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/static_metaini.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
@@ -102,6 +106,10 @@ function(add_system_test_per_target)
   set(SINGLE INIFILE SCRIPT TARGETBASENAME)
   set(MULTI TARGET)
   cmake_parse_arguments(TARGVAR "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  if(TARGVAR_UNPARSED_ARGUMENTS)
+    message(WARNING "add_system_test_per_target: Encountered unparsed arguments: This often indicates typos in named arguments")
+  endif()
 
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
@@ -163,6 +171,10 @@ function(add_dune_system_test)
   set(SINGLE INIFILE BASENAME SCRIPT)
   set(MULTI SOURCE TARGETS)
   cmake_parse_arguments(SYSTEMTEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  if(SYSTEMTEST_UNPARSED_ARGUMENTS)
+    message(WARNING "add_dune_system_test: Encountered unparsed arguments: This often indicates typos in named arguments")
+  endif()
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
   set(DEBUG "")
