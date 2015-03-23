@@ -16,8 +16,6 @@ def call(metaini, testId):
     # get the convergence tests
     tests = extract_convergence_test_info(metaini)
 
-    # IMPORTANT this only checks one convergence test result. Which one?
-
     # assume we are in the same directory as the test was executed
     # manipulate the __name key accordingly
     for run in tests[testIdx]:
