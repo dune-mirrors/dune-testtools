@@ -5,14 +5,12 @@
 #include<dune/grid/uggrid.hh>
 #include<dune/grid/yaspgrid.hh>
 
-#include"../gridconstruction.hh"
+#include<dune/testtools/gridconstruction.hh>
 
 int main()
 {
-  Dune::ParameterTree tree1, tree2, tree3;
-  Dune::ParameterTreeParser::readINITree("test1.ini", tree1);
-  Dune::ParameterTreeParser::readINITree("test2.ini", tree2);
-  Dune::ParameterTreeParser::readINITree("test3.ini", tree3);
+  Dune::ParameterTree tree1;
+  Dune::ParameterTreeParser::readINITree("tree1.ini", tree1);
 
   typedef Dune::YaspGrid<2> G1;
   typedef Dune::YaspGrid<2, Dune::EquidistantOffsetCoordinates<double, 2> > G2;
