@@ -1,8 +1,9 @@
 # File for module specific CMake functions.
 #
-# This file defines the function add_dune_system_test.
+# This file defines the function add_dune_system_test and the function
+# add_dune_convergence_test
 #
-# That function could in the long run be the interface
+# These functions could in the long run be the interface
 # which the user is seeing the automated testing through.
 # It should use CMakeParseArguments to actually have
 # a keyword argument style interface and be easy to handle.
@@ -54,6 +55,42 @@
 # Offers a one-macro solution to both static and dynamic variants. All the parameters
 # are a combination of the parameters of above two macros (TODO write again for clarity,
 # once the interface is fixed).
+#
+# add_convergence_test_per_target(TARGET target1 [, target2 ..]
+#                                 INIFILE inifile
+#                                 [SCRIPT script]
+#                                 [TARGETBASENAME basename]
+#                                 [DEBUG])
+#
+# For a preconfigured set of targets, convergence tests are created. The inifile
+# for the test is expanded into the build tree. The number of tests is
+# the product of the number of executable targets and inifiles defined by
+# the metainifile. Each test consists of several runs defined by the TestKey in the metaini file.
+# The same meta inifile is used for all targets. Call
+# multiple times for different behaviour.
+# The SCRIPT parameter is used to put a python wrapper script around the
+# C++ executable for each execution within one convergence test.
+# The TARGETBASENAME parameter is used internally, to check whether an ini file
+# is matching a given executable.
+#
+# add_dune_convergence_test(SOURCE src1 [, src2 ..]
+#                      BASENAME base
+#                      INIFILE ini
+#                      TARGET target1 [, target2 ..]
+#                      OUTPUT_TARGETS outputtargetlist
+#                     [SCRIPT script]
+#                     [DEBUG]
+#                     )
+# Offers a one-macro solution to add a convergence test with static and dynamic variants.
+# Either a SOURCE or a TARGET can be specified. Both can also be lists of sources or targets.
+# In case a target is specified the target is used to generate convergence tests by dynamic
+# variations of the data in the metaini file. Internally the add_convergence_test_per_target
+# macro is called. When specifying a source instead, executables are built with the
+# add_static_variants macro. These executables are then used to generate the convergence tests
+# by using the add_convergence_test_per_target macro.
+# The OUTPUT_TARGETS variables can be used to get a list of all internally created targets. In
+# case of specifying a target this will be the target itself. In case of specifying a source, this
+# will be a list of all created targets.
 
 find_package(PythonInterp)
 
