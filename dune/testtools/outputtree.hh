@@ -22,6 +22,7 @@ namespace Dune
    *
    *  A list of features:
    *  * Constructor with a filename. Implicit writing to stream on destruction.
+   *  * A set method that automatically converts the given value to a string through an ostringstream
    */
   class OutputTree : public ParameterTree
   {
@@ -41,6 +42,14 @@ namespace Dune
       file.open(_filename);
       report(file);
       file.close();
+    }
+
+    template<typename T>
+    void set(const std::string& key, const T& arg)
+    {
+      std::ostringstream sstr;
+      sstr << arg;
+      (*this)[key] = sstr.str();
     }
 
   private:
