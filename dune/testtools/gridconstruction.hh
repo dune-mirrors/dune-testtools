@@ -451,6 +451,7 @@ public:
 
     // given we have successfully created a grid, maybe perform some operations on it
     // TODO what are suitable such operations for an unstructured grid.
+    grid->loadBalance();
     int refinement = params.get<int>("ug.refinement", 0);
     grid->globalRefine(refinement);
   }
