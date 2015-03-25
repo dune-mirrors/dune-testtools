@@ -224,13 +224,13 @@ function(add_dune_system_test)
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
   set(DEBUG "")
-  if (${SYSTEMTEST_DEBUG})
+  if (SYSTEMTEST_DEBUG)
     set(DEBUG "DEBUG")
-  endif (${SYSTEMTEST_DEBUG})
+  endif (SYSTEMTEST_DEBUG)
 
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
-  if(NOT ${SYSTEMTEST_SCRIPT})
+  if(NOT SYSTEMTEST_SCRIPT)
     set(SYSTEMTEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
   endif()
 
@@ -357,33 +357,23 @@ function(add_dune_convergence_test)
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
   set(DEBUG "")
-  if (${CONVERGENCETEST_DEBUG})
+  if(CONVERGENCETEST_DEBUG)
     set(DEBUG "DEBUG")
-  endif (${CONVERGENCETEST_DEBUG})
+  endif(CONVERGENCETEST_DEBUG)
 
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
-  if(NOT ${CONVERGENCETEST_SCRIPT})
+  if(NOT CONVERGENCETEST_SCRIPT)
     set(CONVERGENCETEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
   endif()
 
-  # check if we have a source or a target given
-  set(HAVE_SOURCE FALSE)
-  set(HAVE_TARGET FALSE)
-  if(NOT ${CONVERGENCETEST_SOURCE} STREQUAL "")
-    set(HAVE_SOURCE TRUE)
-  endif(NOT ${CONVERGENCETEST_SOURCE} STREQUAL "")
-  if(NOT ${CONVERGENCETEST_TARGET} STREQUAL "")
-    set(HAVE_TARGET TRUE)
-  endif(NOT ${CONVERGENCETEST_TARGET} STREQUAL "")
-
-  # throw an error if we have none
-  if(NOT ${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+  # throw an error if we neither SOURCE nor TARGET given.
+  if(NOT CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
     message(FATAL_ERROR "Please specify either a SOURCE or a TARGET.")
-  endif(NOT ${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+  endif(NOT CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
 
   # we either expect a source/sources OR a target/targetlist
-  if(${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+  if(CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
     add_static_variants(SOURCE ${CONVERGENCETEST_SOURCE}
                         BASENAME ${CONVERGENCETEST_BASENAME}
                         INIFILE ${CONVERGENCETEST_INIFILE}
@@ -399,7 +389,7 @@ function(add_dune_convergence_test)
                                     TARGETBASENAME ${CONVERGENCETEST_BASENAME}
                                     SCRIPT ${CONVERGENCETEST_SCRIPT})
 
-  elseif(${HAVE_TARGET} AND NOT ${HAVE_SOURCE})
+  elseif(CONVERGENCETEST_TARGET AND NOT CONVERGENCETEST_SOURCE)
     # export the targetlist to have the full interface functionality
     set(${CONVERGENCETEST_OUTPUT_TARGETS} ${CONVERGENCETEST_TARGET} PARENT_SCOPE)
 
@@ -409,7 +399,7 @@ function(add_dune_convergence_test)
                                     TARGETBASENAME ${CONVERGENCETEST_BASENAME}
                                     SCRIPT ${CONVERGENCETEST_SCRIPT})
 
-  else(${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+  else(CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
     message(FATAL_ERROR "Both SOURCE and TARGET was specified. Ambiguous input.")
-  endif(${HAVE_SOURCE} AND NOT ${HAVE_TARGET})
+  endif(CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
 endfunction(add_dune_convergence_test)
