@@ -34,3 +34,9 @@ def replace_delimited(s, d, leftdelimiter="{", rightdelimiter="}", access_func=l
 
 def extract_delimited(s, leftdelimiter="[", rightdelimiter="]"):
     return escaped_split(escaped_split(s, delimiter=leftdelimiter, maxsplit=1)[1], delimiter=rightdelimiter, maxsplit=1)[0]
+
+def exists_delimited(s, value, leftdelimiter="{", rightdelimiter="}"):
+    if exists_unescaped(s, leftdelimiter) and exists_unescaped(s, rightdelimiter):
+        return (value in extract_delimited(s, leftdelimiter=leftdelimiter, rightdelimiter=rightdelimiter))
+    else:
+        return False

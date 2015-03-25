@@ -1,4 +1,5 @@
 from metaIni import expand_meta_ini, parse_meta_ini_file, write_configuration_to_ini
+from escapes import *
 from writeIni import write_dict_to_ini
 from static_metaini import extract_static_info
 from cmakeoutput import printForCMake
@@ -56,20 +57,54 @@ def extract_convergence_test_info(metaini):
         needs_resolution = False
         for key, value in normal.items():
            for dependentKey in dependentKeys:
-                if dependentKey in value and key not in dependentKeys:
+                if exists_delimited(dependentKey, value) and key not in dependentKeys:
                     dependentKeys.append(key)
                     needs_resolution = True
         for char, assignType in result.items():
             for key, value in assignType.items():
                 for dependentKey in dependentKeys:
-                    if dependentKey in value and key not in dependentKeys:
+                    if exists_delimited(dependentKey, value) and key not in dependentKeys:
                         dependentKeys.append(key)
                         needs_resolution = True
         return needs_resolution
 
+    # first we check if the testKey itself is dependent on other keys
+    # and include those keys in the dependentKeys
+    for char, assignType in result.items():
+        if testKey in assignType:
+            # then it uses a special assignment operator
+            # check if the curly bracket operator is used in the testkey value
+            valuelist = escaped_split(assignType[testKey], delimiter=",")
+            for value in valuelist:
+                if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
+                    # in order to get all dependent keys we have to possibly resolve
+                    # combinations if the dependent key itself uses a curly bracket operator in its name
+                    # TODO e.g. key = {foo{bar}} (if bar == 1, 2 there would be the keys foo1 and foo2)
+                    # is not allowed yet, throws an error for nested keys
+                    resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
+                    if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
+                        sys.stderr.write("Nested key names currently not supported for the convergence test key.")
+                        sys.exit(1)
+                    else:
+                        if resultkey not in dependentKeys:
+                            dependentKeys.append(resultkey)
+
+    # do it for the normal dict too
+    if testKey in normal:
+        value = normal[testKey]
+        if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
+            resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
+            if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
+                sys.stderr.write("Nested key names currently not supported for the convergence test key.")
+                sys.exit(1)
+            else:
+                if resultkey not in dependentKeys:
+                    dependentKeys.append(resultkey)
+
+    # then we resolve all other dependent keys
     while get_dependent_keys(normal, result, dependentKeys): pass
 
-    # ...aggregate those into groups
+    # aggregate configuration belonging to one convergence test
     newconfigurations = []
     count = 0
     visited = [False for i in range(len(configurations))]
