@@ -19,10 +19,8 @@ def test_extract_convergence_test_info2():
 
 def test_extract_convergence_test_info3():
     tests = extract_convergence_test_info("./tests/convtest3.ini")
-    print str(tests)
     # the meta ini file should yield 2 different convergence tests
     assert(len(tests) == 2)
     for configuration in tests:
-        print str(len(configuration)) + "\n"
         # each having a list of four different configurations (e.g. 2 refinements)
         assert(len(configuration) == 5)
