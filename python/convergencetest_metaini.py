@@ -50,13 +50,24 @@ def extract_convergence_test_info(metaini):
     # which keys depend on the testkey
     # the __name value is always unique and should be included from comparison
     dependentKeys = [testKey, "__name"]
-    for key, value in normal.items():
-    	if testKey in value:
-    		dependentKeys.append(key)
-    for char, assignType in result.items():
-        for key, value in assignType.items():
-    		if testKey in value:
-    			dependentKeys.append(key)
+    # do it as long as no resolution is need anymore
+    # values can depend on keys that depend on other keys arbitrarily deep
+    def get_dependent_keys(normal, result, dependentKeys):
+        needs_resolution = False
+        for key, value in normal.items():
+           for dependentKey in dependentKeys:
+                if dependentKey in value and key not in dependentKeys:
+                    dependentKeys.append(key)
+                    needs_resolution = True
+        for char, assignType in result.items():
+            for key, value in assignType.items():
+                for dependentKey in dependentKeys:
+                    if dependentKey in value and key not in dependentKeys:
+                        dependentKeys.append(key)
+                        needs_resolution = True
+        return needs_resolution
+
+    while get_dependent_keys(normal, result, dependentKeys): pass
 
     # ...aggregate those into groups
     newconfigurations = []
