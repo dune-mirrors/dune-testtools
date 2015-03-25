@@ -1,4 +1,6 @@
-set(TESTPROGS outputtreetest constructiontest triggertest)
+set(TESTPROGS outputtreetest triggertest)
+
+add_subdirectory(constructiontest)
 
 if(${ENABLE_MACRO_TESTS})
   add_subdirectory(cmakepython)
@@ -8,8 +10,6 @@ if(${ENABLE_MACRO_TESTS})
 endif(${ENABLE_MACRO_TESTS})
 
 add_executable("outputtreetest" outputtreetest.cc)
-add_executable("constructiontest" constructiontest.cc)
-add_dune_ug_flags(constructiontest)
 
 include(ConditionalIncludes)
 add_executable("triggertest" triggertest.cc)
