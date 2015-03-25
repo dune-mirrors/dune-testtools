@@ -47,8 +47,9 @@ def extract_convergence_test_info(metaini):
     # parse the meta ini file
     normal, result = parse_meta_ini_file(metaini)
 
-    # which keys depend on the testkey?
-    dependentKeys = [testKey]
+    # which keys depend on the testkey
+    # the __name value is always unique and should be included from comparison
+    dependentKeys = [testKey, "__name"]
     for key, value in normal.items():
     	if testKey in value:
     		dependentKeys.append(key)
