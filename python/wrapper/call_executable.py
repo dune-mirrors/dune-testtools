@@ -1,5 +1,6 @@
 """ A module that manages the call to C++ executables """
 
+from argumentparser import get_args
 from parseIni import parse_ini_file
 import subprocess
 import sys
@@ -19,10 +20,5 @@ def call(executable, inifile=None):
 # This is also used as the standard wrapper by cmake
 if __name__ == "__main__":
     # Parse the given arguments
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--exec', help='The executable', required=True)
-    parser.add_argument('-i', '--ini', help='The inifile', required=True)
-    args = vars(parser.parse_args())
-
+    args = get_args()
     sys.exit(call(args["exec"], args["ini"]))
