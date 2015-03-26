@@ -4,13 +4,10 @@ add_directory_test_target(_test_target)
 add_dependencies(${_test_target} ${TESTPROGS})
 
 add_subdirectory(constructiontest)
-
-if(${ENABLE_MACRO_TESTS})
-  add_subdirectory(cmakepython)
-  add_subdirectory(staticvariants)
-  add_subdirectory(dynamicvariants)
-  add_subdirectory(allvariants)
-endif(${ENABLE_MACRO_TESTS})
+add_subdirectory(cmakepython)
+add_subdirectory(staticvariants)
+add_subdirectory(dynamicvariants)
+add_subdirectory(allvariants)
 
 add_executable("outputtreetest" outputtreetest.cc)
 
