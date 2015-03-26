@@ -1,10 +1,10 @@
 __name = {c}_{g.c}
-1 == 1, 2
+1 = 1, 2 | expand
 2 = 2
 3 = 3 
-c =1= c, d
+c = c, d | expand 1
 [g]
-b == {{g.{c}}}, 5
-c =1= 1,2
-d =2= 1,2,3
-e.f =2= a,b, {g.b}
+b = {{g.{c}}}, 5 | expand
+c = 1,2 | expand 1
+d = 1,2,3 | expand 2
+e.f = a,b, {g.b} | expand 2

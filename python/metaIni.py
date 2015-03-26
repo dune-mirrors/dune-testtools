@@ -81,61 +81,66 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         name key will be in the output, whether a scheme was given or not.
     """
 
-    # parse the meta ini file
-    normal, result = parse_meta_ini_file(filename, assignment, commentChar)
+    parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, asStrings=True)
 
-     # start combining dictionaries - there is always the normal dict...
-    configurations = [normal]
+    def split_expand_command(s):
+        # only values that contain a pipe can in theory need expanding
+        if exists_unescaped(s, '|'):
+            # split into value, command and additional potentially additional commands
+            splitted = escaped_split(s, '|', maxsplit=2)
+            # extract the string for the command with the highest precedence
+            cmdstr = splitted[1]
+            # and split it into command name plus arguments
+            cmdargs = escaped_split(cmdstr)
+            # check whether the command name is 'expand'
+            if cmdargs[0] == "expand":
+                assert(len(cmdargs) <= 2)
+                # return a tuple of the value, the splitting identifier, and possible other commands
+                return (splitted[0], cmdargs[1] if len(cmdargs) == 2 else None, " | " + splitted[2] if len(splitted)==3 else "")
+        return (None, None, None)
 
-    def generate_configs(d, configurations):
-        def configs_for_key(key, vals, configs):
-            for config in configs:
-                for val in vals:
-                    c = deepcopy(config)
-                    c[key] = val
-                    yield c
+    def expand_key(c, keys, val, othercommands):
+        # first split all given value lists:
+        splitted = []
+        for v in val:
+            splitted.append(escaped_split(v, ","))
 
-        for key, values in d.items():
-            values = escaped_split(values, ',')
-            configurations = configs_for_key(key, values, configurations)
+        for conf_to_expand in c:
+            new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
+            # now replace all keys correctly:
+            for i, k in enumerate(keys):
+                for j, config in enumerate(new_ones):
+                    config[k] = splitted[i][j] + othercommands[i]
+            for conf in new_ones:
+                yield conf
 
-        for config in configurations:
-            yield config
+    already_done = []
+    configurations = [parse]
+    for key, value in parse.items():
+        # determine whether this value needs splitting
+        tosplit, identifier, othercommands = split_expand_command(value)
 
-    # do the all product part associated with the == assignment
-    if "" in result:
-        configurations = [l for l in generate_configs(result[""], configurations)]
-        del result[""]
+        # only do something if it does:
+        if tosplit:
+            # check whether a split identifier is given
+            if identifier:
+                # and whether that given split identifier has already been processed
+                if not identifier in already_done:
+                    already_done.append(identifier)
+                    # collect a list of all keys that use the same identifier
+                    keys_to_split = []
+                    vals_to_split = []
+                    command_list = []
+                    for k, v in parse.items():
+                        val, ident, oc = split_expand_command(v)
+                        if ident == identifier:
+                            keys_to_split.append(k)
+                            vals_to_split.append(val)
+                            command_list.append(oc)
 
-    def expand_dict(d):
-        """ expand the dictionary of one assignment operator into a set of dictionary
-            containing the actual key value pairs of that assignment operator """
-        output = None
-        for key, values in d.items():
-            values = escaped_split(values, ',')
-            # Determine how many dicts we need when we first split values
-            if output is None:
-                output = [DotDict() for i in range(len(values))]
-            for index, val in enumerate(values):
-                output[index][key] = val
-        return output
-
-    def join_nested_dicts(d1, d2):
-        """ join two dictionaries recursively """
-        for key, item in d2.items():
-            d1[key] = item
-        return d1
-
-    # do the part for all other assignment operators
-    for assign, tree in result.items():
-        newconfigurations = []
-
-        # combine the expanded dictionaries with the ones in configurations
-        for config in configurations:
-            for newpart in expand_dict(tree):
-                newconfigurations.append(join_nested_dicts(deepcopy(config), newpart))
-
-        configurations = newconfigurations
+                    configurations = [c for c in expand_key(configurations, keys_to_split, vals_to_split, command_list)]
+            else:
+                configurations = [c for c in expand_key(configurations, [key], [tosplit], [othercommands])]
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:

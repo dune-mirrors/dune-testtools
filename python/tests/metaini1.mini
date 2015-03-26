@@ -1,9 +1,10 @@
-a == 1, 2
-b == 3, s ,5
+a = 1, 2 | expand
+b = 1
+b = 3, s ,5 | expand
 
-c =1= 1, 5
+c = 1, 5 | expand 1
 [g]
-b == 5,6
-c =1= 1,2
-d =2= 1,2,3
-e.f =2= a,b,c
+b = 5,6 | expand
+c = 1,2 | expand 1
+d = 1,2,3 | expand 2
+e.f = a,b,c | expand 2
