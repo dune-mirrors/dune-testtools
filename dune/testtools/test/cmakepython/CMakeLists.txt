@@ -32,4 +32,6 @@ if(NOT ${TESTPREFIX_nested_5_deeper} EQUAL "wow!")
   message(FATAL_ERROR "Fatal error in Pyhton - CMake interface! TESTPREFIX_nested_5_deeper not parsed correctly")
 endif(NOT ${TESTPREFIX_nested_5_deeper} EQUAL "wow!")
 
-message("All configure tests for the Python CMake interface have been run...")
+if(${DEBUG_MACRO_TESTS})
+  message("All configure tests for the Python CMake interface have been run...")
+endif(${DEBUG_MACRO_TESTS})

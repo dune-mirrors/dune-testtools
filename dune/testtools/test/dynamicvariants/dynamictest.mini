@@ -1,0 +1,6 @@
+__name = {grid.level}
+[grid]
+level == 1, 2, 3
+
+permeability =1= scalar, tensor
+solver =1= solver1, solver2
