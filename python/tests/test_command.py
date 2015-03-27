@@ -1,6 +1,10 @@
 import command
 from parseIni import parse_ini_file
 
+@command.meta_ini_command(name="some", argc=2)
+def product(args=None):
+    return str(int(args[0])*int(args[1]))
+
 def test_basics():
     assert(command._registry.get("tolower", None))
     assert(command._registry["tolower"](value="CAPS") == "caps")
@@ -14,3 +18,6 @@ def test_parsed():
     assert(c["key"] == "bla")
     # double operator
     assert(c["other"] == "BLA")
+
+def test_arguments():
+    assert(command.apply_generic_command("", "bla | some 2 3") == "6")
