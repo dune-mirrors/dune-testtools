@@ -24,6 +24,8 @@ in your meta inifile and have it resolved to:
 x = caps
 """
 
+from escapes import escaped_split
+
 _registry = {}
 
 class CommandType:
@@ -59,6 +61,23 @@ class RegisteredCommand:
     def __call__(self, **kwargs):
         # apply the original function by filtering all keyword arguments that it needs:
         return self._func(**{k : v for (k, v) in kwargs.items() if k in self._func.func_code.co_varnames})
+
+def apply_generic_command(key, value, ctype=CommandType.POST_RESOLUTION):
+    # split the value at the pipe symbol
+    parts = escaped_split(value, delimiter="|", maxsplit=2)
+    # first determine whether this is no op, because no |-operator is present
+    if len(parts) is 1:
+        return value
+    # Now investigate the given command.
+    cmdargs = escaped_split(parts[1])
+    # the first argument must be a valid command
+    assert(cmdargs[0] in _registry)
+    assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
+    # if the command type does not match our current command type, we are also no-op
+    if ctype != _registry[cmdargs[0]]._ctype:
+        return value
+    retstr = _registry[cmdargs[0]](key=key, value=parts[0], args=cmdargs[1:]) + (" | " + parts[2] if len(parts) == 3 else "")
+    return apply_generic_command(ctype=ctype, key=key, value=retstr)
 
 @meta_ini_command(name="tolower")
 def cmd_to_lower(value=None):
