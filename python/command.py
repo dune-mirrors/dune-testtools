@@ -83,4 +83,6 @@ def apply_generic_command(key, value, ctype=CommandType.POST_RESOLUTION):
 def cmd_to_lower(value=None):
     return value.lower() if value else None
 
-# TODO implement a generic command parser
+@meta_ini_command(name="toupper")
+def cmd_to_upper(value=None):
+    return value.upper() if value else None
