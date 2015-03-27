@@ -13,10 +13,6 @@ def test_metaini1():
     configs = expand_meta_ini("./tests/metaini1.mini", filterKeys=("a",))
     assert(len(configs) == 2)
 
-    configs = expand_meta_ini("./tests/metaini1.mini", assignment="=1=")
-    # Nota bene: With =1= being the assignment, nothing gets expanded, so its only 1 config!
-    assert(len(configs) == 1)
-
     configs = expand_meta_ini("./tests/metaini1.mini", filterKeys=("garbagekey",), addNameKey=False)
     assert(str(configs) == '[{}]')
 
