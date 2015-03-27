@@ -93,7 +93,7 @@
 # will be a list of all created targets.
 
 find_package(PythonInterp)
-if(PYTHON_VERSION_STRING VERSIONLESS 2.7)
+if(PYTHON_VERSION_STRING VERSION_LESS 2.7)
   message(FATAL_ERROR "dune-testtools requires at least python 2.7")
 endif()
 
