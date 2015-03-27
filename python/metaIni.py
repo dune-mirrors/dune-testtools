@@ -54,6 +54,55 @@ from writeIni import write_dict_to_ini
 from dotdict import DotDict
 from copy import deepcopy
 from uniquenames import make_key_unique
+from command import meta_ini_command, CommandType, apply_generic_command
+
+def expand_key(c, keys, val, othercommands):
+    # first split all given value lists:
+    splitted = []
+    for v in val:
+        splitted.append(escaped_split(v, ","))
+
+    for conf_to_expand in c:
+        new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
+        # now replace all keys correctly:
+        for i, k in enumerate(keys):
+            for j, config in enumerate(new_ones):
+                config[k] = splitted[i][j] + othercommands[i]
+        for conf in new_ones:
+            yield conf
+
+@meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION)
+def _expand_command(key=None, value=None, configs=None, args=None, othercommands=""):
+    print "Call mit key={}, value={}, configs={}, args={}, othercommands={}".format(key, value, configs, args, othercommands)
+    # first check whether this is all product.
+    if len(args) == 0:
+        return [c for c in expand_key(configs, [key], [value], [othercommands])]
+    else:
+        return None
+#         for key, value in configs[0].items():
+#             # determine whether this value needs splitting
+#             splitted = escaped_split(value, delimiter="|", maxsplit=2)
+#             tosplit = splitted[0] if exists_unescaped(splitted[0], ",") else None
+
+            # only do something if it does:
+#            if tosplit:
+#             # check whether a split identifier is given
+#             if identifier:
+#                 # and whether that given split identifier has already been processed
+#                 if not identifier in already_done:
+#                     already_done.append(identifier)
+#                     # collect a list of all keys that use the same identifier
+#                     keys_to_split = []
+#                     vals_to_split = []
+#                     command_list = []
+#                     for k, v in parse.items():
+#                         val, ident, oc = split_expand_command(v)
+#                         if ident == identifier:
+#                             keys_to_split.append(k)
+#                             vals_to_split.append(val)
+#                             command_list.append(oc)
+#
+#                     configurations = [c for c in expand_key(configurations, keys_to_split, vals_to_split, command_list)]
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -83,64 +132,73 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
 
     parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, asStrings=True)
 
-    def split_expand_command(s):
-        # only values that contain a pipe can in theory need expanding
-        if exists_unescaped(s, '|'):
-            # split into value, command and additional potentially additional commands
-            splitted = escaped_split(s, '|', maxsplit=2)
-            # extract the string for the command with the highest precedence
-            cmdstr = splitted[1]
-            # and split it into command name plus arguments
-            cmdargs = escaped_split(cmdstr)
-            # check whether the command name is 'expand'
-            if cmdargs[0] == "expand":
-                assert(len(cmdargs) <= 2)
-                # return a tuple of the value, the splitting identifier, and possible other commands
-                return (splitted[0], cmdargs[1] if len(cmdargs) == 2 else None, " | " + splitted[2] if len(splitted)==3 else "")
-        return (None, None, None)
+#
+#     def split_expand_command(s):
+#         # only values that contain a pipe can in theory need expanding
+#         if exists_unescaped(s, '|'):
+#             # split into value, command and additional potentially additional commands
+#             splitted = escaped_split(s, '|', maxsplit=2)
+#             # extract the string for the command with the highest precedence
+#             cmdstr = splitted[1]
+#             # and split it into command name plus arguments
+#             cmdargs = escaped_split(cmdstr)
+#             # check whether the command name is 'expand'
+#             if cmdargs[0] == "expand":
+#                 assert(len(cmdargs) <= 2)
+#                 # return a tuple of the value, the splitting identifier, and possible other commands
+#                 return (splitted[0], cmdargs[1] if len(cmdargs) == 2 else None, " | " + splitted[2] if len(splitted)==3 else "")
+#         return (None, None, None)
+#
+#     def expand_key(c, keys, val, othercommands):
+#         # first split all given value lists:
+#         splitted = []
+#         for v in val:
+#             splitted.append(escaped_split(v, ","))
+#
+#         for conf_to_expand in c:
+#             new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
+#             # now replace all keys correctly:
+#             for i, k in enumerate(keys):
+#                 for j, config in enumerate(new_ones):
+#                     config[k] = splitted[i][j] + othercommands[i]
+#             for conf in new_ones:
+#                 yield conf
+#
+#     already_done = []
+#     configurations = [parse]
+#     for key, value in parse.items():
+#         # determine whether this value needs splitting
+#         tosplit, identifier, othercommands = split_expand_command(value)
+#
+#         # only do something if it does:
+#         if tosplit:
+#             # check whether a split identifier is given
+#             if identifier:
+#                 # and whether that given split identifier has already been processed
+#                 if not identifier in already_done:
+#                     already_done.append(identifier)
+#                     # collect a list of all keys that use the same identifier
+#                     keys_to_split = []
+#                     vals_to_split = []
+#                     command_list = []
+#                     for k, v in parse.items():
+#                         val, ident, oc = split_expand_command(v)
+#                         if ident == identifier:
+#                             keys_to_split.append(k)
+#                             vals_to_split.append(val)
+#                             command_list.append(oc)
+#
+#                     configurations = [c for c in expand_key(configurations, keys_to_split, vals_to_split, command_list)]
+#             else:
+#                 configurations = [c for c in expand_key(configurations, [key], [tosplit], [othercommands])]
 
-    def expand_key(c, keys, val, othercommands):
-        # first split all given value lists:
-        splitted = []
-        for v in val:
-            splitted.append(escaped_split(v, ","))
-
-        for conf_to_expand in c:
-            new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
-            # now replace all keys correctly:
-            for i, k in enumerate(keys):
-                for j, config in enumerate(new_ones):
-                    config[k] = splitted[i][j] + othercommands[i]
-            for conf in new_ones:
-                yield conf
-
-    already_done = []
     configurations = [parse]
-    for key, value in parse.items():
-        # determine whether this value needs splitting
-        tosplit, identifier, othercommands = split_expand_command(value)
+    for k, v in parse.items():
+        apply = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.AT_EXPANSION)
+        if apply:
+            configurations = apply
 
-        # only do something if it does:
-        if tosplit:
-            # check whether a split identifier is given
-            if identifier:
-                # and whether that given split identifier has already been processed
-                if not identifier in already_done:
-                    already_done.append(identifier)
-                    # collect a list of all keys that use the same identifier
-                    keys_to_split = []
-                    vals_to_split = []
-                    command_list = []
-                    for k, v in parse.items():
-                        val, ident, oc = split_expand_command(v)
-                        if ident == identifier:
-                            keys_to_split.append(k)
-                            vals_to_split.append(val)
-                            command_list.append(oc)
-
-                    configurations = [c for c in expand_key(configurations, keys_to_split, vals_to_split, command_list)]
-            else:
-                configurations = [c for c in expand_key(configurations, [key], [tosplit], [othercommands])]
+    print configurations
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:

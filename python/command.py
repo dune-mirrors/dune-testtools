@@ -35,6 +35,7 @@ class CommandType:
     POST_EXPANSION = 2
     PRE_RESOLUTION = 3
     POST_RESOLUTION = 4
+    AT_EXPANSION = 5
 
 def meta_ini_command(**kwargs):
     """ A decorator for registered commands. """
@@ -62,12 +63,15 @@ class RegisteredCommand:
         # apply the original function by filtering all keyword arguments that it needs:
         return self._func(**{k : v for (k, v) in kwargs.items() if k in self._func.func_code.co_varnames})
 
-def apply_generic_command(key, value, ctype=CommandType.POST_RESOLUTION):
+def apply_generic_command(value=None, ctype=CommandType.POST_RESOLUTION, **kwargs):
+    """ inspect the given key for a command to apply and do so if present.
+        This command returns the return value of the function or None if nothing has been done.
+    """
     # split the value at the pipe symbol
     parts = escaped_split(value, delimiter="|", maxsplit=2)
     # first determine whether this is no op, because no |-operator is present
     if len(parts) is 1:
-        return value
+        return None
     # Now investigate the given command.
     cmdargs = escaped_split(parts[1])
     # the first argument must be a valid command
@@ -75,9 +79,10 @@ def apply_generic_command(key, value, ctype=CommandType.POST_RESOLUTION):
     assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
     # if the command type does not match our current command type, we are also no-op
     if ctype != _registry[cmdargs[0]]._ctype:
-        return value
-    retstr = _registry[cmdargs[0]](key=key, value=parts[0], args=cmdargs[1:]) + (" | " + parts[2] if len(parts) == 3 else "")
-    return apply_generic_command(ctype=ctype, key=key, value=retstr)
+        return None
+    # call the actual function!
+    return _registry[cmdargs[0]](value=parts[0], args=cmdargs[1:], pipecommands=parts[2] if len(parts) == 3 else "", **kwargs)
+    #TODO decide how the piped commands should be treated.
 
 @meta_ini_command(name="tolower")
 def cmd_to_lower(value=None):
