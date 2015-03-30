@@ -73,37 +73,35 @@ def expand_key(c, keys, val, othercommands):
 
 @meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION)
 def _expand_command(key=None, value=None, configs=None, args=None, othercommands=""):
-    print "Call mit key={}, value={}, configs={}, args={}, othercommands={}".format(key, value, configs, args, othercommands)
     # first check whether this is all product.
     if len(args) == 0:
         configs[:] = [c for c in expand_key(configs, [key], [value], [othercommands])]
-        return None
     else:
-        return None
-#         for key, value in configs[0].items():
-#             # determine whether this value needs splitting
-#             splitted = escaped_split(value, delimiter="|", maxsplit=2)
-#             tosplit = splitted[0] if exists_unescaped(splitted[0], ",") else None
+        # collect a list of all keys that use the same identifier
+        keys_to_split = []
+        vals_to_split = []
+        command_list = []
 
-            # only do something if it does:
-#            if tosplit:
-#             # check whether a split identifier is given
-#             if identifier:
-#                 # and whether that given split identifier has already been processed
-#                 if not identifier in already_done:
-#                     already_done.append(identifier)
-#                     # collect a list of all keys that use the same identifier
-#                     keys_to_split = []
-#                     vals_to_split = []
-#                     command_list = []
-#                     for k, v in parse.items():
-#                         val, ident, oc = split_expand_command(v)
-#                         if ident == identifier:
-#                             keys_to_split.append(k)
-#                             vals_to_split.append(val)
-#                             command_list.append(oc)
-#
-#                     configurations = [c for c in expand_key(configurations, keys_to_split, vals_to_split, command_list)]
+        for key, value in configs[0].items():
+            # determine whether this value needs splitting
+            splitted = escaped_split(value, delimiter="|", maxsplit=2)
+            tosplit = splitted[0] if exists_unescaped(splitted[0], ",") else None
+            identifier = None
+            if len(splitted) > 1:
+                command = escaped_split(splitted[1])
+                if len(command) > 1:
+                    identifier = command[1]
+
+            if identifier == args[0]:
+                keys_to_split.append(key)
+                vals_to_split.append(splitted[0])
+                command_list.append(" | " + splitted[2] if len(splitted)==3 else "")
+
+        # Update the list of configurations by expanding one type of assignment
+        if len(keys_to_split) > 0:
+            configs[:] = [c for c in expand_key(configs, keys_to_split, vals_to_split, command_list)]
+    return None
+
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
