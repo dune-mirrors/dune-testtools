@@ -166,28 +166,20 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
                     return True
             return False
 
-        def resolve_key_dependencies(fulldict, processdict):
+        def resolve_key_dependencies(d):
             """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
-            for key, value in processdict.items():
+            for key, value in d.items():
                 while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
-                    # define a function that replaces the "identity access" d,k -> d[k] when we look for keys
-                    def treat_special_keys(d, key):
-                        if key.startswith("__lower."):
-                            return d[escaped_split(key, ".", maxsplit=1)[1]].lower()
-                        if key.startswith("__upper."):
-                            return d[escaped_split(key, ".", maxsplit=1)[1]].upper()
-                        return d[key]
-
                     # split the contents form the innermost curly brackets from the rest
-                    processdict[key] = replace_delimited(value, fulldict, access_func=treat_special_keys)
-                    value = processdict[key]
+                    d[key] = replace_delimited(value, d)
+                    value = d[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
         # a call to resolve_key_dependencies only resolves one such layer.
         # That is why we need to do this until all dependencies are resolved.
         while needs_resolution(c) is True:
-            resolve_key_dependencies(c, c)
+            resolve_key_dependencies(c)
 
         # HOOK: POST_RESOLUTION
         for k, v in c.items():
