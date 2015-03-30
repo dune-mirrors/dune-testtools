@@ -76,7 +76,8 @@ def _expand_command(key=None, value=None, configs=None, args=None, othercommands
     print "Call mit key={}, value={}, configs={}, args={}, othercommands={}".format(key, value, configs, args, othercommands)
     # first check whether this is all product.
     if len(args) == 0:
-        return [c for c in expand_key(configs, [key], [value], [othercommands])]
+        configs[:] = [c for c in expand_key(configs, [key], [value], [othercommands])]
+        return None
     else:
         return None
 #         for key, value in configs[0].items():
@@ -194,11 +195,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
 
     configurations = [parse]
     for k, v in parse.items():
-        apply = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.AT_EXPANSION)
-        if apply:
-            configurations = apply
-
-    print configurations
+        apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.AT_EXPANSION)
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:
