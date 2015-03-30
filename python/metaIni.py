@@ -129,74 +129,35 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         name key will be in the output, whether a scheme was given or not.
     """
 
+    # parse the ini file
     parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, asStrings=True)
 
-#
-#     def split_expand_command(s):
-#         # only values that contain a pipe can in theory need expanding
-#         if exists_unescaped(s, '|'):
-#             # split into value, command and additional potentially additional commands
-#             splitted = escaped_split(s, '|', maxsplit=2)
-#             # extract the string for the command with the highest precedence
-#             cmdstr = splitted[1]
-#             # and split it into command name plus arguments
-#             cmdargs = escaped_split(cmdstr)
-#             # check whether the command name is 'expand'
-#             if cmdargs[0] == "expand":
-#                 assert(len(cmdargs) <= 2)
-#                 # return a tuple of the value, the splitting identifier, and possible other commands
-#                 return (splitted[0], cmdargs[1] if len(cmdargs) == 2 else None, " | " + splitted[2] if len(splitted)==3 else "")
-#         return (None, None, None)
-#
-#     def expand_key(c, keys, val, othercommands):
-#         # first split all given value lists:
-#         splitted = []
-#         for v in val:
-#             splitted.append(escaped_split(v, ","))
-#
-#         for conf_to_expand in c:
-#             new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
-#             # now replace all keys correctly:
-#             for i, k in enumerate(keys):
-#                 for j, config in enumerate(new_ones):
-#                     config[k] = splitted[i][j] + othercommands[i]
-#             for conf in new_ones:
-#                 yield conf
-#
-#     already_done = []
-#     configurations = [parse]
-#     for key, value in parse.items():
-#         # determine whether this value needs splitting
-#         tosplit, identifier, othercommands = split_expand_command(value)
-#
-#         # only do something if it does:
-#         if tosplit:
-#             # check whether a split identifier is given
-#             if identifier:
-#                 # and whether that given split identifier has already been processed
-#                 if not identifier in already_done:
-#                     already_done.append(identifier)
-#                     # collect a list of all keys that use the same identifier
-#                     keys_to_split = []
-#                     vals_to_split = []
-#                     command_list = []
-#                     for k, v in parse.items():
-#                         val, ident, oc = split_expand_command(v)
-#                         if ident == identifier:
-#                             keys_to_split.append(k)
-#                             vals_to_split.append(val)
-#                             command_list.append(oc)
-#
-#                     configurations = [c for c in expand_key(configurations, keys_to_split, vals_to_split, command_list)]
-#             else:
-#                 configurations = [c for c in expand_key(configurations, [key], [tosplit], [othercommands])]
+    # HOOK: POST_PARSE
+    for k, v in parse.items():
+        parse[k] = apply_generic_command(key=k, value=v, ctype=CommandType.POST_PARSE)
 
+    # initialize the list of configurations with the parsed configuration
     configurations = [parse]
+
+    # HOOK: PRE_EXPANSION
+    for k, v in configurations[0].items():
+        configurations[0][k] = apply_generic_command(key=k, value=v, ctype=CommandType.PRE_EXPANSION)
+
+    # HOOK: AT_EXPANSION
     for k, v in parse.items():
         apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.AT_EXPANSION)
 
+    # HOOK: POST_EXPANSION
+    for c in configurations:
+        for k, v in c.items():
+            c[k] = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.POST_EXPANSION)
+
     # resolve all key-dependent names present in the configurations
     for c in configurations:
+
+        # HOOK: PRE_RESOLUTION
+        for k, v in c.items():
+            c[k] = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.PRE_RESOLUTION)
 
         def needs_resolution(d):
             """ whether curly brackets can be found somewhere in the dictionary d """
@@ -227,6 +188,10 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         # That is why we need to do this until all dependencies are resolved.
         while needs_resolution(c) is True:
             resolve_key_dependencies(c, c)
+
+        # HOOK: POST_RESOLUTION
+        for k, v in c.items():
+            c[k] = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.POST_RESOLUTION)
 
     # apply the filtering of groups if needed
     if filterKeys:

@@ -71,7 +71,7 @@ def apply_generic_command(value=None, ctype=CommandType.POST_RESOLUTION, **kwarg
     parts = escaped_split(value, delimiter="|", maxsplit=2)
     # first determine whether this is no op, because no |-operator is present
     if len(parts) is 1:
-        return None
+        return value
     # Now investigate the given command.
     cmdargs = escaped_split(parts[1])
     # the first argument must be a valid command
@@ -79,7 +79,7 @@ def apply_generic_command(value=None, ctype=CommandType.POST_RESOLUTION, **kwarg
     assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
     # if the command type does not match our current command type, we are also no-op
     if ctype != _registry[cmdargs[0]]._ctype:
-        return None
+        return value
     # call the actual function!
     return _registry[cmdargs[0]](value=parts[0], args=cmdargs[1:], pipecommands=parts[2] if len(parts) == 3 else "", **kwargs)
     #TODO decide how the piped commands should be treated.
