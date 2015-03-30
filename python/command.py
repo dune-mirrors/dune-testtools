@@ -35,7 +35,9 @@ class CommandType:
     POST_EXPANSION = 2
     PRE_RESOLUTION = 3
     POST_RESOLUTION = 4
-    AT_EXPANSION = 5
+    PRE_FILTERING = 5
+    POST_FILTERING = 6
+    AT_EXPANSION = 7
 
 def meta_ini_command(**kwargs):
     """ A decorator for registered commands. """

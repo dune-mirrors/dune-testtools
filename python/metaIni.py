@@ -185,6 +185,10 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         for k, v in c.items():
             apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_RESOLUTION)
 
+    for c in configurations:
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_FILTERING)
+
     # apply the filtering of groups if needed
     if filterKeys:
         # check whether a single filter has been given and make a list if so
@@ -196,8 +200,11 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
                 if not True in [key.startswith(f) for f in filterKeys]:
                     del c[key]
         # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
-        import ast
-        configurations = [DotDict(ast.literal_eval(s)) for s in set([str(c) for c in configurations])]
+        configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
+
+    for c in configurations:
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_FILTERING)
 
     # Implement the naming scheme through the special key __name
     if addNameKey is True:

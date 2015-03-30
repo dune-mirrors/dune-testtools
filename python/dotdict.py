@@ -6,8 +6,13 @@ d["a"]["b"] ==  d["a.b"]
 from escapes import exists_unescaped, escaped_split
 
 class DotDict(dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
+    def __init__(self, from_str=None, *args, **kwargs):
+         if from_str:
+             import ast
+             for k, v in ast.literal_eval(from_str).items():
+                 self.__setitem__(k, v)
+         else:
+             dict.__init__(self, *args, **kwargs)
 
     def __getitem__(self, key):
         key = str(key)
@@ -64,6 +69,13 @@ class DotDict(dict):
                         result = result + p + "."
                     return result
                 yield groupname() + i
+
+    def __str__(self):
+        s = ""
+        for k, v in self.items():
+            s = s + "'" + str(k) + "': '" + str(v) + "', "
+        return "{" + s[:-2] + "}"
+
 
     def items(self):
         return [(k, self[k]) for k in self]
