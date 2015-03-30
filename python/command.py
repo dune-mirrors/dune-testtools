@@ -43,12 +43,13 @@ def meta_ini_command(**kwargs):
 
 class RegisteredCommand:
     """ build the command object """
-    def __init__(self, func, name=None, ctype=CommandType.POST_RESOLUTION, argc=0):
+    def __init__(self, func, name=None, ctype=CommandType.POST_RESOLUTION, argc=0, returnValue=True):
         # store the function to execute abd the command type
         self._func = func
         self._name = name
         self._ctype = ctype
         self._argc = argc
+        self._returnValue = returnValue
 
         if not name:
             raise ValueError("You have to provide a name argument when registering a custom command!")
@@ -61,7 +62,9 @@ class RegisteredCommand:
 
     def __call__(self, **kwargs):
         # apply the original function by filtering all keyword arguments that it needs:
-        return self._func(**{k : v for (k, v) in kwargs.items() if k in self._func.func_code.co_varnames})
+        ret = self._func(**{k : v for (k, v) in kwargs.items() if k in self._func.func_code.co_varnames})
+        if self._returnValue:
+            kwargs["config"][kwargs["key"]] = ret
 
 def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTION, **kwargs):
     """ inspect the given key for a command to apply and do so if present.
@@ -71,7 +74,7 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
     parts = escaped_split(config[key], delimiter="|", maxsplit=2)
     # first determine whether this is no op, because no |-operator is present
     if len(parts) is 1:
-        return config[key]
+        return
     # Now investigate the given command.
     cmdargs = escaped_split(parts[1])
     # the first argument must be a valid command
@@ -79,9 +82,9 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
     assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
     # if the command type does not match our current command type, we are also no-op
     if ctype != _registry[cmdargs[0]]._ctype:
-        return config[key]
+        return
     # call the actual function!
-    return _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=parts[2] if len(parts) == 3 else "", **kwargs)
+    _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=parts[2] if len(parts) == 3 else "", **kwargs)
     #TODO decide how the piped commands should be treated.
 
 @meta_ini_command(name="tolower")

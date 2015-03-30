@@ -7,14 +7,17 @@ def product(args=None):
     return str(int(args[0])*int(args[1]))
 
 def test_basics():
+    d = {}
+    d["a"] = "CAPS | tolower"
     assert(command._registry.get("tolower", None))
-    assert(command._registry["tolower"](value="CAPS") == "caps")
-    assert(command._registry["tolower"](value="CAPS", shit=0) == "caps")
+    command.apply_generic_command(config=d, key="a")
+    assert(d["a"] == "caps")
+    #assert(command._registry["tolower"](value="CAPS", shit=0) == "caps")
 
 def test_parsed():
     c = parse_ini_file("./tests/command.ini")
     for k in c:
-        c[k] = command.apply_generic_command(config=c, key=k)
+        command.apply_generic_command(config=c, key=k)
     # simple operator
     assert(c["key"] == "bla")
     # double operator
@@ -23,7 +26,8 @@ def test_parsed():
 def test_arguments():
     d = {}
     d["a"] = "bla | some 2 3"
-    assert(command.apply_generic_command(config=d, key="a") == "6")
+    command.apply_generic_command(config=d, key="a")
+    assert(d["a"] == "6")
 
 def test_metaini():
     c = expand_meta_ini("./tests/command.ini")
