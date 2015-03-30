@@ -134,30 +134,30 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
 
     # HOOK: POST_PARSE
     for k, v in parse.items():
-        parse[k] = apply_generic_command(key=k, value=v, ctype=CommandType.POST_PARSE)
+        parse[k] = apply_generic_command(config=parse, key=k, ctype=CommandType.POST_PARSE)
 
     # initialize the list of configurations with the parsed configuration
     configurations = [parse]
 
     # HOOK: PRE_EXPANSION
     for k, v in configurations[0].items():
-        configurations[0][k] = apply_generic_command(key=k, value=v, ctype=CommandType.PRE_EXPANSION)
+        configurations[0][k] = apply_generic_command(config=configurations[0], key=k, ctype=CommandType.PRE_EXPANSION)
 
     # HOOK: AT_EXPANSION
     for k, v in parse.items():
-        apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.AT_EXPANSION)
+        apply_generic_command(config=parse, key=k, configs=configurations, ctype=CommandType.AT_EXPANSION)
 
     # HOOK: POST_EXPANSION
     for c in configurations:
         for k, v in c.items():
-            c[k] = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.POST_EXPANSION)
+            c[k] = apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_EXPANSION)
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:
 
         # HOOK: PRE_RESOLUTION
         for k, v in c.items():
-            c[k] = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.PRE_RESOLUTION)
+            c[k] = apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_RESOLUTION)
 
         def needs_resolution(d):
             """ whether curly brackets can be found somewhere in the dictionary d """
@@ -183,7 +183,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
 
         # HOOK: POST_RESOLUTION
         for k, v in c.items():
-            c[k] = apply_generic_command(key=k, value=v, configs=configurations, ctype=CommandType.POST_RESOLUTION)
+            c[k] = apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_RESOLUTION)
 
     # apply the filtering of groups if needed
     if filterKeys:

@@ -14,14 +14,16 @@ def test_basics():
 def test_parsed():
     c = parse_ini_file("./tests/command.ini")
     for k in c:
-        c[k] = command.apply_generic_command(value=c[k])
+        c[k] = command.apply_generic_command(config=c, key=k)
     # simple operator
     assert(c["key"] == "bla")
     # double operator
 #     assert(c["other"] == "BLA")
 
 def test_arguments():
-    assert(command.apply_generic_command(value="bla | some 2 3") == "6")
+    d = {}
+    d["a"] = "bla | some 2 3"
+    assert(command.apply_generic_command(config=d, key="a") == "6")
 
 def test_metaini():
     c = expand_meta_ini("./tests/command.ini")
