@@ -12,7 +12,7 @@ def check_uniqueness(_list, key):
 def test_metaini1():
     configs = expand_meta_ini("./tests/metaini1.mini")
     assert(check_uniqueness(configs, "__name"))
-    
+
 def test_metaini2():
     configs = expand_meta_ini("./tests/metaini2.mini")
     assert(check_uniqueness(configs, "__name"))
