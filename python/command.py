@@ -85,6 +85,9 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
     # if the command type does not match our current command type, we are also no-op
     if ctype != _registry[cmdargs[0]]._ctype:
         return
+    # Remove the command from the value!
+    if ctype != CommandType.AT_EXPANSION:
+        config[key] = parts[0]
     # call the actual function!
     _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=parts[2] if len(parts) == 3 else "", **kwargs)
     #TODO decide how the piped commands should be treated.

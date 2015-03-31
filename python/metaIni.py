@@ -53,8 +53,8 @@ from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from dotdict import DotDict
 from copy import deepcopy
-from uniquenames import make_key_unique
 from command import meta_ini_command, CommandType, apply_generic_command
+import uniquenames
 
 def expand_key(c, keys, val, othercommands):
     # first split all given value lists:
@@ -202,25 +202,19 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
         configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
 
-    for c in configurations:
-        for k, v in c.items():
-            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_FILTERING)
-
     # Implement the naming scheme through the special key __name
     if addNameKey is True:
-        base, extension = filename.split(".", 1)
-        make_key_unique(configurations, "__name")
-        for conf in configurations:
-            conf["__name"] = base + "_" + conf["__name"]
-            # cut the underscore in the corner case of exactly one configuration
-            if conf["__name"][-1] == "_":
-                conf["__name"] = conf["__name"][:-1]
-
-    # if no naming scheme is to be implemented, remove all __name keys
+        if "__name" not in configurations[0]:
+            configurations[0]["__name"] = ""
+        configurations[0]["__name"] = configurations[0]["__name"] + " | unique"
     else:
         for c in configurations:
             if "__name" in c:
                 del c["__name"]
+
+    for c in configurations:
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_FILTERING)
 
     return configurations
 
