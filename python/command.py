@@ -66,7 +66,11 @@ class RegisteredCommand:
         # apply the original function by filtering all keyword arguments that it needs:
         ret = self._func(**{k : v for (k, v) in kwargs.items() if k in self._func.func_code.co_varnames})
         if self._returnValue:
-            kwargs["config"][kwargs["key"]] = ret
+            # update the configuration with the return value
+            kwargs["config"][kwargs["key"]] = ret + kwargs["pipecommands"]
+            # and process all piped commands of the same command type recursively
+            if kwargs["pipecommands"] != "":
+                apply_generic_command(config=kwargs["config"], key=kwargs["key"], ctype=kwargs["ctype"])
 
 def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTION, **kwargs):
     """ inspect the given key for a command to apply and do so if present.
@@ -89,8 +93,7 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
     if ctype != CommandType.AT_EXPANSION:
         config[key] = parts[0]
     # call the actual function!
-    _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=parts[2] if len(parts) == 3 else "", **kwargs)
-    #TODO decide how the piped commands should be treated.
+    _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=" | " + parts[2] if len(parts) == 3 else "", ctype=ctype, **kwargs)
 
 @meta_ini_command(name="tolower")
 def cmd_to_lower(value=None):

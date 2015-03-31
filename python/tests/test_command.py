@@ -21,7 +21,7 @@ def test_parsed():
     # simple operator
     assert(c["key"] == "bla")
     # double operator
-#     assert(c["other"] == "BLA")
+    assert(c["other"] == "BLA")
 
 def test_arguments():
     d = {}
