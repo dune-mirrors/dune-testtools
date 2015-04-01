@@ -106,6 +106,7 @@ def cmd_to_upper(value=None):
 @meta_ini_command(name="eval", ctype=CommandType.POST_FILTERING)
 def _eval_command(value=None):
     import ast
+    import math
     import operator as op
 
     # supported operators
@@ -114,6 +115,11 @@ def _eval_command(value=None):
     def eval_(node):
         if isinstance(node, ast.Num): # <number>
             return node.n
+        elif isinstance(node, ast.Name): # <constant>
+            if node.id.lower() =="pi":
+                return math.pi
+            else:
+                raise ValueError(node.id)
         elif isinstance(node, ast.BinOp): # <left> <operator> <right>
             return operators[type(node.op)](eval_(node.left), eval_(node.right))
         elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
