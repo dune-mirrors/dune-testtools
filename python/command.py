@@ -103,7 +103,22 @@ def cmd_to_lower(value=None):
 def cmd_to_upper(value=None):
     return value.upper() if value else None
 
-@meta_ini_command(name="eval")
+@meta_ini_command(name="eval", ctype=CommandType.POST_FILTERING)
 def _eval_command(value=None):
     import ast
-    return str(ast.literal_eval(value))
+    import operator as op
+
+    # supported operators
+    operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul, ast.Div: op.truediv, ast.Pow: op.pow, ast.USub: op.neg}
+
+    def eval_(node):
+        if isinstance(node, ast.Num): # <number>
+            return node.n
+        elif isinstance(node, ast.BinOp): # <left> <operator> <right>
+            return operators[type(node.op)](eval_(node.left), eval_(node.right))
+        elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
+            return operators[type(node.op)](eval_(node.operand))
+        else:
+            raise TypeError(node)
+
+    return str(eval_(ast.parse(value, mode='eval').body))

@@ -31,4 +31,5 @@ def test_arguments():
 
 def test_metaini():
     c = expand_meta_ini("./tests/command.ini")
+    assert("4" in [conf["ev"] for conf in c])
     assert(len(c) == 4)
