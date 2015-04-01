@@ -102,3 +102,8 @@ def cmd_to_lower(value=None):
 @meta_ini_command(name="toupper")
 def cmd_to_upper(value=None):
     return value.upper() if value else None
+
+@meta_ini_command(name="eval")
+def _eval_command(value=None):
+    import ast
+    return str(ast.literal_eval(value))
