@@ -90,7 +90,7 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
             continue
 
         # check for the include syntax extension
-        if line.startswith("include"):
+        if True in [line.startswith(prefix) for prefix in ["include", "import"]]:
             incfile = line.split()[1]
             incini = parse_ini_file(filename=incfile, commentChar=commentChar, assignment=assignment, asStrings=asStrings, conversionList=conversionList)
             for k in incini:
