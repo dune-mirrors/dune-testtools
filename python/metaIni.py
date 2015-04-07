@@ -80,35 +80,9 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         file (even when no generation pattern is given). If set to false, no
         name key will be in the output, whether a scheme was given or not.
     """
-    # one dictionary to hold the results from several parser runs
-    # the keys are all the types of assignments occuring in the file
-    # except for normal assignment, which is treated differently.
-    result = {}
 
-    # we always have normal assignment
-    normal = parse_ini_file(filename, assignment=assignment, asStrings=True)
-
-    def get_assignment_operators(filename, result):
-        file = open(filename)
-        for line in file:
-            # strip comments from the line
-            for char in commentChar:
-                if exists_unescaped(line, char):
-                    line, comment = escaped_split(line, char, 1)
-                # all other occurences can be handled normally now
-                line = strip_escapes(line, char)
-            # get the assignment operators
-            if count_unescaped(line, assignment) is 2:
-                key, assignChar, value = escaped_split(line, assignment)
-                result[assignChar] = DotDict()
-
-    # look into the file to determine the set of assignment operators used
-    get_assignment_operators(filename, result)
-
-    # get dictionaries for all sorts of assignments
-    for key in result:
-        assignChar = "{}{}{}".format(assignment, key, assignment)
-        result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True)
+    # parse the meta ini file
+    normal, result = parse_meta_ini_file(filename, assignment, commentChar)
 
      # start combining dictionaries - there is always the normal dict...
     configurations = [normal]
@@ -228,6 +202,88 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
 
     return configurations
 
+def parse_meta_ini_file(filename, assignment="=", commentChar=("#",)):
+    # one dictionary to hold the results from several parser runs
+    # the keys are all the types of assignments occuring in the file
+    # except for normal assignment, which is treated differently.
+    result = {}
+
+    # we always have normal assignment
+    normal = parse_ini_file(filename, assignment=assignment, asStrings=True)
+
+    def get_assignment_operators(filename, result):
+        file = open(filename)
+        for line in file:
+            # strip comments from the line
+            for char in commentChar:
+                if exists_unescaped(line, char):
+                    line, comment = escaped_split(line, char, 1)
+                # all other occurences can be handled normally now
+                line = strip_escapes(line, char)
+            # get the assignment operators
+            if count_unescaped(line, assignment) is 2:
+                key, assignChar, value = escaped_split(line, assignment)
+                result[assignChar] = DotDict()
+
+    # look into the file to determine the set of assignment operators used
+    get_assignment_operators(filename, result)
+
+    # get dictionaries for all sorts of assignments
+    for key in result:
+        assignChar = "{}{}{}".format(assignment, key, assignment)
+        result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True)
+
+    return (normal, result)
+
+def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
+    # get the unique ini name
+    fn = c["__name"]
+
+    # check if a special inifile extension was given
+    if "__inifile_extension" in c:
+        extension = c["__inifile_extension"].strip(".")
+        del c["__inifile_extension"]
+    else:
+        # othwise default to .ini
+        extension = "ini"
+
+    # append the ini file name to the names list...
+    metaini["names"].append(fn + "." + extension)
+    # ... and connect it to a exec_suffix
+    # This is done by looking through the list of available static configurations and looking for a match.
+    # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
+    # much larger set of static + dynamic variations.
+    if "__STATIC" in c:
+        for sc in static_info["__CONFIGS"]:
+            if static_info[sc] == c["__STATIC"]:
+                metaini[prefix + fn + "." + extension + "_suffix"] = sc
+    else:
+        metaini[prefix + fn + "." + extension + "_suffix"] = ""
+
+    # add an absolute path to the filename
+    # this is the folder where files are printed to
+    # and manipulate the __name key accordingly
+    # the __name key then consists of the path of the actual ini file and a unique name without extension
+    if "dir" in args:
+        from os import path
+        fn = path.basename(fn)
+        dirname = args["dir"] or path.dirname(fn)
+        fn = path.join(dirname, fn)
+        c["__name"] = fn
+
+    # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
+    # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
+    # from the expansion process.
+    if ("__name" in c) and (not args["cmake"]):
+        del c["__name"]
+    if ("__exec_suffix" in c) and (not args["cmake"]):
+        del c["__exec_suffix"]
+    if ("__STATIC" in c) and (not args["cmake"]):
+        del c["__STATIC"]
+
+    write_dict_to_ini(c, fn + "." + extension)
+
+
 # if this module is run as a script, expand a given meta ini file
 if __name__ == "__main__":
     import argparse
@@ -250,46 +306,7 @@ if __name__ == "__main__":
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
-        fn = c["__name"]
-
-        # check if a special inifile extension was given
-        if "__inifile_extension" in c:
-            extension = c["__inifile_extension"].strip(".")
-            del c["__inifile_extension"]
-        else:
-            # othwise default to .ini
-            extension = "ini"
-
-        # append the ini file name to the names list...
-        metaini["names"].append(fn + "." + extension)
-        # ... and connect it to a exec_suffix
-        # This is done by looking through the list of available static configurations and looking for a match.
-        # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
-        # much larger set of static + dynamic variations.
-        if "__STATIC" in c:
-            for sc in static_info["__CONFIGS"]:
-                if static_info[sc] == c["__STATIC"]:
-                    metaini[fn + "." + extension + "_suffix"] = sc
-        else:
-            metaini[fn + "." + extension + "_suffix"] = ""
-
-        del c["__name"]
-        # maybe add an absolute path to the filename
-        if "dir" in args:
-            from os import path
-            fn = path.basename(fn)
-            dirname = args["dir"] or path.dirname(fn)
-            fn = path.join(dirname, fn)
-
-        # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
-        # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
-        # from the expansion process.
-        if ("__exec_suffix" in c) and (not args["cmake"]):
-            del c["__exec_suffix"]
-        if ("__STATIC" in c) and (not args["cmake"]):
-            del c["__STATIC"]
-
-        write_dict_to_ini(c, fn + "." + extension)
+        write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
         from cmakeoutput import printForCMake
