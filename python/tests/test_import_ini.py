@@ -1,4 +1,3 @@
-import import_ini
 from metaIni import expand_meta_ini
 
 def test_import():
