@@ -87,6 +87,14 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
                             current_dict[key] = rule(value)
                         except ValueError:
                             pass
+            continue
+
+        # check for the include syntax extension
+        if line.startswith("include"):
+            incfile = line.split()[1]
+            incini = parse_ini_file(filename=incfile, commentChar=commentChar, assignment=assignment, asStrings=asStrings, conversionList=conversionList)
+            for k in incini:
+                result_dict[k] = incini[k]
 
     return result_dict
 
