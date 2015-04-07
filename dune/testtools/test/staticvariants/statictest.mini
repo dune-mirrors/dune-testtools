@@ -1,5 +1,5 @@
-__exec_suffix =1= 1,2
+__exec_suffix = 1, 2 | expand 1
 
 [__STATIC.COMPILE_DEFINITIONS]
-GRID =1= YASP, UG
+GRID = YASP, UG | expand 1
 

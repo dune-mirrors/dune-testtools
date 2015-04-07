@@ -67,9 +67,7 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
         line = strip_escapes(line, "]")
 
         # check whether this line defines a key/value pair
-        # only process if the assignment string is found exactly once
-        # 0 => no relevant assignment 2=> this is actually an assignment with a more complicated operator
-        if count_unescaped(line, assignment) is 1:
+        if exists_unescaped(line, assignment):
             # split key from value
             key, value = escaped_split(line, assignment)
 
@@ -89,6 +87,14 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
                             current_dict[key] = rule(value)
                         except ValueError:
                             pass
+            continue
+
+        # check for the include syntax extension
+        if True in [line.startswith(prefix) for prefix in ["include", "import"]]:
+            incfile = line.split()[1]
+            incini = parse_ini_file(filename=incfile, commentChar=commentChar, assignment=assignment, asStrings=asStrings, conversionList=conversionList)
+            for k in incini:
+                result_dict[k] = incini[k]
 
     return result_dict
 

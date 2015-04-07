@@ -26,4 +26,4 @@ def test_dotdict():
     assert("b.c" in d)
     assert(not "d.e.f" in d)
 
-    assert(str(d) == "{'a': 'bla', '1': 5, 'b': {'c': 'bla', 'd': 'x'}}")
+    assert(str(d) == "{'a': 'bla', '1': '5', 'b.c': 'bla', 'b.d': 'x'}")

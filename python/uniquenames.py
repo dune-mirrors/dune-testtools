@@ -4,18 +4,14 @@ This is needed to implement the naming of ini files and static configurations al
 a naming scheme might be given, but it may not be unique.
 """
 
-def make_key_unique(l, key):
-    """
-    Arguments:
-    ----------
-    l : list
-        A list of dicts that represents the set of configurations
-    key : str
-        the key that should be made unique
-    """
+from command import meta_ini_command, CommandType
+
+@meta_ini_command(name="unique", ctype=CommandType.POST_FILTERING, returnValue=False)
+def make_key_unique(configs=None, key=None):
+    print "Called with configs={}".format(configs)
     # first count the number of occurences of the values
     key_dict = {}
-    for c in l:
+    for c in configs:
         # If the key isnt even in the dict, add it as "" to allow a numbered scheme
         if key not in c:
             c[key] = ""
@@ -32,7 +28,7 @@ def make_key_unique(l, key):
             key_dict[k] = 0
 
     # Now make the values unique
-    for c in l:
+    for c in configs:
         # Check whether this value was found multiple times. If so, it has to be made unique.
         if c[key] in key_dict:
             # increase the counter in key_dict for the given key

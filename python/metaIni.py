@@ -53,7 +53,55 @@ from parseIni import parse_ini_file
 from writeIni import write_dict_to_ini
 from dotdict import DotDict
 from copy import deepcopy
-from uniquenames import make_key_unique
+from command import meta_ini_command, CommandType, apply_generic_command
+import uniquenames
+
+def expand_key(c, keys, val, othercommands):
+    # first split all given value lists:
+    splitted = []
+    for v in val:
+        splitted.append(escaped_split(v, ","))
+
+    for conf_to_expand in c:
+        new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
+        # now replace all keys correctly:
+        for i, k in enumerate(keys):
+            for j, config in enumerate(new_ones):
+                config[k] = splitted[i][j] + othercommands[i]
+        for conf in new_ones:
+            yield conf
+
+@meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION, returnValue=False)
+def _expand_command(key=None, value=None, configs=None, args=None, othercommands=""):
+    # first check whether this is all product.
+    if len(args) == 0:
+        configs[:] = [c for c in expand_key(configs, [key], [value], [othercommands])]
+    else:
+        # collect a list of all keys that use the same identifier
+        keys_to_split = []
+        vals_to_split = []
+        command_list = []
+
+        for key, value in configs[0].items():
+            # determine whether this value needs splitting
+            splitted = escaped_split(value, delimiter="|", maxsplit=2)
+            tosplit = splitted[0] if exists_unescaped(splitted[0], ",") else None
+            identifier = None
+            if len(splitted) > 1:
+                command = escaped_split(splitted[1])
+                if len(command) > 1:
+                    identifier = command[1]
+
+            if identifier == args[0]:
+                keys_to_split.append(key)
+                vals_to_split.append(splitted[0])
+                command_list.append(" | " + splitted[2] if len(splitted)==3 else "")
+
+        # Update the list of configurations by expanding one type of assignment
+        if len(keys_to_split) > 0:
+            configs[:] = [c for c in expand_key(configs, keys_to_split, vals_to_split, command_list)]
+    return None
+
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -81,64 +129,35 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         name key will be in the output, whether a scheme was given or not.
     """
 
-    # parse the meta ini file
-    normal, result = parse_meta_ini_file(filename, assignment, commentChar)
+    # parse the ini file
+    parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, asStrings=True)
 
-     # start combining dictionaries - there is always the normal dict...
-    configurations = [normal]
+    # HOOK: POST_PARSE
+    for k, v in parse.items():
+        apply_generic_command(config=parse, key=k, ctype=CommandType.POST_PARSE)
 
-    def generate_configs(d, configurations):
-        def configs_for_key(key, vals, configs):
-            for config in configs:
-                for val in vals:
-                    c = deepcopy(config)
-                    c[key] = val
-                    yield c
+    # initialize the list of configurations with the parsed configuration
+    configurations = [parse]
 
-        for key, values in d.items():
-            values = escaped_split(values, ',')
-            configurations = configs_for_key(key, values, configurations)
+    # HOOK: PRE_EXPANSION
+    for k, v in configurations[0].items():
+        apply_generic_command(config=configurations[0], key=k, ctype=CommandType.PRE_EXPANSION)
 
-        for config in configurations:
-            yield config
+    # HOOK: AT_EXPANSION
+    for k, v in parse.items():
+        apply_generic_command(config=parse, key=k, configs=configurations, ctype=CommandType.AT_EXPANSION)
 
-    # do the all product part associated with the == assignment
-    if "" in result:
-        configurations = [l for l in generate_configs(result[""], configurations)]
-        del result[""]
-
-    def expand_dict(d):
-        """ expand the dictionary of one assignment operator into a set of dictionary
-            containing the actual key value pairs of that assignment operator """
-        output = None
-        for key, values in d.items():
-            values = escaped_split(values, ',')
-            # Determine how many dicts we need when we first split values
-            if output is None:
-                output = [DotDict() for i in range(len(values))]
-            for index, val in enumerate(values):
-                output[index][key] = val
-        return output
-
-    def join_nested_dicts(d1, d2):
-        """ join two dictionaries recursively """
-        for key, item in d2.items():
-            d1[key] = item
-        return d1
-
-    # do the part for all other assignment operators
-    for assign, tree in result.items():
-        newconfigurations = []
-
-        # combine the expanded dictionaries with the ones in configurations
-        for config in configurations:
-            for newpart in expand_dict(tree):
-                newconfigurations.append(join_nested_dicts(deepcopy(config), newpart))
-
-        configurations = newconfigurations
+    # HOOK: POST_EXPANSION
+    for c in configurations:
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_EXPANSION)
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:
+
+        # HOOK: PRE_RESOLUTION
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_RESOLUTION)
 
         def needs_resolution(d):
             """ whether curly brackets can be found somewhere in the dictionary d """
@@ -147,28 +166,28 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
                     return True
             return False
 
-        def resolve_key_dependencies(fulldict, processdict):
+        def resolve_key_dependencies(d):
             """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
-            for key, value in processdict.items():
+            for key, value in d.items():
                 while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
-                    # define a function that replaces the "identity access" d,k -> d[k] when we look for keys
-                    def treat_special_keys(d, key):
-                        if key.startswith("__lower."):
-                            return d[escaped_split(key, ".", maxsplit=1)[1]].lower()
-                        if key.startswith("__upper."):
-                            return d[escaped_split(key, ".", maxsplit=1)[1]].upper()
-                        return d[key]
-
                     # split the contents form the innermost curly brackets from the rest
-                    processdict[key] = replace_delimited(value, fulldict, access_func=treat_special_keys)
-                    value = processdict[key]
+                    d[key] = replace_delimited(value, d)
+                    value = d[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
         # a call to resolve_key_dependencies only resolves one such layer.
         # That is why we need to do this until all dependencies are resolved.
         while needs_resolution(c) is True:
-            resolve_key_dependencies(c, c)
+            resolve_key_dependencies(c)
+
+        # HOOK: POST_RESOLUTION
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_RESOLUTION)
+
+    for c in configurations:
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_FILTERING)
 
     # apply the filtering of groups if needed
     if filterKeys:
@@ -181,24 +200,21 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
                 if not True in [key.startswith(f) for f in filterKeys]:
                     del c[key]
         # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
-        import ast
-        configurations = [DotDict(ast.literal_eval(s)) for s in set([str(c) for c in configurations])]
+        configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
 
     # Implement the naming scheme through the special key __name
     if addNameKey is True:
-        base, extension = filename.split(".", 1)
-        make_key_unique(configurations, "__name")
-        for conf in configurations:
-            conf["__name"] = base + "_" + conf["__name"]
-            # cut the underscore in the corner case of exactly one configuration
-            if conf["__name"][-1] == "_":
-                conf["__name"] = conf["__name"][:-1]
-
-    # if no naming scheme is to be implemented, remove all __name keys
+        if "__name" not in configurations[0]:
+            configurations[0]["__name"] = ""
+        configurations[0]["__name"] = configurations[0]["__name"] + " | unique"
     else:
         for c in configurations:
             if "__name" in c:
                 del c["__name"]
+
+    for c in configurations:
+        for k, v in c.items():
+            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_FILTERING)
 
     return configurations
 
