@@ -96,12 +96,12 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
     _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=" | " + parts[2] if len(parts) == 3 else "", ctype=ctype, **kwargs)
 
 @meta_ini_command(name="tolower")
-def cmd_to_lower(value=None):
-    return value.lower() if value else None
+def _cmd_to_lower(value=None):
+    return value.lower()
 
 @meta_ini_command(name="toupper")
-def cmd_to_upper(value=None):
-    return value.upper() if value else None
+def _cmd_to_upper(value=None):
+    return value.upper()
 
 @meta_ini_command(name="eval", ctype=CommandType.POST_FILTERING)
 def _eval_command(value=None):
