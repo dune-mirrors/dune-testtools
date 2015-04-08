@@ -218,39 +218,6 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
 
     return configurations
 
-def parse_meta_ini_file(filename, assignment="=", commentChar=("#",)):
-    # one dictionary to hold the results from several parser runs
-    # the keys are all the types of assignments occuring in the file
-    # except for normal assignment, which is treated differently.
-    result = {}
-
-    # we always have normal assignment
-    normal = parse_ini_file(filename, assignment=assignment, asStrings=True)
-
-    def get_assignment_operators(filename, result):
-        file = open(filename)
-        for line in file:
-            # strip comments from the line
-            for char in commentChar:
-                if exists_unescaped(line, char):
-                    line, comment = escaped_split(line, char, 1)
-                # all other occurences can be handled normally now
-                line = strip_escapes(line, char)
-            # get the assignment operators
-            if count_unescaped(line, assignment) is 2:
-                key, assignChar, value = escaped_split(line, assignment)
-                result[assignChar] = DotDict()
-
-    # look into the file to determine the set of assignment operators used
-    get_assignment_operators(filename, result)
-
-    # get dictionaries for all sorts of assignments
-    for key in result:
-        assignChar = "{}{}{}".format(assignment, key, assignment)
-        result[key] = parse_ini_file(filename, assignment=assignChar, asStrings=True)
-
-    return (normal, result)
-
 def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
     # get the unique ini name
     fn = c["__name"]
