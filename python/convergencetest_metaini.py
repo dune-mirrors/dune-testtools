@@ -44,7 +44,6 @@ def extract_convergence_test_info(metaini):
     for value in valuelist:
         if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
             resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
-            print resultkey
             if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
                 sys.stderr.write("Nested key names currently not supported for the convergence test key.")
                 sys.exit(1)
