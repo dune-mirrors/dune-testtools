@@ -128,3 +128,8 @@ def _eval_command(value=None):
             raise TypeError(node)
 
     return str(eval_(ast.parse(value, mode='eval').body))
+
+@meta_ini_command(name="convergence_test", ctype=CommandType.POST_PARSE)
+def _get_convergence_test_key(config=None, key=None, value=None):
+    config["__CONVERGENCE_TEST.__test_key"] = key
+    return value + str("| expand")

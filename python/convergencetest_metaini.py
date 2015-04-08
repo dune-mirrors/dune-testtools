@@ -1,33 +1,59 @@
-from metaIni import expand_meta_ini, parse_meta_ini_file, write_configuration_to_ini
-from escapes import *
+from metaIni import expand_meta_ini, write_configuration_to_ini
+from parseIni import *
 from writeIni import write_dict_to_ini
+
+from command import meta_ini_command, CommandType
+from escapes import *
 from static_metaini import extract_static_info
+
 from cmakeoutput import printForCMake
 import argparse
 import sys
 
 def extract_convergence_test_info(metaini):
     # get the key that will define the convergence test
-    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.TestKey", addNameKey=False)
+    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.__test_key", addNameKey=False)
     
     # if no __CONVERGENCE_TEST.TestKey was found exit with parameter error message
     if len(testKeyDict[0]) == 0:
-        sys.stderr.write("Parameter Error: __CONVERGENCE_TEST section has no key 'TestKey': in meta-inifile: " + str(metaini) + "\n")
-        sys.exit(0)
-    # if somebody tries expansion assignment operators on the TestKey throw a parameter error as
-    # this option is not really useful. Time and space convergence e.g. can be done with two separate inifiles.
-    if len(testKeyDict) > 1:
-        sys.stderr.write("Parameter Error: The '__CONVERGENCE_TEST.TestKey' has to be a single key: in meta-inifile: " + str(metaini) + "\n")
+        sys.stderr.write("Parameter Error: No key was marked as test key with the '| convergence_test' command : in meta-inifile: " + str(metaini) + "\n")
         sys.exit(0)
 
     # this is the test key
-    testKey = testKeyDict[0]["__CONVERGENCE_TEST.TestKey"]
-       
-    # check if the given testKey exists
-    testKeyDict = expand_meta_ini(metaini, filterKeys=testKey, addNameKey=False)
-    if len(testKeyDict[0]) == 0:
-        sys.stderr.write("Parameter Error: The given 'TestKey': " + str(testKey) + " does not match any key in the meta-inifile: " + str(metaini) + "\n")
-        sys.exit(0)
+    testKey = testKeyDict[0]["__CONVERGENCE_TEST.__test_key"]
+
+    # parse the meta ini file
+    parse = parse_ini_file(metaini)
+
+    # which keys depend on the testkey
+    # the __name value is always unique and should be included from comparison
+    dependentKeys = [testKey, "__name"]
+    # do it as long as no resolution is need anymore
+    # values can depend on keys that depend on other keys arbitrarily deep
+    def get_dependent_keys(parse, dependentKeys):
+        needs_resolution = False
+        for key, value in parse.items():
+           for dependentKey in dependentKeys:
+                if exists_delimited(str(value), dependentKey) and key not in dependentKeys:
+                    dependentKeys.append(key)
+                    needs_resolution = True
+        return needs_resolution
+
+    # check the parse dictionary for key dependencies
+    valuelist = escaped_split(parse[testKey], delimiter=",")
+    for value in valuelist:
+        if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
+            resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
+            print resultkey
+            if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
+                sys.stderr.write("Nested key names currently not supported for the convergence test key.")
+                sys.exit(1)
+            else:
+                if resultkey not in dependentKeys:
+                    dependentKeys.append(resultkey)
+
+    # then we resolve all other dependent keys
+    while get_dependent_keys(parse, dependentKeys): pass
 
     # expand the ini file
     configurations = expand_meta_ini(metaini)
@@ -44,65 +70,6 @@ def extract_convergence_test_info(metaini):
             else:
                 isEqual = False
         return isEqual
-
-    # parse the meta ini file
-    normal, result = parse_meta_ini_file(metaini)
-
-    # which keys depend on the testkey
-    # the __name value is always unique and should be included from comparison
-    dependentKeys = [testKey, "__name"]
-    # do it as long as no resolution is need anymore
-    # values can depend on keys that depend on other keys arbitrarily deep
-    def get_dependent_keys(normal, result, dependentKeys):
-        needs_resolution = False
-        for key, value in normal.items():
-           for dependentKey in dependentKeys:
-                if exists_delimited(dependentKey, value) and key not in dependentKeys:
-                    dependentKeys.append(key)
-                    needs_resolution = True
-        for char, assignType in result.items():
-            for key, value in assignType.items():
-                for dependentKey in dependentKeys:
-                    if exists_delimited(dependentKey, value) and key not in dependentKeys:
-                        dependentKeys.append(key)
-                        needs_resolution = True
-        return needs_resolution
-
-    # first we check if the testKey itself is dependent on other keys
-    # and include those keys in the dependentKeys
-    for char, assignType in result.items():
-        if testKey in assignType:
-            # then it uses a special assignment operator
-            # check if the curly bracket operator is used in the testkey value
-            valuelist = escaped_split(assignType[testKey], delimiter=",")
-            for value in valuelist:
-                if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
-                    # in order to get all dependent keys we have to possibly resolve
-                    # combinations if the dependent key itself uses a curly bracket operator in its name
-                    # TODO e.g. key = {foo{bar}} (if bar == 1, 2 there would be the keys foo1 and foo2)
-                    # is not allowed yet, throws an error for nested keys
-                    resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
-                    if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
-                        sys.stderr.write("Nested key names currently not supported for the convergence test key.")
-                        sys.exit(1)
-                    else:
-                        if resultkey not in dependentKeys:
-                            dependentKeys.append(resultkey)
-
-    # do it for the normal dict too
-    if testKey in normal:
-        value = normal[testKey]
-        if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
-            resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
-            if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
-                sys.stderr.write("Nested key names currently not supported for the convergence test key.")
-                sys.exit(1)
-            else:
-                if resultkey not in dependentKeys:
-                    dependentKeys.append(resultkey)
-
-    # then we resolve all other dependent keys
-    while get_dependent_keys(normal, result, dependentKeys): pass
 
     # aggregate configuration belonging to one convergence test
     newconfigurations = []
