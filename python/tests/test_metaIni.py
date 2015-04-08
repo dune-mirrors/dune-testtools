@@ -16,7 +16,7 @@ def test_metaini1():
     configs = expand_meta_ini("./tests/metaini1.mini", whiteFilter=("garbagekey",), addNameKey=False)
     assert(str(configs) == '[{}]')
 
-    configs = expand_meta_ini("./tests/metaini1.mini", blackFilter=("a",))
+    configs = expand_meta_ini("./tests/metaini1.mini", blackFilter=["a"])
     assert(len(configs) == 36)
 
 

@@ -197,14 +197,14 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
 
     if blackFilter:
         # check whether a single filter has been given and make a tuple if so
-        if not isinstance(blackFilter, tuple):
+        if not hasattr(blackFilter, '__iter__'):
             blackFilter = (blackFilter,)
         # remove all keys that match the given filtering
         configurations = [c.filter([k for k in c if not True in [k.startswith(f) for f in blackFilter]]) for c in configurations]
 
     if whiteFilter:
         # check whether a single filter has been given and make a tuple if so
-        if not isinstance(whiteFilter, tuple):
+        if not hasattr(whiteFilter, '__iter__'):
             whiteFilter = (whiteFilter,)
         # remove all keys that do not match the given filtering
         configurations = [c.filter(whiteFilter) for c in configurations]
