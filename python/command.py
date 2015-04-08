@@ -130,6 +130,9 @@ def _eval_command(value=None):
     return str(eval_(ast.parse(value, mode='eval').body))
 
 @meta_ini_command(name="convergence_test", ctype=CommandType.POST_PARSE)
-def _get_convergence_test_key(config=None, key=None, value=None):
+def _get_convergence_test_key(config=None, key=None, value=None, pipecommands=""):
     config["__CONVERGENCE_TEST.__test_key"] = key
-    return value + str("| expand")
+    if "expand" in pipecommands:
+        return value + pipecommands
+    else:
+        return value + "| expand" + pipecommands
