@@ -10,8 +10,8 @@ def call(metaini, testId):
     testIdx = int(testId)
 
     # get the convergence test info from the meta ini file
-    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.TestKey", addNameKey=False)
-    testKey = testKeyDict[0]["__CONVERGENCE_TEST.TestKey"]
+    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.__test_key", addNameKey=False)
+    testKey = testKeyDict[0]["__CONVERGENCE_TEST.__test_key"]
 
     # get the convergence tests
     tests = extract_convergence_test_info(metaini)
