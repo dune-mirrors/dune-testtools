@@ -77,23 +77,40 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
         This command returns the return value of the function or None if nothing has been done.
     """
     # split the value at the pipe symbol
-    parts = escaped_split(config[key], delimiter="|", maxsplit=2)
+    parts = escaped_split(config[key], delimiter="|")
     # first determine whether this is no op, because no |-operator is present
     if len(parts) is 1:
         return
-    # Now investigate the given command.
-    cmdargs = escaped_split(parts[1])
-    # the first argument must be a valid command
-    assert(cmdargs[0] in _registry)
-    assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
-    # if the command type does not match our current command type, we are also no-op
-    if ctype != _registry[cmdargs[0]]._ctype:
+    # Now investigate the given commands
+    partiterator = iter(parts)
+    # Skip the value and go for the commands
+    next(partiterator)
+    othercommands = ""; commands = []; match = False
+    for cmd in partiterator:
+        cmdargs = escaped_split(cmd)
+        # the first argument must be a valid command
+        assert(cmdargs[0] in _registry)
+        assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
+        # if the command type does not match our current command type, we save it for later
+        if ctype != _registry[cmdargs[0]]._ctype:
+            othercommands = othercommands + " | " + cmd
+        else:
+            commands.append(cmd)
+            match = True
+
+    # if none of the commands is matching the command type this is no op
+    if not match:
         return
-    # Remove the command from the value!
-    if ctype != CommandType.AT_EXPANSION:
-        config[key] = parts[0]
-    # call the actual function!
-    _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=" | " + parts[2] if len(parts) == 3 else "", ctype=ctype, **kwargs)
+
+    # apply the commands that match the current command type
+    for cmd in commands:
+        cmdargs = escaped_split(cmd)
+        # Remove the commands from the value!
+        # add a command here if the command should not be removed from the value
+        if cmdargs[0] != "expand":
+            config[key] = parts[0] + othercommands
+        # call the actual function!
+        _registry[cmdargs[0]](config=config, key=key, value=parts[0], args=cmdargs[1:], pipecommands=othercommands, ctype=ctype, **kwargs)
 
 @meta_ini_command(name="tolower")
 def _cmd_to_lower(value=None):
@@ -128,3 +145,11 @@ def _eval_command(value=None):
             raise TypeError(node)
 
     return str(eval_(ast.parse(value, mode='eval').body))
+
+@meta_ini_command(name="convergence_test", ctype=CommandType.POST_PARSE, returnValue=False)
+def _get_convergence_test_key(config=None, key=None, value=None, pipecommands=""):
+    config["__CONVERGENCE_TEST.__test_key"] = key
+    if "expand" in pipecommands:
+        config[key] = value + pipecommands
+    else:
+        config[key] = value + "| expand" + pipecommands

@@ -1,5 +1,5 @@
 from parseIni import parse_ini_file
-from metaIni import expand_meta_ini, parse_meta_ini_file, write_configuration_to_ini
+from metaIni import expand_meta_ini, write_configuration_to_ini
 from convergencetest_metaini import extract_convergence_test_info
 import os
 import sys
@@ -10,8 +10,8 @@ def call(metaini, testId):
     testIdx = int(testId)
 
     # get the convergence test info from the meta ini file
-    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.TestKey", addNameKey=False)
-    testKey = testKeyDict[0]["__CONVERGENCE_TEST.TestKey"]
+    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.__test_key", addNameKey=False)
+    testKey = testKeyDict[0]["__CONVERGENCE_TEST.__test_key"]
 
     # get the convergence tests
     tests = extract_convergence_test_info(metaini)
