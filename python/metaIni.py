@@ -106,7 +106,7 @@ def _expand_command(key=None, value=None, configs=None, args=None, othercommands
             configs[:] = [c for c in expand_key(configs, keys_to_split, vals_to_split, command_list)]
     return None
 
-def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=None, addNameKey=True):
+def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=None, blackFilter=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -121,10 +121,13 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
     commentChar: list
         A list of characters that define comments. Everything on a line
         after such character is ignored during the parsing process.
-    filterKeys : string
-        Only apply the algorithm to a set of keys given.
-        Defaults to None, which means that all groups are taken into account.
-        This is white list filtering (explicitly give the keys you want).
+    whiteFilter : tuple
+        Filter the given keys. The elements of the returned set of
+        configurations will be unique.
+    blackFilter : tuple
+        Remove the given keys from the output. The elements of the returned set of
+        configurations will be unique. If both the whiteFilter and the blackFilter
+        option are used, the blackFilter will be applied first.
     addNameKey : bool
         Whether a key __name should be in the output. Defaults to true, where
         a unique name key is generated from the given name key and added to the
@@ -192,16 +195,21 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         for k, v in c.items():
             apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_FILTERING)
 
-    # apply the filtering of groups if needed
-    if filterKeys:
-        # check whether a single filter has been given and make a list if so
-        if not isinstance(filterKeys, list):
-            filterKeys = [filterKeys]
+    if blackFilter:
+        # check whether a single filter has been given and make a tuple if so
+        if not isinstance(blackFilter, tuple):
+            blackFilter = (blackFilter,)
+        # remove all keys that match the given filtering
+        configurations = [c.filter([k for k in c if not True in [k.startswith(f) for f in blackFilter]]) for c in configurations]
+
+    if whiteFilter:
+        # check whether a single filter has been given and make a tuple if so
+        if not isinstance(whiteFilter, tuple):
+            whiteFilter = (whiteFilter,)
         # remove all keys that do not match the given filtering
-        for c in configurations:
-            for key, value in c.items():
-                if not True in [key.startswith(f) for f in filterKeys]:
-                    del c[key]
+        configurations = [c.filter(whiteFilter) for c in configurations]
+
+    if blackFilter or whiteFilter:
         # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
         configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
 

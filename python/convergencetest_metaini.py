@@ -12,7 +12,7 @@ import sys
 
 def extract_convergence_test_info(metaini):
     # get the key that will define the convergence test
-    testKeyDict = expand_meta_ini(metaini, filterKeys="__CONVERGENCE_TEST.__test_key", addNameKey=False)
+    testKeyDict = expand_meta_ini(metaini, whiteFilter="__CONVERGENCE_TEST.__test_key", addNameKey=False)
     
     # if no __CONVERGENCE_TEST.TestKey was found exit with parameter error message
     if len(testKeyDict[0]) == 0:
