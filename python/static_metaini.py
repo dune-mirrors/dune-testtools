@@ -9,15 +9,10 @@ def extract_static_info(metaini):
     static_section = expand_meta_ini(metaini, filterKeys=("__STATIC", "__exec_suffix"), addNameKey=False)
 
     # make the found exec suffixes unique
-    #if len(static_section) > 0:
-    if 1:
-        if "__exec_suffix" not in static_section[0]:
-            static_section[0]["__exec_suffix"] = ""
-        static_section[0]["__exec_suffix"] = static_section[0]["__exec_suffix"] + " | unique"
-        apply_generic_command(config=static_section[0], configs=static_section, key="__exec_suffix", ctype=CommandType.POST_FILTERING)
-        print "PRINTING after mod:"
-        for s in static_section:
-            print(s)
+    if "__exec_suffix" not in static_section[0]:
+        static_section[0]["__exec_suffix"] = ""
+    static_section[0]["__exec_suffix"] = static_section[0]["__exec_suffix"] + " | unique"
+    apply_generic_command(config=static_section[0], configs=static_section, key="__exec_suffix", ctype=CommandType.POST_FILTERING)
 
     # determine a list of subgroups within the static section
     static_groups = []
