@@ -8,7 +8,6 @@ from command import meta_ini_command, CommandType
 
 @meta_ini_command(name="unique", ctype=CommandType.POST_FILTERING, returnValue=False)
 def make_key_unique(configs=None, key=None):
-    print "Called with configs={}".format(configs)
     # first count the number of occurences of the values
     key_dict = {}
     for c in configs:
