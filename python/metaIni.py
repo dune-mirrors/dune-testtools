@@ -81,27 +81,30 @@ def _expand_command(key=None, value=None, configs=None, args=None, othercommands
         keys_to_split = []
         vals_to_split = []
         command_list = []
-
+        # configs[0] is the parsed dict
         for key, value in configs[0].items():
-            # determine whether this value needs splitting
-            splitted = escaped_split(value, delimiter="|", maxsplit=2)
-            tosplit = splitted[0] if exists_unescaped(splitted[0], ",") else None
-            identifier = None
-            if len(splitted) > 1:
-                command = escaped_split(splitted[1])
-                if len(command) > 1:
-                    identifier = command[1]
-
-            if identifier == args[0]:
+            # search for the (first) expand command
+            parts = escaped_split(value, delimiter="|")
+            partiterator = iter(parts); next(partiterator)
+            command = []
+            for cmd in partiterator:
+                cmdargs = escaped_split(cmd)
+                if cmdargs[0] == "expand":
+                    command = cmdargs
+                    break
+            # if we have a simple expand command skip this key
+            if len(command) <= 1:
+                continue
+            # if the expand argument matches, add the key for expansion
+            if command[1] == args[0]:
                 keys_to_split.append(key)
-                vals_to_split.append(splitted[0])
-                command_list.append(" | " + splitted[2] if len(splitted)==3 else "")
+                vals_to_split.append(parts[0])
+                command_list.append(othercommands)
 
         # Update the list of configurations by expanding one type of assignment
         if len(keys_to_split) > 0:
             configs[:] = [c for c in expand_key(configs, keys_to_split, vals_to_split, command_list)]
     return None
-
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines

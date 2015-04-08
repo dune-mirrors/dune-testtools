@@ -24,6 +24,8 @@ def test_extract_convergence_test_info3():
     for configuration in tests:
         # each having a list of four different configurations (e.g. 2 refinements)
         assert(len(configuration) == 5)
+        for c in configuration:
+            assert(any(c["level"] in str(i) for i in range(0, 6)))
 
 def test_extract_convergence_test_info4():
     tests = extract_convergence_test_info("./tests/convtest4.ini")
@@ -32,3 +34,5 @@ def test_extract_convergence_test_info4():
     for configuration in tests:
         # each having a list of four different configurations (e.g. 2 refinements)
         assert(len(configuration) == 5)
+        for c in configuration:
+            assert(any(c["level"] in i for i in ["a", "b", "c", "d", "e", "f"]))
