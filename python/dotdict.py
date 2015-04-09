@@ -76,6 +76,11 @@ class DotDict(dict):
             s = s + "'" + str(k) + "': '" + str(v) + "', "
         return "{" + s[:-2] + "}"
 
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
 
     def items(self):
         return [(k, self[k]) for k in self]
