@@ -91,7 +91,12 @@ def parse_ini_file(filename, commentChar=("#",), assignment="=", asStrings=False
 
         # check for the include syntax extension
         if True in [line.startswith(prefix) for prefix in ["include", "import"]]:
+            # read the file name to open from the ini file...
             incfile = line.split()[1]
+            # and maybe prepend the path from the current ini file:
+            import os.path
+            incfile = os.path.join(os.path.dirname(filename), incfile)
+            # and parse the given include
             incini = parse_ini_file(filename=incfile, commentChar=commentChar, assignment=assignment, asStrings=asStrings, conversionList=conversionList)
             for k in incini:
                 result_dict[k] = incini[k]
