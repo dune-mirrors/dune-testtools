@@ -7,7 +7,7 @@
           100000 90000 100000 100000 100000 100000 100000 100000
         </DataArray>
         <DataArray type="Float32" Name="T" NumberOfComponents="1" format="ascii">
-          320 320 320 320 320 321 320 350
+          350 324 320 320 320 320 320 320
         </DataArray>
       </PointData>
       <CellData Scalars="small">
@@ -17,13 +17,17 @@
       </CellData>
       <Points>
         <DataArray type="Float32" Name="Coordinates" NumberOfComponents="3" format="ascii">
-          1.0 0.0 0.0 0.0 1.0 0.0 1.0 1.0 0.0
-          2.0 0.0 0.0 2.0 1.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0
+          0.0 1.0 0.0
+          1.0 0.0 0.0
+          1.0 1.0 0.0
+          2.0 0.0 0.0
+          2.0 1.0 0.0
         </DataArray>
       </Points>
       <Cells>
         <DataArray type="Int32" Name="connectivity" NumberOfComponents="1" format="ascii">
-          5 0 2 1 0 3 4 2
+          0 2 3 1 2 4 5 3
         </DataArray>
         <DataArray type="Int32" Name="offsets" NumberOfComponents="1" format="ascii">
           4 8
