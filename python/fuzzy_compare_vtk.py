@@ -8,7 +8,7 @@ using absolute and/or relative difference comparison.
 
 import argparse
 import xml.etree.ElementTree as ET
-from operator import attrgetter
+from operator import attrgetter, itemgetter
 import sys
 
 # fuzzy compare VTK tree from VTK strings
@@ -48,30 +48,30 @@ def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
         return 1
 
 # fuzzy compare of VTK nodes
-def is_fuzzy_equal_node(node1, node2, absolute, relative):
+def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
     
     for node1child, node2child in zip(node1.iter(), node2.iter()):
         if node1.tag != node2.tag:
-            print 'The name of the node differs in ', node1.tag, ' and ', node2.tag
+            if verbose: sys.stderr.write('The name of the node differs in ' + node1.tag + ' and ' + node2.tag)
             return False
         if node1.attrib.items() != node2.attrib.items():
-            print 'Attributes differ in node ', node1.tag
+            if verbose: sys.stderr.write('Attributes differ in node ' + node1.tag)
             return False
         if len(list(node1.iter())) != len(list(node2.iter())):
-            print 'Number of children differs in node ', node1.tag
+            if verbose: sys.stderr.write('Number of children differs in node ' + node1.tag)
             return False
         if node1child.text or node2child.text:
-            if not is_fuzzy_equal_text(node1child.text, node2child.text, absolute, relative):
-                if(node1child.attrib["Name"] == node2child.attrib["Name"]):
-                    print 'Data differs in parameter ', node1child.attrib["Name"]
+            if not is_fuzzy_equal_text(node1child.text, node2child.text, absolute, relative, verbose):
+                if node1child.attrib["Name"] == node2child.attrib["Name"]:
+                    if verbose: sys.stderr.write('Data differs in parameter ' + node1child.attrib["Name"])
                     return False
                 else:
-                    print 'Comparing different parameters', node1child.attrib["Name"], ' and ', node2child.attrib["Name"]
+                    if verbose: sys.stderr.write('Comparing different parameters' + node1child.attrib["Name"] + ' and ' + node2child.attrib["Name"])
                     return False
     return True
 
 # fuzzy compare of text (in the xml sense) consisting of whitespace separated numbers
-def is_fuzzy_equal_text(text1, text2, absolute, relative):
+def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
     list1 = text1.split()
     list2 = text2.split()
     # difference only in whitespace?
@@ -81,17 +81,15 @@ def is_fuzzy_equal_text(text1, text2, absolute, relative):
     for number1, number2 in zip(list1, list2):
         number1 = float(number1)
         number2 = float(number2)
-        print(abs(abs(number1 / number2) - 1.0))
-        print(relative)
         if not number2 == 0.0:
             # check for the relative difference
             if number2 == 0.0 or abs(abs(number1 / number2) - 1.0) > relative:
-                print 'Relative difference is too large between', number1, ' and ', number2
+                if verbose: sys.stderr.write('Relative difference is too large between' + str(number1) + ' and ' + str(number2))
                 return False
         else:
             # check for the absolute difference
             if abs(number1 - number2) > absolute:
-                print 'Absolute difference is too large between', number1, ' and ', number2
+                if verbose: sys.stderr.write('Absolute difference is too large between' + str(number1) + ' and ' + str(number2))
                 return False
     return True
 
@@ -134,7 +132,7 @@ def sort_elements(items, newroot):
 # has to sort all Cell and Point Data after the attribute "Name"!
 def sort_vtk(root):
     if(root.tag != "VTKFile"):
-        print 'Format is not a VTKFile. Sorting will most likely fail!'
+        sys.stderr.write('Format is not a VTKFile. Sorting will most likely fail!')
     # create a new root for the sorted tree
     newroot = ET.Element(root.tag)
     # create the sorted copy
@@ -144,19 +142,95 @@ def sort_vtk(root):
     # return the sorted element tree
     return newroot 
 
+def is_different_grid_order(root1, root2):
+    return is_fuzzy_equal_node(root1.find(".//Points"), root2.find(".//Points"), 1e-2, 1e-9)
+
 # sorts the data by point coordinates so that it is independent of index numbering
 def sort_vtk_by_coordinates(root1, root2):
-    if is_different_grid_order(root1, root1):
-        # TODO implement me
-        return (root1, root2)
-    else:
-        return (root1, root2)
+    if not is_fuzzy_equal_node(root1.find(".//Points/DataArray"), root2.find(".//Points/DataArray"), 1e-2, 1e-9, False):
+        for root in [root1, root2]:
+            # parse all DataArrays in a dictionary
+            pointDataArrays = []
+            cellDataArrays = []
+            dataArrays = {}
+            numberOfComponents = {}
+            for dataArray in root.findall(".//PointData/DataArray"):
+                pointDataArrays.append(dataArray.attrib["Name"])
+            for dataArray in root.findall(".//CellData/DataArray"):
+                cellDataArrays.append(dataArray.attrib["Name"])
+            for dataArray in root.findall(".//DataArray"):
+                dataArrays[dataArray.attrib["Name"]] = dataArray.text
+                numberOfComponents[dataArray.attrib["Name"]] = dataArray.attrib["NumberOfComponents"]
 
-def is_different_grid_order(root1, root2):
-    # TODO implement me
-    points1 = root1.find("Points")
-    points2 = root2.find("Points")
-    return False
+            vertexArray = []
+            coords = dataArrays["Coordinates"].split()
+            # group the coordinates into coordinate tuples
+            dim = int(numberOfComponents["Coordinates"])
+            for i in range(len(coords)/dim):
+                vertexArray.append([float(c) for c in coords[i*dim:i*dim+dim]])
+
+            # obtain a vertex index map
+            vMap = []
+            for idx, coords in enumerate(vertexArray):
+                vMap.append((idx, coords))
+            sortedVMap = sorted(vMap, key=itemgetter(1))
+            vertexIndexMap = {}
+            for idxNew, idxOld in enumerate(sortedVMap):
+                vertexIndexMap[idxOld[0]] = idxNew
+
+            # group the cells into vertex index tuples
+            cellArray = []
+            offsets = dataArrays["offsets"].split()
+            connectivity = dataArrays["connectivity"].split()
+            vertex = 0
+            for cellIdx, offset in enumerate(offsets):
+                cellArray.append([])
+                for v in range(vertex, int(offset)):
+                    cellArray[cellIdx].append(int(connectivity[v]))
+                    vertex += 1
+
+            # replace all vertex indices in the cellArray by the new indices
+            for cell in cellArray:
+                for idx, vertexIndex in enumerate(cell):
+                    cell[idx] = vertexIndexMap[vertexIndex]
+
+            # sort all data arrays
+            for name, text in dataArrays.items():
+                # split the text
+                items = text.split()
+                # convert if vector
+                num = int(numberOfComponents[name])
+                newitems = []
+                for i in range(len(items)/num):
+                    newitems.append([i for i in items[i*num:i*num+num]])
+                items = newitems
+                # sort the items: we have either vertex or cell data
+                if name in pointDataArrays:
+                    sortedItems = [j for (i, j) in sorted(zip(vertexArray, items), key=itemgetter(0))]
+                elif name in cellDataArrays or name == "types":
+                    sortedItems = [j for (i, j) in sorted(zip(cellArray, items), key=itemgetter(0))]
+                elif name == "offsets":
+                    sortedItems = []
+                    counter = 0
+                    for cell in sorted(cellArray):
+                        counter += len(cell)
+                        sortedItems.append([str(counter)])
+                elif name == "Coordinates":
+                    sortedItems = sorted(vertexArray)
+                elif name == "connectivity":
+                    sortedItems = sorted(cellArray)
+
+                # convert the sorted arrays to a xml text
+                dataArrays[name] = ""
+                for i in sortedItems:
+                    for j in i:
+                        dataArrays[name] += str(j) + " "
+
+            # do the replacement in the actual elements
+            for dataArray in root.findall(".//DataArray"):
+                dataArray.text = dataArrays[dataArray.attrib["Name"]]
+
+    return (root1, root2)
 
 # main program if called as script return appropriate error codes
 if __name__ == "__main__":
