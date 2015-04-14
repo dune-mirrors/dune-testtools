@@ -52,21 +52,21 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
     
     for node1child, node2child in zip(node1.iter(), node2.iter()):
         if node1.tag != node2.tag:
-            if verbose: print 'The name of the node differs in ', node1.tag, ' and ', node2.tag
+            if verbose: sys.stderr.write('The name of the node differs in ' + node1.tag + ' and ' + node2.tag)
             return False
         if node1.attrib.items() != node2.attrib.items():
-            if verbose: print 'Attributes differ in node ', node1.tag
+            if verbose: sys.stderr.write('Attributes differ in node ' + node1.tag)
             return False
         if len(list(node1.iter())) != len(list(node2.iter())):
-            if verbose: print 'Number of children differs in node ', node1.tag
+            if verbose: sys.stderr.write('Number of children differs in node ' + node1.tag)
             return False
         if node1child.text or node2child.text:
             if not is_fuzzy_equal_text(node1child.text, node2child.text, absolute, relative, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
-                    if verbose: print 'Data differs in parameter ', node1child.attrib["Name"]
+                    if verbose: sys.stderr.write('Data differs in parameter ' + node1child.attrib["Name"])
                     return False
                 else:
-                    if verbose: print 'Comparing different parameters', node1child.attrib["Name"], ' and ', node2child.attrib["Name"]
+                    if verbose: sys.stderr.write('Comparing different parameters' + node1child.attrib["Name"] + ' and ' + node2child.attrib["Name"])
                     return False
     return True
 
@@ -84,12 +84,12 @@ def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
         if not number2 == 0.0:
             # check for the relative difference
             if number2 == 0.0 or abs(abs(number1 / number2) - 1.0) > relative:
-                if verbose: print 'Relative difference is too large between', number1, ' and ', number2
+                if verbose: sys.stderr.write('Relative difference is too large between' + str(number1) + ' and ' + str(number2))
                 return False
         else:
             # check for the absolute difference
             if abs(number1 - number2) > absolute:
-                if verbose: print 'Absolute difference is too large between', number1, ' and ', number2
+                if verbose: sys.stderr.write('Absolute difference is too large between' + str(number1) + ' and ' + str(number2))
                 return False
     return True
 
@@ -132,7 +132,7 @@ def sort_elements(items, newroot):
 # has to sort all Cell and Point Data after the attribute "Name"!
 def sort_vtk(root):
     if(root.tag != "VTKFile"):
-        print 'Format is not a VTKFile. Sorting will most likely fail!'
+        sys.stderr.write('Format is not a VTKFile. Sorting will most likely fail!')
     # create a new root for the sorted tree
     newroot = ET.Element(root.tag)
     # create the sorted copy
