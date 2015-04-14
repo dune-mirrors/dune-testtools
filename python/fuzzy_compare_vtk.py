@@ -167,16 +167,16 @@ def sort_vtk_by_coordinates(root1, root2):
             # group the coordinates into coordinate tuples
             dim = int(numberOfComponents["Coordinates"])
             for i in range(len(coords)/dim):
-                vertexArray.append([c for c in coords[i*dim:i*dim+dim]])
+                vertexArray.append([float(c) for c in coords[i*dim:i*dim+dim]])
 
             # obtain a vertex index map
             vMap = []
             for idx, coords in enumerate(vertexArray):
-                vMap.append((str(idx), coords))
+                vMap.append((idx, coords))
             sortedVMap = sorted(vMap, key=itemgetter(1))
             vertexIndexMap = {}
-            for idx, element in enumerate(sortedVMap):
-                vertexIndexMap[str(idx)] = element[0]
+            for idxNew, idxOld in enumerate(sortedVMap):
+                vertexIndexMap[idxOld[0]] = idxNew
 
             # group the cells into vertex index tuples
             cellArray = []
@@ -186,7 +186,7 @@ def sort_vtk_by_coordinates(root1, root2):
             for cellIdx, offset in enumerate(offsets):
                 cellArray.append([])
                 for v in range(vertex, int(offset)):
-                    cellArray[cellIdx].append(connectivity[v])
+                    cellArray[cellIdx].append(int(connectivity[v]))
                     vertex += 1
 
             # replace all vertex indices in the cellArray by the new indices
@@ -221,7 +221,10 @@ def sort_vtk_by_coordinates(root1, root2):
                     sortedItems = sorted(cellArray)
 
                 # convert the sorted arrays to a xml text
-                dataArrays[name] = " ".join(j for j in [" ".join(i) for i in sortedItems])
+                dataArrays[name] = ""
+                for i in sortedItems:
+                    for j in i:
+                        dataArrays[name] += str(j) + " "
 
             # do the replacement in the actual elements
             for dataArray in root.findall(".//DataArray"):
