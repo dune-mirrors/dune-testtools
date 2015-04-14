@@ -21,12 +21,6 @@ def call(metaini, testId):
     for run in tests[testIdx]:
         run["__name"] = os.path.basename(run["__name"])
 
-
-    for run in tests[testIdx]:
-        sys.stderr.write(run["__name"] + "\n")
-
-
-
     def strip_quotes(dqstring):
         from ast import literal_eval
         return literal_eval(literal_eval(dqstring))
