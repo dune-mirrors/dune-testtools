@@ -1,4 +1,4 @@
-from metaIni import expand_meta_ini
+from metaini import expand_meta_ini
 from cmakeoutput import printForCMake
 from command import apply_generic_command, CommandType
 from uniquenames import *

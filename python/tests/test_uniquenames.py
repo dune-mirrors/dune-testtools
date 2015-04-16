@@ -1,4 +1,4 @@
-from metaIni import expand_meta_ini 
+from metaini import expand_meta_ini
 
 def check_uniqueness(_list, key):
     found = []

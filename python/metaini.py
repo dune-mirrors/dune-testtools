@@ -49,8 +49,8 @@ Known issues:
 """
 
 from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from parseIni import parse_ini_file
-from writeIni import write_dict_to_ini
+from parseini import parse_ini_file
+from writeini import write_dict_to_ini
 from dotdict import DotDict
 from copy import deepcopy
 from command import meta_ini_command, CommandType, apply_generic_command

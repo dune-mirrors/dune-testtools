@@ -1,4 +1,4 @@
-from metaIni import *
+from metaini import *
 
 def test_metaini1():
     configs = expand_meta_ini("./tests/metaini1.mini")

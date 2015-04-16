@@ -1,6 +1,6 @@
-from metaIni import expand_meta_ini, write_configuration_to_ini
-from parseIni import *
-from writeIni import write_dict_to_ini
+from metaini import expand_meta_ini, write_configuration_to_ini
+from parseini import *
+from writeini import write_dict_to_ini
 
 from command import meta_ini_command, CommandType
 from escapes import *

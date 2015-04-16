@@ -1,4 +1,4 @@
-from metaIni import expand_meta_ini
+from metaini import expand_meta_ini
 
 def test_import():
     configs = expand_meta_ini("./tests/import.ini")
