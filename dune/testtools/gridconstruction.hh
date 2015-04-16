@@ -20,8 +20,10 @@
 #include<dune/grid/io/file/dgfparser/dgfyasp.hh>
 
 // UGGrid specific includes
+#if HAVE_UG
 #include<dune/grid/uggrid.hh>
 #include<dune/grid/io/file/dgfparser/dgfug.hh>
+#endif
 
 /**
  * \file A factory class combining all methods of grid construction under
@@ -352,6 +354,7 @@ private:
   std::shared_ptr<Grid> grid;
 };
 
+#if HAVE_UG
 /** An IniGridFactory for an UGGrid
  *
  * All keys are expected to be in group uggrid.
@@ -464,5 +467,7 @@ public:
 private:
   std::shared_ptr<Grid> grid;
 };
+
+#endif // HAVE_UG
 
 #endif
