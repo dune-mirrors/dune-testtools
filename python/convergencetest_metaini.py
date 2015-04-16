@@ -25,11 +25,31 @@ def extract_convergence_test_info(metaini):
     # parse the meta ini file
     parse = parse_ini_file(metaini)
 
-    # which keys depend on the testkey
-    # the __name value is always unique and should be included from comparison
+    # get key dependencies
+    # the __name value is always unique
     dependentKeys = [testKey, "__name"]
-    # do it as long as no resolution is need anymore
-    # values can depend on keys that depend on other keys arbitrarily deep
+
+    # also get keys that will be made unique
+    for key, value in parse.items():
+        if ("| unique" in str(value)) or ("| output_name" in str(value)):
+            dependentKeys.append(key)
+
+    # check if the test key depends on other keys (this is only partly supported)
+    valuelist = escaped_split(parse[testKey], delimiter=",")
+    for value in valuelist:
+        if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
+            resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
+            if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
+                sys.stderr.write("Nested key dependencies currently not supported for the convergence test key.")
+                sys.exit(1)
+            else:
+                if exists_unescaped(value.replace("{" + resultkey + "}",""), "{")  or exists_unescaped(value.replace("{" + resultkey + "}",""), "}"):
+                    sys.stderr.write("Multiple key dependencies currently not supported for the convergence test key.")
+                    sys.exit(1)
+                if resultkey not in dependentKeys:
+                    dependentKeys.append(resultkey)
+
+    # check if other keys depend on the test key
     def get_dependent_keys(parse, dependentKeys):
         needs_resolution = False
         for key, value in parse.items():
@@ -38,18 +58,6 @@ def extract_convergence_test_info(metaini):
                     dependentKeys.append(key)
                     needs_resolution = True
         return needs_resolution
-
-    # check the parse dictionary for key dependencies
-    valuelist = escaped_split(parse[testKey], delimiter=",")
-    for value in valuelist:
-        if exists_unescaped(value, "{") or exists_unescaped(value, "}"):
-            resultkey = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
-            if exists_unescaped(resultkey, "{") or exists_unescaped(resultkey, "}"):
-                sys.stderr.write("Nested key names currently not supported for the convergence test key.")
-                sys.exit(1)
-            else:
-                if resultkey not in dependentKeys:
-                    dependentKeys.append(resultkey)
 
     # then we resolve all other dependent keys
     while get_dependent_keys(parse, dependentKeys): pass
@@ -89,7 +97,6 @@ def extract_convergence_test_info(metaini):
 
     # check if we have the right number of convergence tests
     assert(count == len(newconfigurations))
-
     return newconfigurations
 
 if __name__ == "__main__":

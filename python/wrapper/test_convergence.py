@@ -25,38 +25,42 @@ def call(metaini, testId):
         from ast import literal_eval
         return literal_eval(literal_eval(dqstring))
 
+    # parse the output files
     output = []
     for run in tests[testIdx]:
-        ininame = run["__name"]
-        if "__output_extension" in run:
-            ininame = ininame + "." + run["__output_extension"]
-        else:
-            ininame = ininame + ".output"
+        try:
+            ininame = os.path.basename(run["__output_name"]) + "." + run["__output_extension"]
+        except KeyError:
+            ininame = os.path.basename(run["__name"]) + "." + run["__output_extension"]
+
         # check if the output file exists
         if not os.path.isfile(ininame):
             sys.stderr.write("The output file to process does not exist (" + ininame + ")")
             return 1
+
         # if it exists parse it
         outDict = parse_ini_file(ininame, conversionList=(int, float, strip_quotes))
-        outDict["testKey"] = run[testKey]
-        outDict["expectedRate"] = float(run["__CONVERGENCE_TEST.ExpectedRate"])
-        outDict["eps"] = float(run["__CONVERGENCE_TEST.AbsoluteDiff"])
+        outDict["__testKey"] = run[testKey]
+        outDict["__expectedRate"] = float(run["__CONVERGENCE_TEST.ExpectedRate"])
+        outDict["__absDiff"] = float(run["__CONVERGENCE_TEST.AbsoluteDiff"])
+        outDict["__normType"] = run["__CONVERGENCE_TEST.NormType"]
+        outDict["__quantityName"] = run["__CONVERGENCE_TEST.QuantityName"]
         output.append(outDict)
 
     test_failed = False
     # calculate the rate according to the outputted data
     for runIdx in range(len(tests[testIdx])-1):
-        norm1 = output[runIdx]["Norm"]
-        norm2 = output[runIdx+1]["Norm"]
-        hmax1 = output[runIdx]["HMax"]
-        hmax2 = output[runIdx+1]["HMax"]
+        norm1 = output[runIdx][output[runIdx]["__normType"]]
+        norm2 = output[runIdx+1][output[runIdx]["__normType"]]
+        hmax1 = output[runIdx][output[runIdx]["__quantityName"]]
+        hmax2 = output[runIdx+1][output[runIdx]["__quantityName"]]
         rate = log(norm2/norm1)/log(hmax2/hmax1)
         # compare the rate to the expected rate
-        if abs(rate-output[runIdx]["expectedRate"]) > output[runIdx]["eps"]:
+        if abs(rate-output[runIdx]["__expectedRate"]) > output[runIdx]["__absDiff"]:
             test_failed = True
             sys.stderr.write("Test failed because the absolute difference between the \
                 calculated rate: " + str(rate) + " and the expected rate: " + \
-                str(output[runIdx]["expectedRate"]) + " was too large.\n")
+                str(output[runIdx]["__expectedRate"]) + " was too large.\n")
 
     # return appropriate returncode
     if test_failed:

@@ -18,20 +18,16 @@ int main(int argc, char** argv)
 	// here the programme could do grid refinement
 	//////////////////////////////////////////////
 
-	// construct the output tree with the right filename
-	// this is important so the test script can find the output
-	std::string outputName = params["__name"];
-	outputName += ".";
-    outputName += params["__output_extension"];
-	Dune::OutputTree outputTree(outputName);
+	// construct the output tree with the parameter tree
+	Dune::OutputTree outputTree(params);
 
 	////////////////////////////////////////////////////////////////
     // here would be the programme that calculates norm and hmax and
     // outputs it like this:
     ////////////////////////////////////////////////////////////////
-	// TODO this needs to be more general (get keys from the ini file)
-	outputTree["Norm"] = std::to_string(1.0/(1<<level));
-    outputTree["HMax"] = std::to_string(1.0/(1<<level));
+	double norm = 1.0/(1<<level);
+	double hmax = 1.0/(1<<level);
+	outputTree.setConvergenceData(norm, hmax);
    
     return 0;
 }

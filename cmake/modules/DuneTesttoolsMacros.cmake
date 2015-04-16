@@ -207,7 +207,12 @@ function(add_system_test_per_target)
       get_filename_component(iniext ${inifile} EXT)
 
       if(${DOSOMETHING})
-        add_test(${target}_${ininame} env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} ${TARGVAR_SCRIPT} --exec ${target} --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
+        add_test(NAME ${target}_${ininame}
+                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} ${TARGVAR_SCRIPT}
+                    --exec ${target}
+                    --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
+                    --source ${CMAKE_CURRENT_SOURCE_DIR}
+                )
       endif(${DOSOMETHING})
     endforeach(inifile ${iniinfo_names})
   endforeach(target ${TARGVAR_TARGET})
@@ -251,6 +256,7 @@ function(add_dune_system_test)
 
   add_system_test_per_target(INIFILE ${SYSTEMTEST_INIFILE}
                              TARGET ${targetlist}
+                             SCRIPT ${SYSTEMTEST_SCRIPT}
                              ${DEBUG}
                              TARGETBASENAME ${SYSTEMTEST_BASENAME})
 
