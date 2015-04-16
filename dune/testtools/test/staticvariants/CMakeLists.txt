@@ -1,6 +1,6 @@
 if(${DEBUG_MACRO_TESTS})
   add_static_variants(SOURCE source.cc INIFILE statictest.mini DEBUG BASENAME statictest TARGETS targetlist)
   message("Targets generated for staticvariants testsuite: ${targetlist}")
-else(${DEBUG_MACRO_TESTS})
+else()
   add_static_variants(SOURCE source.cc INIFILE statictest.mini BASENAME statictest TARGETS targetlist)
-endif(${DEBUG_MACRO_TESTS})
+endif()

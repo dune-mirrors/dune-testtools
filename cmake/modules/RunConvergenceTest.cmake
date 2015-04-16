@@ -1,8 +1,8 @@
 foreach(var CONVERGENCE_TEST_INIS CONVERGENCE_TEST_ID CONVERGENCE_TEST_META_INI CONVERGENCE_TEST_TARGET CONVERGENCE_TEST_SCRIPT)
   if(NOT DEFINED ${var})
     message(FATAL_ERROR "'${var}' must be defined on the command line")
-  endif(NOT DEFINED ${var})
-endforeach(var CONVERGENCE_TEST_INIS CONVERGENCE_TEST_ID CONVERGENCE_TEST_TARGET CONVERGENCE_TEST_SCRIPT)
+  endif()
+endforeach()
 
 string(REPLACE "+" ";" inis ${CONVERGENCE_TEST_INIS})
 
@@ -16,8 +16,8 @@ foreach(ini ${inis})
   # Check its return status
   if(result)
     message(FATAL_ERROR "Test run with ${CONVERGENCE_TEST_TARGET} and inifile ${ini} failed")
-  endif(result)
-endforeach(ini ${inis})
+  endif()
+endforeach()
 
 # run the evaluation script
 set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}/python:$ENV{PYTHONPATH}")
@@ -28,4 +28,4 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/wrapp
 if(result)
   message(SEND_ERROR "${output}")
   message(FATAL_ERROR "Test run with ${CONVERGENCE_TEST_TARGET} and inifile ${ini} failed")
-endif(result)
+endif()

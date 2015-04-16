@@ -123,7 +123,7 @@ function(add_static_variants)
     set(tname ${STATVAR_BASENAME})
     if(NOT ${conf} STREQUAL "__empty")
       set(tname ${tname}_${conf})
-    endif(NOT ${conf} STREQUAL "__empty")
+    endif()
     # add the executable with that configurations
     add_executable(${tname} "${STATVAR_SOURCE}")
     list(APPEND targetlist "${tname}")
@@ -135,19 +135,19 @@ function(add_static_variants)
     foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
       set_property(TARGET ${tname} APPEND PROPERTY
         COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
-    endforeach(cd ${STATINFO___COMPILE_DEFINITIONS})
+    endforeach()
 
     # maybe output debug information
     if(${STATVAR_DEBUG})
       message("Generated target ${tname}")
       get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
       message("  with COMPILE_DEFINITIONS: ${cd}")
-    endif(${STATVAR_DEBUG})
-  endforeach(conf ${STATINFO___CONFIGS})
+    endif()
+  endforeach()
 
   # export the list of created targets
   set(${STATVAR_TARGETS} ${targetlist} PARENT_SCOPE)
-endfunction(add_static_variants)
+endfunction()
 
 function(add_system_test_per_target)
   # parse arguments to function call
@@ -175,9 +175,9 @@ function(add_system_test_per_target)
   # add the tests for all targets
   foreach(target ${TARGVAR_TARGET})
     foreach(inifile ${iniinfo_names})
-      if (${TARGVAR_DEBUG})
+      if(${TARGVAR_DEBUG})
         message("  Adding a target with executable ${target} and inifile ${inifile}...")
-      endif (${TARGVAR_DEBUG})
+      endif()
 
       # Somehow the test have to be named, although the naming scheme is not relevant for
       # the selection of tests to run on the server side. For the moment we combine the
@@ -191,17 +191,17 @@ function(add_system_test_per_target)
       set(DOSOMETHING FALSE)
       if("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
         set(DOSOMETHING TRUE)
-      endif("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
+      endif()
       if("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
         set(DOSOMETHING TRUE)
-      endif("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
+      endif()
       if(NOT DEFINED TARGVAR_TARGETBASENAME)
         set(DOSOMETHING TRUE)
-      endif(NOT DEFINED TARGVAR_TARGETBASENAME)
+      endif()
 
-      if (${TARGVAR_DEBUG})
+      if(${TARGVAR_DEBUG})
         message("  -- ${DOSOMETHING}")
-      endif (${TARGVAR_DEBUG})
+      endif()
 
       # get the extension of the ini file (can be user defined)
       get_filename_component(iniext ${inifile} EXT)
@@ -213,11 +213,10 @@ function(add_system_test_per_target)
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                 )
-      endif(${DOSOMETHING})
-    endforeach(inifile ${iniinfo_names})
-  endforeach(target ${TARGVAR_TARGET})
-
-endfunction(add_system_test_per_target)
+      endif()
+    endforeach()
+  endforeach()
+endfunction()
 
 function(add_dune_system_test)
   # parse arguments
@@ -232,9 +231,9 @@ function(add_dune_system_test)
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
   set(DEBUG "")
-  if (SYSTEMTEST_DEBUG)
+  if(SYSTEMTEST_DEBUG)
     set(DEBUG "DEBUG")
-  endif (SYSTEMTEST_DEBUG)
+  endif()
 
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
@@ -260,7 +259,7 @@ function(add_dune_system_test)
                              ${DEBUG}
                              TARGETBASENAME ${SYSTEMTEST_BASENAME})
 
-endfunction(add_dune_system_test)
+endfunction()
 
 function(add_convergence_test_per_target)
   # parse arguments to function call
@@ -297,9 +296,9 @@ function(add_convergence_test_per_target)
         # executable target name with the ini file name.
         get_filename_component(ininame ${inifile} NAME_WE)
 
-        if (${TARGVAR_DEBUG})
+        if(${TARGVAR_DEBUG})
           message("  Adding a target to test ${test} with executable ${target} and inifile ${ininame}...")
-        endif (${TARGVAR_DEBUG})
+        endif()
 
         # check whether something needs to be done. This is either when our target is matching
         # the given suffix, or when TARGETBASENAME isnt given (this indicates stand-alone usage)
@@ -308,17 +307,17 @@ function(add_convergence_test_per_target)
         set(DOSOMETHING FALSE)
         if("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
           set(DOSOMETHING TRUE)
-        endif("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
+        endif()
         if("${TARGVAR_TARGETBASENAME}_${iniinfo_${test}_${inifile}_suffix}" STREQUAL "${target}")
           set(DOSOMETHING TRUE)
-        endif("${TARGVAR_TARGETBASENAME}_${iniinfo_${test}_${inifile}_suffix}" STREQUAL "${target}")
+        endif()
         if(NOT DEFINED TARGVAR_TARGETBASENAME)
           set(DOSOMETHING TRUE)
-        endif(NOT DEFINED TARGVAR_TARGETBASENAME)
+        endif()
 
-        if (${TARGVAR_DEBUG})
+        if(${TARGVAR_DEBUG})
           message("  -- ${DOSOMETHING}")
-        endif (${TARGVAR_DEBUG})
+        endif()
 
         # get the extension of the ini file (can be user defined)
         get_filename_component(iniext ${inifile} EXT)
@@ -326,8 +325,8 @@ function(add_convergence_test_per_target)
         if(${DOSOMETHING})
           # add the inifile to the list of ini files for this target
           list(APPEND convergence_test_inis "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}")
-        endif(${DOSOMETHING})
-      endforeach(inifile ${iniinfo_names})
+        endif()
+      endforeach()
 
       if(NOT "${convergence_test_inis}" STREQUAL "")
         # convert list to plus seperated string
@@ -345,13 +344,13 @@ function(add_convergence_test_per_target)
                                       -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
                                       -P "${DUNE_TESTTOOLS_PATH}/cmake/modules/RunConvergenceTest.cmake"
                                       )
-        if (${TARGVAR_DEBUG})
+        if(${TARGVAR_DEBUG})
           message(STATUS "Added convergence test: convergence_test_${target}_${test}")
-        endif (${TARGVAR_DEBUG})
-      endif(NOT "${convergence_test_inis}" STREQUAL "")
-    endforeach(test ${iniinfo_tests})
-  endforeach(target ${TARGVAR_TARGET})
-endfunction(add_convergence_test_per_target)
+        endif()
+      endif()
+    endforeach()
+  endforeach()
+endfunction()
 
 function(add_dune_convergence_test)
   # parse arguments
@@ -368,7 +367,7 @@ function(add_dune_convergence_test)
   set(DEBUG "")
   if(CONVERGENCETEST_DEBUG)
     set(DEBUG "DEBUG")
-  endif(CONVERGENCETEST_DEBUG)
+  endif()
 
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
@@ -379,7 +378,7 @@ function(add_dune_convergence_test)
   # throw an error if we neither SOURCE nor TARGET given.
   if(NOT CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
     message(FATAL_ERROR "Please specify either a SOURCE or a TARGET.")
-  endif(NOT CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
+  endif()
 
   # we either expect a source/sources OR a target/targetlist
   if(CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
@@ -411,4 +410,4 @@ function(add_dune_convergence_test)
   else(CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
     message(FATAL_ERROR "Both SOURCE and TARGET was specified. Ambiguous input.")
   endif(CONVERGENCETEST_SOURCE AND NOT CONVERGENCETEST_TARGET)
-endfunction(add_dune_convergence_test)
+endfunction()

@@ -1,10 +1,10 @@
 if(${DEBUG_MACRO_TESTS})
   add_dune_convergence_test(SOURCE test_convergencetest.cc INIFILE test_convergencetest.ini BASENAME convergence_test OUTPUT_TARGETS targetlist DEBUG)
   message("Targets generated for convergence test testsuite: ${targetlist}")
-else(${DEBUG_MACRO_TESTS})
+else()
   add_dune_convergence_test(SOURCE test_convergencetest.cc INIFILE test_convergencetest.ini BASENAME convergence_test OUTPUT_TARGETS targetlist)
-endif(${DEBUG_MACRO_TESTS})
+endif()
 
 foreach(_exe ${targetlist})
   target_link_libraries(${_exe} ${DUNE_LIBS})
-endforeach(_exe ${targetlist})
+endforeach()

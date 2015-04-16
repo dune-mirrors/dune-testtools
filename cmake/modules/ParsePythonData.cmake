@@ -33,5 +33,5 @@ function(parse_python_data)
     # restore any semicolons in the data
     string(REPLACE "${KEYS___SEMICOLON}" ";" output "${DATA_${key}}")
     set(${PYPARSE_PREFIX}_${key} ${output} PARENT_SCOPE)
-  endforeach(key ${KEYS___SINGLE} ${KEYS___MULTI})
-endfunction(parse_python_data)
+  endforeach()
+endfunction()
