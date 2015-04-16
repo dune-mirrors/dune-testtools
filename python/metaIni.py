@@ -155,27 +155,28 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), filterKeys=Non
         for k, v in c.items():
             apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_EXPANSION)
 
+    # define functions needed for resolving key-dependent values
+    def needs_resolution(d):
+        """ whether curly brackets can be found somewhere in the dictionary d """
+        for key, value in d.items():
+            if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
+                return True
+        return False
+
+    def resolve_key_dependencies(d):
+        """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
+        for key, value in d.items():
+            while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
+                # split the contents form the innermost curly brackets from the rest
+                d[key] = replace_delimited(value, d)
+                value = d[key]
+
     # resolve all key-dependent names present in the configurations
     for c in configurations:
 
         # HOOK: PRE_RESOLUTION
         for k, v in c.items():
             apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_RESOLUTION)
-
-        def needs_resolution(d):
-            """ whether curly brackets can be found somewhere in the dictionary d """
-            for key, value in d.items():
-                if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
-                    return True
-            return False
-
-        def resolve_key_dependencies(d):
-            """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
-            for key, value in d.items():
-                while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
-                    # split the contents form the innermost curly brackets from the rest
-                    d[key] = replace_delimited(value, d)
-                    value = d[key]
 
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
