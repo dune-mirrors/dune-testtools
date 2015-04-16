@@ -16,3 +16,13 @@ def test_metaini1():
 def test_metaini2():
     configs = expand_meta_ini("./tests/metaini2.mini")
     assert(check_uniqueness(configs, "__name"))
+
+def expect_exception(excepttype, f, *args):
+    try:
+        f(*args)
+    except excepttype:
+        return True
+    return False
+
+def test_exception_on_depending_on_unique_key():
+    assert(expect_exception(ValueError, expand_meta_ini, "./tests/wrongunique.ini"))
