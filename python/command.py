@@ -89,7 +89,11 @@ def apply_generic_command(config=None, key=None, ctype=CommandType.POST_RESOLUTI
     for cmd in partiterator:
         cmdargs = escaped_split(cmd)
         # the first argument must be a valid command
-        assert(cmdargs[0] in _registry)
+        try:
+            assert(cmdargs[0] in _registry)
+        except AssertionError as e:
+            e.args += ("The command " + cmdargs[0] + " is not registered!",)
+            raise
         assert(len(cmdargs) <= _registry[cmdargs[0]]._argc + 1)
         # if the command type does not match our current command type, we save it for later
         if ctype != _registry[cmdargs[0]]._ctype:
@@ -146,9 +150,20 @@ def _eval_command(value=None):
 
     return str(eval_(ast.parse(value, mode='eval').body))
 
+@meta_ini_command(name="output_name", ctype=CommandType.POST_RESOLUTION, returnValue=False)
+def _get_convergence_test_key(config=None, key=None, value=None, pipecommands=""):
+    config["__output_name"] = value
+    if "unique" in pipecommands:
+        config[key] = value + pipecommands
+    else:
+        config[key] = value + "| unique" + pipecommands
+
 @meta_ini_command(name="convergence_test", ctype=CommandType.POST_PARSE, returnValue=False)
 def _get_convergence_test_key(config=None, key=None, value=None, pipecommands=""):
     config["__CONVERGENCE_TEST.__test_key"] = key
+    if not "__output_extension" in config:
+        config["__output_extension"] = "output"
+
     if "expand" in pipecommands:
         config[key] = value + pipecommands
     else:

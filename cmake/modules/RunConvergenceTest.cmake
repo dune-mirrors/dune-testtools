@@ -10,9 +10,9 @@ foreach(ini ${inis})
   # Execute the test-executable
   set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}/python:$ENV{PYTHONPATH}")
   execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CONVERGENCE_TEST_SCRIPT} --exec ${CONVERGENCE_TEST_TARGET} --ini ${ini}
-                  RESULT_VARIABLE result ERROR_VARIABLE output OUTPUT_VARIABLE output)
+                  RESULT_VARIABLE result ERROR_VARIABLE err_output OUTPUT_VARIABLE output)
 
-  message("${output}")
+  message(STATUS "${err_output}")
   # Check its return status
   if(result)
     message(FATAL_ERROR "Test run with ${CONVERGENCE_TEST_TARGET} and inifile ${ini} failed")
