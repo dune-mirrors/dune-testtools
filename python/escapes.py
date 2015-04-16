@@ -36,7 +36,4 @@ def extract_delimited(s, leftdelimiter="[", rightdelimiter="]"):
     return escaped_split(escaped_split(s, delimiter=leftdelimiter, maxsplit=1)[1], delimiter=rightdelimiter, maxsplit=1)[0]
 
 def exists_delimited(s, value, leftdelimiter="{", rightdelimiter="}"):
-    if exists_unescaped(s, leftdelimiter) and exists_unescaped(s, rightdelimiter):
-        return leftdelimiter + value + rightdelimiter in s
-    else:
-        return False
+    return exists_unescaped(s, leftdelimiter + value + rightdelimiter)
