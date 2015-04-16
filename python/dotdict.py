@@ -76,6 +76,14 @@ class DotDict(dict):
             s = s + "'" + str(k) + "': '" + str(v) + "', "
         return "{" + s[:-2] + "}"
 
+    def filter(self, filterList):
+        d = DotDict()
+       # for k in sorted(self.keys()):
+        for k in self:
+            if True in [k.startswith(f) for f in filterList]:
+                d[k] = self[k]
+        return d
+
     def get(self, key, default=None):
         try:
             return self[key]
@@ -84,3 +92,9 @@ class DotDict(dict):
 
     def items(self):
         return [(k, self[k]) for k in self]
+
+    def keys(self):
+        return [k for k in self]
+
+    def values(self):
+        return [self[k] for k in self]
