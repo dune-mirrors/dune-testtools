@@ -112,7 +112,9 @@ The following subsections describes all other general purpose commands, that exi
 
 \subsubsection{The unique command}
 
-A key marked with the command \lstinline!unique! will be made unique throughout the set of generated ini files. This is done by appending a consecutive numbering scheme to those (and only those) values, that appear multiple times in the set. Some special keys like \lstinline!__name! (see section~\ref{sec:systemtest}) have the unique command applied automatically.
+A key marked with the command \lstinline!unique! will be made unique throughout the set of generated ini files. This is done by appending a consecutive numbering scheme to those (and only those) values, that appear multiple times in the set. Some special keys like \lstinline!__name! (see section~\ref{sec:systemtest}) have the unique command applied automatically. \\
+
+Using the curly bracket syntax to depend on keys which have the \lstinline!unique! command applied is not well-defined.
 
 \subsubsection{Simple value-altering commands: tolower, toupper, eval}
 
@@ -125,7 +127,7 @@ The \lstinline!eval! command applies a simple expression parsing to the given va
  circumference = 2 * {r} * pi | eval
 \end{lstlisting}
 
-Note that the \lstinline!eval! command is currently within the POST_FILTERING priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
+Note that the \lstinline!eval! command is currently within the POST\_FILTERING priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
 
 \subsection{The include statement}
 The \lstinline!include! statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name. See figure~\ref{fig:include} for a minimal example. \\
