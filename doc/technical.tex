@@ -91,6 +91,8 @@ The following subsections describes all other general purpose commands, that exi
 
 \subsubsection{The unique command}
 
+A key marked with the command \lstinline!unique! will be made unique throughout the set of generated ini files. This is done by appending a consecutive numbering scheme to those (and only those) values, that appear multiple times in the set. Some special keys like \lstinline!__name! (see section~\ref{sec:systemtest}) have the unique command applied automatically.
+
 \subsubsection{Simple value-altering commands: tolower, toupper, eval}
 
 \lstinline!tolower! is a command turning the given value to lowercase. \lstinline!toupper! converts to uppercase respectively. \\
@@ -136,6 +138,9 @@ The \lstinline!include! statement can be used to paste the contents of another i
 \end{figure}
 
 This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, \lstinline!include! and \lstinline!import! are synonymous w.r.t. to this feature.
+
+\section{Describing system tests with the Meta Ini Format}
+\label{sec:systemtest}
 
 \section{Testtools}
 \label{sec:testtools}
