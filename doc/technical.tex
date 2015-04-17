@@ -72,7 +72,28 @@ Commands can be applied to key/value pairs by using a pipe and then stating the 
 
 \subsection{The expand command}
 
-The \lstinline!expand! command is the most important command, as it defines the mechanism to provide sets of ini files.
+The \lstinline!expand! command is the most important command, as it defines the mechanism to provide sets of ini files. The values of keys that have the expand command are expected to be comma-separated lists. That list is split and the set of configurations is updated to hold the product of all possibile values. Listing~\ref{lst:exp1} shows a simple example which yields 6 ini files.
+
+\begin{lstlisting}[caption={A simple example of expanded keys},label=lst:exp1]
+ key = foo, bar | expand
+ someother = 1, 2, 3 | expand
+\end{lstlisting}
+
+Sometimes, you may not want to generate the product of possible values, but instead couple multiple key expansions. You can do that by providing an argument to the expand command. All expand commands with the same argument, will be expanded together. Having expand commands with the same argument but a differing number of camma separated values is not well-defined. Listing~\ref{lst:exp2} shows again a minimal example, which yields 2 configurations.
+
+\begin{lstlisting}[caption={A simple example of expanded keys with argument},label=lst:exp2]
+ key = 1, 2 | expand foo
+ someother = 4, 5 | expand foo
+\end{lstlisting}
+
+The above mechanism can be combined at will. Listing~\ref{lst:exp3} shows an example, which yields 6 ini files.
+
+\begin{lstlisting}[caption={A simple combining multiple expansions},label=lst:exp3]
+ key = foo, bar | expand 1
+ someother = 1, 2, 3 | expand
+ bla = 1, 2 | expand 1
+\end{lstlisting}
+
 \subsection{Key-dependent values}
 \label{sec:keydepend}
 
