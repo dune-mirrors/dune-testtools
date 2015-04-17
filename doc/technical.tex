@@ -66,10 +66,43 @@ The meta ini format is an extension to the normal ini file, which describes a se
 
 Commands can be applied to key/value pairs by using a pipe and then stating the command name and potential arguments. As you'd expect from a pipe, you can use multiple commands on single key/value pair. If so, the order of resolution is the following:
 \begin{itemize}
- \item Commands with a command type of higher priority are executed first. Check figure~\ref{fig:ctypes} for available command types
+ \item Commands with a command type of higher priority are executed first. The available command types in order of priority are: POST\_PARSE, PRE\_EXPANSION, POST\_EXPANSION, PRE\_RESOLUTION, POST\_RESOLUTION, PRE\_FILTERING, POST\_FILTERING, AT\_EXPANSION.
  \item Given multiple commands with the same type, commands are executed from left to right.
 \end{itemize}
 
+\subsection{The expand command}
+
+The \lstinline!expand! command is the most important command, as it defines the mechanism to provide sets of ini files.
+\subsection{Key-dependent values}
+\label{sec:keydepend}
+
+Whenever values that contain unescaped curly brackets, the string within those curly brackets will be interpreted as a key and will be replaced by the associated value (after expansion). This feature can be used as many times as you wish, even in a nested fashion, as long as no circular dependencies arise. See listing~\ref{lst:keydepend} for a complex example of the syntax. In that example one configuration with \lstinline!y=1! and one with \lstinline!y=2! would be generated.
+
+\begin{lstlisting}[caption={A complex example of key-dependent value syntax},label=lst:keydepend]
+ k = a, ubb | expand
+ y = {bl{k}}
+ bla = 1
+ blubb = 2
+\end{lstlisting}
+
+\subsection{Other commands}
+
+The following subsections describes all other general purpose commands, that exist in dune-testtools. This does not cover commands that are specific to certain testtools. Those are described in section~\ref{sec:testtools}.
+
+\subsubsection{The unique command}
+
+\subsubsection{Simple value-altering commands: tolower, toupper, eval}
+
+\lstinline!tolower! is a command turning the given value to lowercase. \lstinline!toupper! converts to uppercase respectively. \\
+
+The \lstinline!eval! command applies a simple expression parsing to the given value. The following operators are recognized: addition (\lstinline!+!), subtraction (\lstinline!-!), multiplication (\lstinline!*!), floating point division (\lstinline!/!), a power function(\lstinline!^!) and a unary minus (\lstinline!-!). Operands may be any literals, \lstinline!pi! is expanded to its value. See listing~\ref{lst:eval} for an example.
+
+\begin{lstlisting}[caption={An example of the eval command},label=lst:eval]
+ radius = 1, 2, 3 | expand
+ circumference = 2 * {r} * pi | eval
+\end{lstlisting}
+
+Note that the \lstinline!eval! command is currently within the POST_FILTERING priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
 
 \subsection{The include statement}
 The \lstinline!include! statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name. See figure~\ref{fig:include} for a minimal example. \\
@@ -105,6 +138,7 @@ The \lstinline!include! statement can be used to paste the contents of another i
 This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, \lstinline!include! and \lstinline!import! are synonymous w.r.t. to this feature.
 
 \section{Testtools}
+\label{sec:testtools}
 
 \section{Buildbot configuration}
 
