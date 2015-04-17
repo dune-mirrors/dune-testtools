@@ -1,5 +1,6 @@
 \documentclass[11pt]{article}
 
+\usepackage{amsmath}
 \usepackage{listings}
 \lstset{language=C++, basicstyle=\ttfamily,
   stringstyle=\ttfamily, commentstyle=\it, extendedchars=true}
@@ -21,7 +22,87 @@ Dominic Kempf$^\dagger$
 
 \section{Introduction}
 
+The dune-testtools project is part of a project on quality assurance and reproducibility in numerical software frameworks. It is joint work between the dune-pdelab and the DuMuX development teams.
+
 \section{The Meta Ini Format}
+
+The meta ini format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in Dune. To reiterate the syntax of such ini file, see the EBNF in figure~\ref{fig:normalebnf} and example~\ref{lst:normalini}. Note that, you can define groups of keys either by using the \lstinline![..]! syntax, by putting dots into keys or by using a combination of both.
+
+\begin{figure}
+\begin{align*}
+ <ini> & ::= \{<pair> | <group>\}^* \\
+ <group> & ::= \underline{[}<str>\underline{]} \\
+ <pair> & ::= <str>\underline{ = }<str>
+\end{align*}
+\caption{EBNF describing normal Dune style ini files.}
+\label{fig:normalebnf}
+\end{figure}
+
+\begin{lstlisting}[caption={A normal DUNE-style ini file},label=lst:normalini]
+ key = value
+ somegroup.x = 1
+ [somegroup]
+ y = 2
+ [somegroup.subgroup]
+ z = 3
+\end{lstlisting}
+
+The meta ini format is an extension to the normal ini file, which describes a set of ini files within one file. You find the EBNF of the extended syntax in \ref{fig:metaebnf}. The rest of this section is about describing the semantics of the extensions.
+
+\begin{figure}
+\begin{align*}
+ <ini> & ::= \{<pair> | <group> | <include> \}^* \\
+ <group> & ::= \underline{[}<str>\underline{]} \\
+ <pair> & ::= <str>\underline{ = }<value>\{\underline{|} <command>\}^* \\
+ <value> & ::= <str>\{\underline{\{}<value>\underline{\}}\}^*<str> \\
+ <command> & ::= <cmdname> \{<cmdargs>\}^* \\
+ <include> & ::= \underline{include} <str>
+\end{align*}
+\caption{EBNF describing the expanded meta ini syntax.}
+\label{fig:metaebnf}
+\end{figure}
+
+\subsection{The command syntax}
+
+Commands can be applied to key/value pairs by using a pipe and then stating the command name and potential arguments. As you'd expect from a pipe, you can use multiple commands on single key/value pair. If so, the order of resolution is the following:
+\begin{itemize}
+ \item Commands with a command type of higher priority are executed first. Check figure~\ref{fig:ctypes} for available command types
+ \item Given multiple commands with the same type, commands are executed from left to right.
+\end{itemize}
+
+
+\subsection{The include statement}
+The \lstinline!include! statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name. See figure~\ref{fig:include} for a minimal example. \\
+
+\begin{figure}
+\begin{tabular}{ccc}
+\begin{minipage}{.4\linewidth}
+\begin{lstlisting}[title={include.ini}]
+ x = new
+ include other.ini
+ y = new
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{.3\linewidth}
+\begin{lstlisting}[title={other.ini}]
+ x = old
+ y = old
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{.3\linewidth}
+\begin{lstlisting}[title={Result}]
+ x = old
+ y = new
+\end{lstlisting}
+\end{minipage}
+\end{tabular}
+\caption{A minimum example to illustrate the \lstinline!include! statement}
+\label{fig:include}
+\end{figure}
+
+This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, \lstinline!include! and \lstinline!import! are synonymous w.r.t. to this feature.
 
 \section{Testtools}
 
