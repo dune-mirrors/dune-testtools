@@ -1,18 +1,19 @@
 \documentclass[11pt]{article}
 
 \usepackage{amsmath}
+\usepackage{url}
 \usepackage{listings}
-\lstset{language=C++, basicstyle=\ttfamily,
+\lstset{language=C++, basicstyle=\small\ttfamily,
   stringstyle=\ttfamily, commentstyle=\it, extendedchars=true}
 
-\title{Technical Documentation of \textbf{dnue-testtools}}
+\title{Technical Documentation of \textbf{dune-testtools}}
 
 \author{
 Timo Koch$^\ast$ \and
 Dominic Kempf$^\dagger$
 }
 
-\date{April 16, 2015}
+\date{June 02, 2015}
 
 \begin{document}
 
@@ -22,11 +23,11 @@ Dominic Kempf$^\dagger$
 
 \section{Introduction}
 
-The dune-testtools project is part of a project on quality assurance and reproducibility in numerical software frameworks. It is joint work between the dune-pdelab and the DuMuX development teams.
+The dune-testtools project is part of a project on quality assurance and reproducibility in numerical software frameworks. It is joint work between the dune-pdelab\footnote{See \url{https://www.dune-project.org/pdelab/}} and the DuMu$_\textrm{x}$\footnote{See \url{http://dumux.org/}} development teams.
 
 \section{The Meta Ini Format}
 
-The meta ini format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in Dune. To reiterate the syntax of such ini file, see the EBNF in figure~\ref{fig:normalebnf} and example~\ref{lst:normalini}. Note that, you can define groups of keys either by using the \lstinline![..]! syntax, by putting dots into keys or by using a combination of both.
+The \emph{meta ini} format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in DUNE. To reiterate the syntax of such ini file, see the EBNF in figure~\ref{fig:normalebnf} and example~\ref{lst:normalini}. Note that, you can define groups of keys either by using the \lstinline![..]! syntax, by putting dots into keys, or by using a combination of both.
 
 \begin{figure}
 \begin{align*}
@@ -34,7 +35,7 @@ The meta ini format is used in dune-testtools as a domain specific language for 
  <group> & ::= \underline{[}<str>\underline{]} \\
  <pair> & ::= <str>\underline{ = }<str>
 \end{align*}
-\caption{EBNF describing normal Dune style ini files.}
+\caption{EBNF describing normal DUNE-style ini files.}
 \label{fig:normalebnf}
 \end{figure}
 
@@ -125,7 +126,7 @@ The \lstinline!eval! command applies a simple expression parsing to the given va
  circumference = 2 * {r} * pi | eval
 \end{lstlisting}
 
-Note that the \lstinline!eval! command is currently within the POST_FILTERING priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
+Note that the \lstinline!eval! command is currently within the\lstinline!POST_FILTERING! priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
 
 \subsection{The include statement}
 The \lstinline!include! statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name. See figure~\ref{fig:include} for a minimal example. \\
@@ -160,12 +161,115 @@ The \lstinline!include! statement can be used to paste the contents of another i
 
 This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, \lstinline!include! and \lstinline!import! are synonymous w.r.t. to this feature.
 
-\section{Describing system tests with the Meta Ini Format}
+\subsection{Escaping in meta ini files}
+
+\section{System tests with CMake and the Meta Ini Format}
 \label{sec:systemtest}
+CMake\footnote{\url{http://www.cmake.org/}} is the build system supported by dune-testtools. The CTest system is used to generate test.
+A CMake interface handles the interplay between
+meta ini files and the generation of (system) tests. The meta ini syntax can be used without CMake in useful applications as well but
+shows its power and convenience in combination with the build system. In particular the CMake interface is designed to understand particular
+meta ini syntax that enables the meta ini file to control the build and test generation process.
+
+Dune-testtool offers tools particularly for system testing. This means that the designed test has to cover a wide range of the
+software's functionality in contrast to checking a specific feature, i.e. unit testing. There are two different concepts to
+generate that range in dune-testtools
+\begin{itemize}
+ \item Dynamic variations of parameters that are known at runtime
+ \item Static variations of parameters / types / classes that are known at compile time
+\end{itemize}
+Both variations can be specified in the meta ini file.
+The subsequent sections present how to use the CMake interface in combination with meta ini files to generate system tests.
+
+\subsection{A simple test}
+A simple \emph{ctest} using an ordinaty DUNE-style ini file can be added using the CMake interface as follows
+\begin{lstlisting}[caption={A CMakeLists.txt adding a simple test with the dune-testtools CMake interface function \lstinline!add_dune_system_test!}]
+add_dune_system_test(SOURCE mytest.cc
+                     BASENAME mytest
+                     INIFILE mytest.ini)
+\end{lstlisting}
+
+Note that for this simple example the macro is equal to writing
+\begin{lstlisting}[caption={A CMakeLists.txt adding a simple test with the standard CMake macros}]
+add_executable(mytest mytest.cc)
+add_test(NAME mytest
+         COMMAND ./mytest mytest.ini)
+\end{lstlisting}
+We will see more sensible usage of the macro subsequently.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ?? Note that for the full syntax of the CMake interface you can refer to the Doxygen documentation of dune-testtools.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Dynamic variations}
+For creating tests covering different runtime parameters the CMake macro \lstinline!add_dune_system_test! can be used exactly
+as in the simple test example above. The ordinary ini file gets replaced with a meta ini file as in Listing~\ref{lst:dyn}.
+\begin{lstlisting}[caption={[dynamic.mini] An example of dynamic variations},label=lst:dyn]
+ [TimeManager]
+ timestep = 0.1, 0.5 | expand
+ endtime = 5, 10 | expand
+\end{lstlisting}
+As explained above the meta ini file expands to four ini files with the respective combinations of the parameters \lstinline!timestep! and
+\lstinline!endtime!. Using that meta ini file in combination with the CMake macro call
+\begin{lstlisting}[caption={A CMakeLists.txt generating dynamic variations}]
+add_dune_system_test(SOURCE mytest.cc
+                     BASENAME mytest
+                     INIFILE dynamic.mini)
+\end{lstlisting}
+will create four ctests each running the created executable with one of the four generated ini files. Naturally, the source file \lstinline!mytest.cc!
+should make use of the given parameters. The standard naming scheme for the ini files will result in \lstinline!mytest_0000.ini, mytest_0001.ini, ...!.
+For more control over the naming schemes see Section~\ref{sec:namingschemes}. The created tests are named as a combination of executable and ini file,
+hence \lstinline!mytest_mytest_0000, mytest_mytest_0001, ...!.
+
+\subsection{Static variations}
+Creating tests convering different compile time parameters is also straight forward. The meta ini file can be used to generate precompiler
+variables. A meta ini file creating static variations is shown in Listing~\ref{lst:static}.
+\begin{lstlisting}[caption={[static.mini] An example of dynamic variations},label=lst:dyn]
+ [__STATIC.COMPILE_DEFINITIONS]
+ SOLVER = Dune::Solv1, Dune::Solv2<T> | expand
+\end{lstlisting}
+This meta ini is parsed for CMake and will generate two different executables for each precompiler variable using the same call as above
+\begin{lstlisting}[caption={A CMakeLists.txt generating static variations with compile definitions}]
+add_dune_system_test(SOURCE mytest.cc
+                     BASENAME mytest
+                     INIFILE static.mini)
+\end{lstlisting}
+Not that the special group \lstinline![__STATIC.COMPILE_DEFINITIONS]! is reserved for this purpose. The created executables will be called \lstinline!mytest_0000, mytest_0001, ...! according to the standard naming scheme. For customization
+please read the next section.
+
+\subsection{Naming schemes for ini files}
+\label{sec:namingschemes}
+The meta ini syntax offers special keys controlling the naming scheme of ini files and executables.
+\begin{lstlisting}[caption={Meta ini file using the special keys for setting the naming scheme},label=lst:namingschemes]
+ __name = {timestep}
+ __exec_suffix = {__STATIC.COMPILE_DEFINITIONS.SOLVER}
+ __ini_extension = input
+ __ini_option_key = --input
+ timestep = 0.5, 1.0 | expand t
+ naming = smalltimestep, bigtimestep | expand t
+ [__STATIC.COMPILE_DEFINITIONS]
+ SOLVER = solver1, solver2 | expand
+\end{lstlisting}
+The meta ini file in Listing~\ref{lst:namingschemes} makes use of those special keys. The key \lstinline!__name! sets the basename for the
+generated ini files by expansion. If it is unique within the set of inifiles the basename is the name of the ini file, if not a numbered scheme
+will be added to provide uniqueness. The key \lstinline!__execsuffix! sets the suffix that will be added to the name of the executable. Again,
+if not unique a numbered scheme will be added automatically to the suffix. The key \lstinline!__ini_extension! sets the extension of the created
+ini files. The default is \lstinline!*.ini!. The \lstinline!__ini_option_key! can be used to tell CMake that the ini file is attached to an
+executable using an option key. In this example the programme will be called with \lstinline!./mytest_solver1 --input smalltimestep.input!.
+
+\subsection{Understanding the CMake macro \lstinline!add_dune_system_test!}
+
+\subsection{Creating tests from existing executables}
+\subsection{Creating executables with static variations without tests}
 
 \section{Testtools}
 \label{sec:testtools}
+\subsection{Fuzzy compare VTK files}
+\subsection{Comparing custom output / The Dune::OutputTree}
+\subsection{Convergence tests}
 
 \section{Buildbot configuration}
+% dune-testtools offers python modules to easily configure a buildbot master.
+
+\section{Handling test results}
 
 \end{document}
