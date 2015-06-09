@@ -57,7 +57,7 @@ The meta ini format is an extension to the normal ini file, which describes a se
  <pair> & ::= <str>\underline{ = }<value>\{\underline{|} <command>\}^* \\
  <value> & ::= <str>\{\underline{\{}<value>\underline{\}}\}^*<str> \\
  <command> & ::= <cmdname> \{<cmdargs>\}^* \\
- <include> & ::= \underline{include} <str>
+ <include> & ::= \underline{include} <str> | \underline{import} <str>
 \end{align*}
 \caption{EBNF describing the expanded meta ini syntax.}
 \label{fig:metaebnf}
@@ -128,7 +128,7 @@ The \lstinline!eval! command applies a simple expression parsing to the given va
  circumference = 2 * {r} * pi | eval
 \end{lstlisting}
 
-Note that the \lstinline!eval! command is currently within the POST_FILTERING priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
+Note that the \lstinline!eval! command is currently within the POST\_FILTERING priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
 
 \subsection{The include statement}
 The \lstinline!include! statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name. See figure~\ref{fig:include} for a minimal example. \\
@@ -242,7 +242,7 @@ please read the next section.
 \label{sec:namingschemes}
 The meta ini syntax offers special keys controlling the naming scheme of ini files and executables.
 \begin{lstlisting}[caption={Meta ini file using the special keys for setting the naming scheme},label=lst:namingschemes]
- __name = {timestep}
+ __name = {naming}
  __exec_suffix = {__STATIC.COMPILE_DEFINITIONS.SOLVER}
  __ini_extension = input
  __ini_option_key = --input
