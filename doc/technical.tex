@@ -164,6 +164,15 @@ The \lstinline!include! statement can be used to paste the contents of another i
 This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, \lstinline!include! and \lstinline!import! are synonymous w.r.t. to this feature.
 
 \subsection{Escaping in meta ini files}
+Meta ini files contain some special characters. Those are:
+\begin{itemize}
+ \item \lstinline![! \lstinline!]! in group declarations
+ \item \lstinline!=! in key/value pairs
+ \item \lstinline!{! \lstinline!}! in values for key-dependent resolution
+ \item \lstinline!|! in values for piping commands
+ \item \lstinline!,! in comma separated value lists when using the \lstinline!expand! command
+\end{itemize}
+All those character can be escaped with a preceding backslash. It is currently not possible to escape a backslash itself. It is neither possible to use quotes as a mean of escaping instead. Escaping is only necessary when the character would have special meaning (You could in theory have for example commata in keys). Escaping a dot in a groupname is currently not supported, but it would be bad style anyway.
 
 \section{System tests with CMake and the Meta Ini Format}
 \label{sec:systemtest}
