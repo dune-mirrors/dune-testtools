@@ -1,0 +1,16 @@
+# based on http://milianw.de/code-snippets/highlighting-ini-files-for-nano
+# mini highlighting
+syntax "mini" "\.mini(\.old|~)?$"
+     
+# values
+color brightred "=.*$"
+# equal sign
+color green "="
+# sections
+color brightcyan "^\s*\[.*\]"
+# keys
+color cyan "^\s*[a-zA-Z0-9_\.]+"
+# comments
+color brightyellow ";.*$"
+# commands
+color brightgreen "\|.*$"
