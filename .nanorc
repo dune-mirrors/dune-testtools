@@ -1,6 +1,6 @@
 # based on http://milianw.de/code-snippets/highlighting-ini-files-for-nano
 # mini highlighting
-syntax "mini" "\.mini(\.old|~)?$"
+syntax "mini" "\.mini(\.old|~)?$|\.ini(\.old|~)"
      
 # values
 color brightred "=.*$"
