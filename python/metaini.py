@@ -210,9 +210,14 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     if blackFilter:
         # check whether a single filter has been given and make a tuple if so
         if not hasattr(blackFilter, '__iter__'):
-            blackFilter = (blackFilter,)
-        # remove all keys that match the given filtering
-        configurations = [c.filter([k for k in c if not True in [k.startswith(f) for f in blackFilter]]) for c in configurations]
+            blackFilter = [blackFilter]
+    else:
+        blackFilter = []
+
+    # always ignore the section called "__local". Its keys by definition do not influence the number of configuration.
+    blackFilter = [f for f in blackFilter] + ["__local"]
+    # remove all keys that match the given filtering
+    configurations = [c.filter([k for k in c if not True in [k.startswith(f) for f in blackFilter]]) for c in configurations]
 
     if whiteFilter:
         # check whether a single filter has been given and make a tuple if so
@@ -221,9 +226,8 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
         # remove all keys that do not match the given filtering
         configurations = [c.filter(whiteFilter) for c in configurations]
 
-    if blackFilter or whiteFilter:
-        # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
-        configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
+    # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
+    configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
 
     # Implement the naming scheme through the special key __name
     if addNameKey is True:
