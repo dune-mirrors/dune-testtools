@@ -49,7 +49,7 @@ Known issues:
 """
 
 from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from parseini import parse_ini_file
+from parser import parse_ini_file
 from writeini import write_dict_to_ini
 from dotdict import DotDict
 from copy import deepcopy
@@ -140,7 +140,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     """
 
     # parse the ini file
-    parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, asStrings=True)
+    parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar)
 
     # HOOK: POST_PARSE
     for k, v in parse.items():
