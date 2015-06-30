@@ -76,17 +76,3 @@ def parse_ini_file(filename, assignment="=", commentChar="#"):
                 current_dict[part[0]] = part[1].strip()
 
     return result_dict
-
-# Constructing parser objects might be costly... keep a cache!
-_metaini_bnf_cache = {}
-
-def metaini_bnf(commentChar="#"):
-    """ The EBNF for the extensions to the ini format we do allow """
-    if (commentChar,) not in _metaini_bnf_cache:
-        comm = Literal(commentChar).suppress()
-        comment = comm + Optional(restOfLine).suppress()
-        cmdname = Word(printables + " ", excludeChars="#") + Optional(comment)
-        command = comm + comm + cmdname
-        _metaini_bnf_cache[(commentChar,)] = ZeroOrMore(command)
-
-    return _metaini_bnf_cache[(commentChar,)]
