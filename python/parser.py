@@ -38,7 +38,7 @@ def ini_bnf(assignment="=", commentChar="#"):
         # We allow reading data, that is not of key/value pair form
         # We do lose the embeddedness of our language at this point.
         # An alternative would be to place commands behind ## directive.
-        nonkeyval = Word(printables + " ", excludeChars=commentChar).setParseAction(lambda s: ['__conditionals.' + str(getKey()), s[0]])
+        nonkeyval = Word(printables + " ", excludeChars=commentChar).setParseAction(lambda s: ['__local.conditionals.' + str(getKey()), s[0]])
         # Introduce the include statement here, although I do like it anymore.
         include = (Literal("include") | Literal("import")).setParseAction(lambda x : "__include") + Word(printables, excludeChars=commentChar)
 
@@ -70,7 +70,7 @@ def parse_ini_file(filename, assignment="=", commentChar="#"):
                 other = parse_ini_file(incfile, assignment=assignment, commentChar=commentChar)
                 for key, val in other.items():
                     result_dict[key] = val
-            elif part[0].startswith("__conditionals"):
+            elif part[0].startswith("__local.conditionals"):
                 result_dict[part[0]] = part[1].strip()
             else:
                 current_dict[part[0]] = part[1].strip()
