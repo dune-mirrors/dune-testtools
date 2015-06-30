@@ -93,8 +93,21 @@
 # will be a list of all created targets.
 
 find_package(PythonInterp)
+
+# Check the found python version
 if(PYTHON_VERSION_STRING VERSION_LESS 2.7)
   message(FATAL_ERROR "dune-testtools requires at least python 2.7")
+endif()
+
+# Check for the existence of the python-pyparsing package
+if(NOT CMAKE_CROSSCOMPILING)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pyparsing" RESULT_VARIABLE PYPARSING_RETURN)
+  message("PYPARSING_RETURN: ${PYPARSING_RETURN}")
+  if(NOT PYPARSING_RETURN STREQUAL "0")
+    message(FATAL_ERROR "dune-testtools requires the package python-pyparsing to be present on the system")
+  endif()
+else()
+  message(WARNING "Cross-compilation warning: Assuming existence of python-pyparsing on the target system!")
 endif()
 
 include(ParsePythonData)
