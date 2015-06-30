@@ -6,6 +6,17 @@ from dotdict import DotDict
 # Constructing parser objects might be costly... keep a cache!
 _ini_bnf_cache = {}
 
+
+_counter = 0
+def resetKeyCounter():
+    global _counter
+    _counter = 0
+
+def getKey():
+    global _counter
+    _counter = _counter + 1
+    return _counter - 1
+
 def ini_bnf(assignment="=", commentChar="#"):
     """ The EBNF for a normal Dune style ini file. """
     if (assignment, commentChar) not in _ini_bnf_cache:
@@ -24,13 +35,18 @@ def ini_bnf(assignment="=", commentChar="#"):
         value = Word(printables + " ", excludeChars=commentChar)
         # A key value pair is a concatenation of those 3
         keyval = key + equals + value
+        # We allow reading data, that is not of key/value pair form
+        # We do lose the embeddedness of our language at this point.
+        # An alternative would be to place commands behind ## directive.
+        nonkeyval = Word(printables + " ", excludeChars=commentChar).setParseAction(lambda s: ['__conditionals.' + str(getKey()), s[0]])
         # Introduce the include statement here, although I do like it anymore.
         include = (Literal("include") | Literal("import")).setParseAction(lambda x : "__include") + Word(printables, excludeChars=commentChar)
 
-        line = comment | (keyval | section | include) + Optional(comment)
+        line = comment | (keyval | section | include | nonkeyval) + Optional(comment)
 
         _ini_bnf_cache[(assignment, commentChar)] = ZeroOrMore(Group(line))
 
+    resetKeyCounter()
     return _ini_bnf_cache[(assignment, commentChar)]
 
 def parse_ini_file(filename, assignment="=", commentChar="#"):
@@ -54,6 +70,8 @@ def parse_ini_file(filename, assignment="=", commentChar="#"):
                 other = parse_ini_file(incfile, assignment=assignment, commentChar=commentChar)
                 for key, val in other.items():
                     result_dict[key] = val
+            elif part[0].startswith("__conditionals"):
+                result_dict[part[0]] = part[1].strip()
             else:
                 current_dict[part[0]] = part[1].strip()
 
