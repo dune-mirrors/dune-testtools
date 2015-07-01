@@ -53,11 +53,11 @@ class MetaIniParser(object):
 
     def setKeyValuePair(self, origString, loc, tokens):
         self.log("Setting KV pair ({}, {}) within group {}".format(tokens[0], tokens[1], self._currentGroup))
-        self._currentDict[self._currentGroup + tokens[0]] = tokens[1]
+        self._currentDict[self._currentGroup + tokens[0]] = tokens[1].strip()
 
     def setNonKeyValueLine(self, origString, loc, tokens):
         self.log("Setting Non-KV line: {}".format(tokens[0]))
-        self._currentDict['__local.conditionals.' + str(self._counter)] = tokens[0]
+        self._currentDict['__local.conditionals.' + str(self._counter)] = tokens[0].strip()
         self._counter = self._counter + 1
 
     def processInclude(self, origString, loc, tokens):
