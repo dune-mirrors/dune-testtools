@@ -1,5 +1,5 @@
 import command
-from parseIni import parse_ini_file
+from parser import parse_ini_file
 from metaini import expand_meta_ini
 
 @command.meta_ini_command(name="some", argc=2)
