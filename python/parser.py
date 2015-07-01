@@ -1,78 +1,87 @@
 """ Define a parser from EBNF for the meta ini syntax """
 
-from pyparsing import Literal, printables, Word, Optional, restOfLine, ZeroOrMore, Group
+from pyparsing import Literal, Word, alphanums, Combine, OneOrMore, ZeroOrMore, QuotedString, Optional, restOfLine, printables, oneOf
 from dotdict import DotDict
+import os.path
 
-# Constructing parser objects might be costly... keep a cache!
-_ini_bnf_cache = {}
+def escapesInValues():
+    """ defines the characters that should be escaped in values """
+    return ",{}|#"
 
+class MetaIniParser(object):
+    # Define a switch for logging information. This is very useful debugging the parser.
+    _logging = False
 
-_counter = 0
-def resetKeyCounter():
-    global _counter
-    _counter = 0
+    def __init__(self, assignment="=", commentChar="#"):
+        self._parser = self.construct_bnf(assignment=assignment, commentChar=commentChar)
 
-def getKey():
-    global _counter
-    _counter = _counter + 1
-    return _counter - 1
+    def log(self, s):
+        if MetaIniParser._logging:
+            print s
 
-def ini_bnf(assignment="=", commentChar="#"):
-    """ The EBNF for a normal Dune style ini file. """
-    if (assignment, commentChar) not in _ini_bnf_cache:
-        lbrack = Literal("[").suppress()
-        rbrack = Literal("]").suppress()
-        equals = Literal(assignment).suppress()
-        comm = Literal(commentChar).suppress()
-
+    def construct_bnf(self, assignment="=", commentChar="#"):
+        """ The EBNF for a normal Dune style ini file. """
         # A comment starts with the comment literal and affects the rest of the line
-        comment = comm + Optional(restOfLine).suppress()
-        # A section is guarded bz square brackets
-        section = lbrack + Word(printables, excludeChars=["]"]) + rbrack
+        comment = Literal(commentChar).suppress() + Optional(restOfLine).suppress()
+        # A section is guarded by square brackets
+        section = Literal("[") + Word(alphanums + "._").setParseAction(self.setGroup) + Literal("]")
         # A key can consist of anything that is not an equal sign
-        key = Word(printables, excludeChars="=")
+        key = Word(alphanums + "_.")
         # A value may contain virtually anything
-        value = Word(printables + " ", excludeChars=commentChar)
+        value = Combine(OneOrMore(QuotedString(quoteChar='"', escChar='\\').setParseAction(self.escapeQuoted) | Word(printables + " ", excludeChars=[commentChar, '"'])))
         # A key value pair is a concatenation of those 3
-        keyval = key + equals + value
+        keyval = (key + Literal(assignment).suppress() + value).setParseAction(self.setKeyValuePair)
         # We allow reading data, that is not of key/value pair form
         # We do lose the embeddedness of our language at this point.
         # An alternative would be to place commands behind ## directive.
-        nonkeyval = Word(printables + " ", excludeChars=commentChar).setParseAction(lambda s: ['__local.conditionals.' + str(getKey()), s[0]])
+        nonkeyval = Combine(OneOrMore(QuotedString(quoteChar='"', escChar='\\').setParseAction(self.escapeQuoted) | Word(printables + " ", excludeChars=[commentChar, '"']))).setParseAction(self.setNonKeyValueLine)
         # Introduce the include statement here, although I do like it anymore.
-        include = (Literal("include") | Literal("import")).setParseAction(lambda x : "__include") + Word(printables, excludeChars=commentChar)
+        include = oneOf("include import") + Word(printables, excludeChars=commentChar).setParseAction(self.processInclude)
 
         line = comment | (keyval | section | include | nonkeyval) + Optional(comment)
 
-        _ini_bnf_cache[(assignment, commentChar)] = ZeroOrMore(Group(line))
+        return ZeroOrMore(line)
 
-    resetKeyCounter()
-    return _ini_bnf_cache[(assignment, commentChar)]
+    def escapeQuoted(self, origString, loc, tokens):
+        self.log("Going to escape {}".format(tokens[0]))
+        for char in ",|":
+            tokens[0] = tokens[0].replace(char, "\\" + char)
 
+    def setGroup(self, origString, loc, tokens):
+        self.log("Setting current group from '{}' to '{}.'".format(self._currentGroup, tokens[0]))
+        self._currentGroup = tokens[0] + "."
+
+    def setKeyValuePair(self, origString, loc, tokens):
+        self.log("Setting KV pair ({}, {}) within group {}".format(tokens[0], tokens[1], self._currentGroup))
+        self._currentDict[self._currentGroup + tokens[0]] = tokens[1]
+
+    def setNonKeyValueLine(self, origString, loc, tokens):
+        self.log("Setting Non-KV line: {}".format(tokens[0]))
+        self._currentDict['__local.conditionals.' + str(self._counter)] = tokens[0]
+        self._counter = self._counter + 1
+
+    def processInclude(self, origString, loc, tokens):
+        self.log("Processing include directive from {}".format(tokens[0]))
+        # save the current file before going into recursion
+        file = self._currentFile
+        self._currentFile = os.path.join(os.path.dirname(self._currentFile), tokens[0])
+        self._currentGroup = ''
+        # Parse the include
+        self._parser.parseFile(self._currentFile)
+        # Reset current File and group
+        self._currentGroup = ''
+        self._currentFile = file
+
+    def apply(self, filename):
+        self._counter = 0
+        self._currentGroup = ''
+        self._currentDict = DotDict()
+        self._currentFile = filename
+
+        self._parser.parseFile(filename)
+        return self._currentDict
+
+# This is backwards compatibility, we could as  well skip it.
 def parse_ini_file(filename, assignment="=", commentChar="#"):
     """ Take an inifile and parse it into a DotDict """
-    # Get an EBNF parser and apply it!
-    bnf = ini_bnf(assignment=assignment, commentChar=commentChar)
-    parseresult = bnf.parseFile(filename)
-
-    # Initialize an empty return dict and a working dict for subgrouping
-    result_dict = DotDict()
-    current_dict = result_dict
-    for part in parseresult:
-        if len(part) == 1:
-            if not part[0] in result_dict:
-                result_dict[part[0]] = DotDict()
-            current_dict = result_dict[part[0]]
-        if len(part) == 2:
-            if part[0] == '__include':
-                import os.path
-                incfile = os.path.join(os.path.dirname(filename), part[1])
-                other = parse_ini_file(incfile, assignment=assignment, commentChar=commentChar)
-                for key, val in other.items():
-                    result_dict[key] = val
-            elif part[0].startswith("__local.conditionals"):
-                result_dict[part[0]] = part[1].strip()
-            else:
-                current_dict[part[0]] = part[1].strip()
-
-    return result_dict
+    return MetaIniParser(assignment=assignment, commentChar=commentChar).apply(filename)
