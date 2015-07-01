@@ -5,11 +5,14 @@ for all VTK style formats like VTK files. Fuzzy compares numbers by
 using absolute and/or relative difference comparison.
 
 """
+from __future__ import absolute_import
 
 import argparse
 import xml.etree.ElementTree as ET
 from operator import attrgetter, itemgetter
 import sys
+from six.moves import range
+from six.moves import zip
 
 # fuzzy compare VTK tree from VTK strings
 def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
@@ -54,7 +57,7 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
         if node1.tag != node2.tag:
             if verbose: sys.stderr.write('The name of the node differs in ' + node1.tag + ' and ' + node2.tag)
             return False
-        if node1.attrib.items() != node2.attrib.items():
+        if list(node1.attrib.items()) != list(node2.attrib.items()):
             if verbose: sys.stderr.write('Attributes differ in node ' + node1.tag)
             return False
         if len(list(node1.iter())) != len(list(node2.iter())):
@@ -166,7 +169,7 @@ def sort_vtk_by_coordinates(root1, root2):
             coords = dataArrays["Coordinates"].split()
             # group the coordinates into coordinate tuples
             dim = int(numberOfComponents["Coordinates"])
-            for i in range(len(coords)/dim):
+            for i in range(len(coords)//dim):
                 vertexArray.append([float(c) for c in coords[i*dim:i*dim+dim]])
 
             # obtain a vertex index map
@@ -195,13 +198,13 @@ def sort_vtk_by_coordinates(root1, root2):
                     cell[idx] = vertexIndexMap[vertexIndex]
 
             # sort all data arrays
-            for name, text in dataArrays.items():
+            for name, text in list(dataArrays.items()):
                 # split the text
                 items = text.split()
                 # convert if vector
                 num = int(numberOfComponents[name])
                 newitems = []
-                for i in range(len(items)/num):
+                for i in range(len(items)//num):
                     newitems.append([i for i in items[i*num:i*num+num]])
                 items = newitems
                 # sort the items: we have either vertex or cell data

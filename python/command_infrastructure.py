@@ -28,7 +28,8 @@ in your meta inifile and have it resolved to:
 x = caps
 """
 
-from escapes import escaped_split
+from __future__ import absolute_import
+from .escapes import escaped_split
 
 _registry = {}
 

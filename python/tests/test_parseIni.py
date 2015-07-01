@@ -1,5 +1,6 @@
-from parser import parse_ini_file
-from escapes import count_unescaped
+from __future__ import absolute_import
+from ..parser import parse_ini_file
+from ..escapes import count_unescaped
 
 def test_parse1():
     # A 'normal' ini file that uses all subgrouping mechanisms

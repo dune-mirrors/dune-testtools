@@ -1,6 +1,7 @@
 """ A test for the vtu fuzzy compare"""
+from __future__ import absolute_import
 
-from fuzzy_compare_vtk import compare_vtk
+from ..fuzzy_compare_vtk import compare_vtk
 
 def test_0():
     assert(compare_vtk("./tests/vtu1.vtu", "./tests/vtu2.vtu") == 0)

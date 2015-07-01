@@ -47,14 +47,16 @@ The example produces a total of 6 ini files.
 Known issues:
 - the code could use a lot more error checking
 """
+from __future__ import absolute_import
 
-from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from parser import parse_ini_file, CommandToApply
-from writeini import write_dict_to_ini
-from dotdict import DotDict
+from .escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
+from .parser import parse_ini_file, CommandToApply
+from .writeini import write_dict_to_ini
+from .dotdict import DotDict
 from copy import deepcopy
-from command import meta_ini_command, CommandType, apply_commands, command_count
-import uniquenames
+from .command import meta_ini_command, CommandType, apply_commands, command_count
+from .uniquenames import *
+from six.moves import range
 
 def uniquekeys():
     """ define those keys which are special and should always be made unique """
@@ -112,7 +114,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
 
     # parse the ini file
     parse, cmds = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, returnCommands=True)
-    
+
     # initialize the list of configurations with the parsed configuration
     configurations = [parse]
 
@@ -284,7 +286,7 @@ if __name__ == "__main__":
     metaini["names"] = []  # TODO this should  have underscores!
 
     # extract the static information from the meta ini file
-    from static_metaini import extract_static_info
+    from .static_metaini import extract_static_info
     static_info = extract_static_info(args["ini"])
 
     # write the configurations to the file specified in the name key.
@@ -292,5 +294,5 @@ if __name__ == "__main__":
         write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
-        from cmakeoutput import printForCMake
+        from .cmakeoutput import printForCMake
         printForCMake(metaini)

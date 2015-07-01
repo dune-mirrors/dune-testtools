@@ -1,8 +1,9 @@
-from parser import CommandToApply
-from metaini import expand_meta_ini
-from cmakeoutput import printForCMake
-from command import apply_commands
-from uniquenames import *
+from __future__ import absolute_import
+from .parser import CommandToApply
+from .metaini import expand_meta_ini
+from .cmakeoutput import printForCMake
+from .command import apply_generic_command, CommandType
+from .uniquenames import *
 import sys
 import argparse
 

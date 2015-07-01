@@ -2,12 +2,13 @@
 
 d["a"]["b"] ==  d["a.b"]
 """
+from __future__ import absolute_import
 
 class DotDict(dict):
     def __init__(self, from_str=None, *args, **kwargs):
          if from_str:
              import ast
-             for k, v in ast.literal_eval(from_str).items():
+             for k, v in list(ast.literal_eval(from_str).items()):
                  self.__setitem__(k, v)
          else:
              dict.__init__(self, *args, **kwargs)
@@ -70,7 +71,7 @@ class DotDict(dict):
 
     def __str__(self):
         s = ""
-        for k, v in self.items():
+        for k, v in list(self.items()):
             s = s + "'" + str(k) + "': '" + str(v) + "', "
         return "{" + s[:-2] + "}"
 

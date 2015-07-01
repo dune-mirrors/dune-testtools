@@ -3,14 +3,15 @@
 Some easy commands are defined and implemeted here. All others get imported from here.
 This is necessary to have a reliably full command registry.
 """
+from __future__ import absolute_import
 
-from command_infrastructure import meta_ini_command, command_registry, CommandType, apply_commands, command_count
+from .command_infrastructure import meta_ini_command, command_registry, CommandType, apply_commands, command_count
 
 # import all those modules that do define commands.
 # Only this way we can ensure that the registry is completely
 # build up.
-import uniquenames
-import metaini
+from .uniquenames import *
+from .metaini import *
 
 @meta_ini_command(name="tolower")
 def _cmd_to_lower(value=None):

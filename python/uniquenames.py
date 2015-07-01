@@ -3,9 +3,10 @@
 This is needed to implement the naming of ini files and static configurations alike. There,
 a naming scheme might be given, but it may not be unique.
 """
+from __future__ import absolute_import
 
-from command import meta_ini_command, CommandType
-from escapes import escaped_split
+from .command import meta_ini_command, CommandType
+from .escapes import escaped_split
 
 @meta_ini_command(name="unique", ctype=CommandType.POST_FILTERING, returnValue=False)
 def make_key_unique(configs=None, key=None):
@@ -21,7 +22,7 @@ def make_key_unique(configs=None, key=None):
             key_dict[c[key]] += 1
 
     # Now delete all those that appeared only once (those are unique already) and reset all the others to 0
-    for k, count in key_dict.items():
+    for k, count in list(key_dict.items()):
         if count is 1:
             del key_dict[k]
         else:

@@ -1,9 +1,11 @@
 """ Define a parser from EBNF for the meta ini syntax """
+from __future__ import absolute_import
+from __future__ import print_function
 
 from pyparsing import Literal, Word, alphanums, Combine, OneOrMore, ZeroOrMore, QuotedString, Optional, restOfLine, printables, oneOf, Group, LineEnd
-from dotdict import DotDict
 from collections import namedtuple
 import os.path
+from .dotdict import DotDict
 
 CommandToApply = namedtuple('CommandToApply', ['name', 'args', 'key'])
 
@@ -25,7 +27,7 @@ class MetaIniParser(object):
 
     def log(self, s):
         if MetaIniParser._logging:
-            print s
+            print(s)
 
     def construct_bnf(self, assignment="=", commentChar="#"):
         """ The EBNF for a normal Dune style ini file. """
