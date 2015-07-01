@@ -1,7 +1,7 @@
 """ A module that manages the call to C++ executables """
 
 from argumentparser import get_args
-from parseIni import parse_ini_file
+from parser import parse_ini_file
 import subprocess
 import sys
 

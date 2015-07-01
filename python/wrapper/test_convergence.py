@@ -1,4 +1,4 @@
-from parseIni import parse_ini_file
+from parser import parse_ini_file
 from metaini import expand_meta_ini, write_configuration_to_ini
 from convergencetest_metaini import extract_convergence_test_info
 import os
