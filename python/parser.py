@@ -4,10 +4,6 @@ from pyparsing import Literal, Word, alphanums, Combine, OneOrMore, ZeroOrMore, 
 from dotdict import DotDict
 import os.path
 
-def escapesInValues():
-    """ defines the characters that should be escaped in values """
-    return ",{}|#"
-
 class MetaIniParser(object):
     # Define a switch for logging information. This is very useful debugging the parser.
     _logging = False
