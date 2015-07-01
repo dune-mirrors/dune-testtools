@@ -9,6 +9,7 @@ CHANGE_IN_PYTHON_DIR="diff --git a/python/"
 git diff origin.. | if grep --quiet "$CHANGE_IN_PYTHON_DIR"
 then
   cd python
+  rm *.pyc
   env PYTHONPATH=$PYTHONPATH:. py.test
   exit $?
 fi
