@@ -9,7 +9,7 @@ def product(args=None):
 def test_basics():
     d = {}
     d["a"] = "CAPS | tolower"
-    assert(command._registry.get("tolower", None))
+    assert(command.command_registry().get("tolower", None))
     command.apply_generic_command(config=d, key="a")
     assert(d["a"] == "caps")
     #assert(command._registry["tolower"](value="CAPS", shit=0) == "caps")
