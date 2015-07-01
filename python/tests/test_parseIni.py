@@ -1,23 +1,30 @@
-from parseIni import *
+from parser import parse_ini_file
+from escapes import count_unescaped
 
 def test_parse1():
-    # A 'normal' ini file that is parsed with and without subgroups and as strings or as converted values
+    # A 'normal' ini file that uses all subgrouping mechanisms
     parsed = parse_ini_file("./tests/parse1.ini")
-    real = {'x': 5, 'y': 'str', 'group': {'y': 'str', 'x': 5, 'z': 1, 'subgroup': {'y': 'str', 'x': 5, 'z': 1}}}
-    assert(parsed == real)
-
-    parsed = parse_ini_file("./tests/parse1.ini", asStrings=True)
-    real = {'y': 'str', 'x': '5', 'group': {'y': 'str', 'x': '5', 'z': '1', 'subgroup': {'y': 'str', 'x': '5', 'z': '1'}}}
-    assert(parsed == real)
+    assert(len(parsed) == 8)
+    assert(parsed['x'] == '5')
+    assert(parsed['y'] == 'str')
+    assert(parsed['group.y'] == 'str')
+    assert(parsed['group.x'] == '5')
+    assert(parsed['group.z'] == '1')
+    assert(parsed['group.subgroup.y'] == 'str')
+    assert(parsed['group.subgroup.z'] == '1')
 
 def test_parse2():
-    # An ini file that contains such screwed up comments that it is actually empty
-    parsed = parse_ini_file("./tests/parse2.ini", commentChar=('&', '$'))
-    assert(parsed == {})
+    # A file that contains non-key-value data
+    parsed = parse_ini_file("./tests/parse2.ini")['__local.conditionals']
+    assert(len(parsed) == 3)
+    assert(parsed['0'] == 'blub')
+    assert(parsed['1'] == '{x} == {y} | doSomething')
+    assert(parsed['2'] == '{x} == {y} | doSomething')
 
 def test_parse3():
-    # A multicharacter assignment operator, that is used without caring about spaces before/after at all
-    parsed = parse_ini_file("./tests/parse3.ini", assignment="complex")
-    real = {'y': 'str', 'x': 5, 'group': {'x': 5, 'z': 1, 'subgroup': {'z': 1}}}
-    assert(parsed == real)
-
+    # Testing all sorts of escapes
+    parsed = parse_ini_file("./tests/parse3.ini")
+    assert(count_unescaped(parsed['a'], '|') == 1)
+    assert(count_unescaped(parsed['b'], '|') == 1)
+    assert(count_unescaped(parsed['c'], ',') == 3)
+    assert(count_unescaped(parsed['d'], '"') == 2)
