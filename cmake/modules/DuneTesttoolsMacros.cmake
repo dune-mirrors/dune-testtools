@@ -219,11 +219,11 @@ function(add_system_test_per_target)
       get_filename_component(iniext ${inifile} EXT)
 
       # if the script contains the py extension remove it because we execute it as a module
-      string(STRIP ".py" ${TARGVAR_SCRIPT})
+      get_filename_component(module ${TARGVAR_SCRIPT} NAME_WE)
 
       if(${DOSOMETHING})
         add_test(NAME ${target}_${ininame}
-                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH} ${PYTHON_EXECUTABLE} -m python.wrapper.${TARGVAR_SCRIPT}
+                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH} ${PYTHON_EXECUTABLE} -m python.wrapper.${module}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
@@ -253,7 +253,7 @@ function(add_dune_system_test)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT SYSTEMTEST_SCRIPT)
-    set(SYSTEMTEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(SYSTEMTEST_SCRIPT call_executable)
   endif()
 
   # The above macros have been written in a way that allows us to use them
