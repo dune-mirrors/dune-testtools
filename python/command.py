@@ -12,6 +12,7 @@ from .command_infrastructure import meta_ini_command, command_registry, CommandT
 # build up.
 from .uniquenames import *
 from .metaini import *
+from .conditionals import *
 
 @meta_ini_command(name="tolower")
 def _cmd_to_lower(value=None):
