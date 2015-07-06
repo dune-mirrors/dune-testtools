@@ -1,7 +1,8 @@
-from argumentparser import get_args
-from call_executable import call
-from fuzzy_compare_vtk import compare_vtk
-from parser import parse_ini_file
+from __future__ import absolute_import
+from .argumentparser import get_args
+from .call_executable import call
+from ..fuzzy_compare_vtk import compare_vtk
+from ..parser import parse_ini_file
 import sys
 
 if __name__ == "__main__":

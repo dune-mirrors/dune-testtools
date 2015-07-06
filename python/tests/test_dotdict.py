@@ -1,4 +1,5 @@
-from dotdict import DotDict
+from __future__ import absolute_import
+from ..dotdict import DotDict
 
 def test_dotdict():
     # define some arbitrary dotdict
@@ -19,11 +20,13 @@ def test_dotdict():
     d[1] = 5
 
     # test the items method
-    for k, v in d.items():
+    for k, v in list(d.items()):
         assert(d[k] == v)
 
     # __contains__
     assert("b.c" in d)
     assert(not "d.e.f" in d)
 
-    assert(str(d) == "{'a': 'bla', '1': '5', 'b.c': 'bla', 'b.d': 'x'}")
+    d_check = {'1': 5, 'b.d': 'x', 'b.c': 'bla', 'a': 'bla'}
+    unmatched_item = set(d.items()) ^ set(d_check.items())
+    assert(len(unmatched_item) == 0)

@@ -1,9 +1,11 @@
-from parser import parse_ini_file
-from metaini import expand_meta_ini, write_configuration_to_ini
-from convergencetest_metaini import extract_convergence_test_info
+from __future__ import absolute_import
+from ..parser import parse_ini_file
+from ..metaini import expand_meta_ini, write_configuration_to_ini
+from ..convergencetest_metaini import extract_convergence_test_info
 import os
 import sys
 from math import log
+from six.moves import range
 
 def call(metaini, testId):
     # the id of the test we are checking
@@ -74,4 +76,3 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     sys.exit(call(args["ini"], args["test"]))
-    

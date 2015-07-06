@@ -28,7 +28,8 @@ in your meta inifile and have it resolved to:
 x = caps
 """
 
-from escapes import escaped_split
+from __future__ import absolute_import
+from .escapes import escaped_split
 
 _registry = {}
 
@@ -46,7 +47,7 @@ class CommandType:
     AT_EXPANSION = 6
 
 def command_count():
-    return max(v for v in CommandType.__dict__.values() if type(v) == int) + 1
+    return max(v for v in list(CommandType.__dict__.values()) if type(v) == int) + 1
 
 def meta_ini_command(**kwargs):
     """ A decorator for registered commands. """
@@ -77,7 +78,7 @@ class RegisteredCommand:
 
     def __call__(self, **kwargs):
         # apply the original function by filtering all keyword arguments that it needs:
-        return self._func(**{k : v for (k, v) in kwargs.items() if k in self._func.func_code.co_varnames})
+        return self._func(**{k : v for (k, v) in list(kwargs.items()) if k in self._func.__code__.co_varnames})
 
 def apply_commands(configurations, cmds):
     """ Apply the given command
