@@ -10,6 +10,7 @@ To implement a custom command you have to do the following:
   * config : The configuration dictionary
   * configs : The list of all configurations
   * args : The list of arguments givne to the command
+  * argdefaults : A list of default arguments to apply, if the arguments are missing in the meta ini file. 
 - decorate it with @meta_ini_command. meta_ini_command itself takes some arguments:
   * name : How to use this command from a meta ini file (mandatory)
   * ctype : the command type, a.k.a. when to execute the command. defaults to CommandType.POST_RESOLUTION, which is after all curly brackets in the file have been resolved.
@@ -55,12 +56,16 @@ def meta_ini_command(**kwargs):
 
 class RegisteredCommand:
     """ build the command object """
-    def __init__(self, func, name=None, ctype=CommandType.POST_RESOLUTION, argc=0, returnValue=True, returnConfigs=False):
+    def __init__(self, func, name=None, ctype=CommandType.POST_RESOLUTION, argc=0, argdefaults=None, returnValue=True, returnConfigs=False):
         # store the function to execute abd the command type
         self._func = func
         self._name = name
         self._ctype = ctype
         self._argc = argc
+        if argdefaults:
+            self._argdefaults = argdefaults + [None for i in range(argc-len(argdefaults))]
+        else:
+            self._argdefaults = list(None for x in range(argc))
         self._returnConfigs = returnConfigs
         # We cannot return both configurations and a value. Disable the returning of values if configurations are enabled
         if returnConfigs:
@@ -69,6 +74,8 @@ class RegisteredCommand:
 
         if not name:
             raise ValueError("You have to provide a name argument when registering a custom command!")
+        if argdefaults and len(argdefaults) != argc:
+            raise ValueError("Number of default arguments is not matching (use None for no default)")
 
         # register this instance in the registry
         _registry[name] = self
@@ -77,6 +84,10 @@ class RegisteredCommand:
         return "Registered command {} - Function object <{}>".format(self._name, self._func)
 
     def __call__(self, **kwargs):
+        # apply default arguments to the given arguments
+        kwargs["args"] = kwargs["args"] + [None for i in range(self._argc-len(kwargs["args"]))]
+        kwargs["args"] = [a if kwargs["args"][i] is None else kwargs["args"][i] for i, a in enumerate(self._argdefaults)]
+
         # apply the original function by filtering all keyword arguments that it needs:
         return self._func(**{k : v for (k, v) in list(kwargs.items()) if k in self._func.__code__.co_varnames})
 
