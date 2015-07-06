@@ -124,7 +124,7 @@ function(add_static_variants)
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH} ${PYTHON_EXECUTABLE} -m python.static_metaini --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.static_metaini --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
@@ -175,11 +175,11 @@ function(add_system_test_per_target)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
-    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH} ${PYTHON_EXECUTABLE} -m python.metaini --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
+  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.metaini --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")
@@ -223,7 +223,7 @@ function(add_system_test_per_target)
 
       if(${DOSOMETHING})
         add_test(NAME ${target}_${ininame}
-                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH} ${PYTHON_EXECUTABLE} -m python.wrapper.${module}
+                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
@@ -289,11 +289,11 @@ function(add_convergence_test_per_target)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
-    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH} ${PYTHON_EXECUTABLE} -m python.convergencetest_metaini
+  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.convergencetest_metaini
                     --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                     OUTPUT_VARIABLE output)
 
@@ -387,7 +387,7 @@ function(add_dune_convergence_test)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT CONVERGENCETEST_SCRIPT)
-    set(CONVERGENCETEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(CONVERGENCETEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
 
   # throw an error if we neither SOURCE nor TARGET given.
