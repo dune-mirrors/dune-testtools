@@ -20,7 +20,7 @@ class MetaIniParser(object):
         self._currentDict = DotDict()
 
         # To avoid cyclic dependencies, we do NOT do this import in the module header
-        from command import command_registry, CommandType, command_count
+        from .command import command_registry, CommandType, command_count
         self._foundCommands = { i:[] for i in range(command_count())}
         self._commands = " ".join(command_registry())
         self._parser = self.construct_bnf(assignment=assignment, commentChar=commentChar)
@@ -72,7 +72,7 @@ class MetaIniParser(object):
         for command in tokens[2:]:
             self.log("  with an applied command: '{}'".format(command))
             commandtuple = CommandToApply(command[0], command[1:], self._currentGroup + tokens[0].strip())
-            from command import command_registry
+            from .command import command_registry
             self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
 
     def setNonKeyValueLine(self, origString, loc, tokens):
@@ -83,7 +83,7 @@ class MetaIniParser(object):
         for command in tokens[1:]:
             self.log("  with an applied command: '{}'".format(command))
             commandtuple = CommandToApply(command[0], command[1:], '__local.conditionals.' + str(self._counter))
-            from command import command_registry
+            from .command import command_registry
             self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
         # increase the counter
         self._counter = self._counter + 1
