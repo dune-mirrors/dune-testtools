@@ -8,7 +8,9 @@
 CHANGE_IN_PYTHON_DIR="diff --git a/python/"
 git diff origin.. | if grep --quiet "$CHANGE_IN_PYTHON_DIR"
 then
-  cd python
-  env PYTHONPATH=$PYTHONPATH:. py.test
+  echo "Run testsuite with python executable"
+  env PYTHONPATH=$PYTHONPATH:. python -m pytest python/
+  echo "Run testsuite with python3 executable"
+  env PYTHONPATH=$PYTHONPATH:. python3 -m pytest python/
   exit $?
 fi
