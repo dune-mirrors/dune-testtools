@@ -1,6 +1,27 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+import sys
+from setuptools import setup
+from setuptools.command.test import test as TestCommand
+
+
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
 setup(name='DUNETesttools',
       version='0.1',
@@ -8,8 +29,8 @@ setup(name='DUNETesttools',
       author='Dominic Kempf <dominic.kempf@iwr.uni-heidelberg.de>, Timo Koch <timo.koch@iws.uni-stuttgart.de>',
       author_email='no_mailinglist_yet@dune-testtools.de',
       url='http://conan2.iwr.uni-heidelberg.de/git/dominic/dune-testtools',
-      packages=['dune_testtools', 'dune_testtools.wrapper', 'dune_testtools.tests'],
-      package_dir={'dune_testtools.tests': 'dune_testtools/tests'},
-      package_data={'dune_testtools.tests': ['*.ini', '*.vtu']},
-      requires=['pyparsing', 'xml.etree.ElementTree'],
+      packages=['dune_testtools', 'dune_testtools.wrapper'],
+      install_requires=['pyparsing'],
+      tests_require=['pytest'],
+      cmdclass = {'test': PyTest},
      )
