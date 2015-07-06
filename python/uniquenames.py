@@ -38,8 +38,4 @@ def make_key_unique(configs=None, key=None):
             if c[key] == "":
                 c[key] = str(key_dict[""] - 1).zfill(4)
             else:
-                valueParts = escaped_split(c[key], delimiter="|", maxsplit=2)
-                if len(valueParts) is 1:
-                    c[key] = valueParts[0] + "_" + str(key_dict[c[key]] - 1).zfill(4)
-                else:
-                    c[key] = valueParts[0] + "_" + str(key_dict[c[key]] - 1).zfill(4) + " | " + valueParts[1]
+                c[key] = c[key] + "_" + str(key_dict[c[key]] - 1).zfill(4)

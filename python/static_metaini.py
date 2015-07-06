@@ -1,6 +1,7 @@
+from parser import CommandToApply
 from metaini import expand_meta_ini
 from cmakeoutput import printForCMake
-from command import apply_generic_command, CommandType
+from command import apply_commands
 from uniquenames import *
 import sys
 import argparse
@@ -11,8 +12,8 @@ def extract_static_info(metaini):
     # make the found exec suffixes unique
     if "__exec_suffix" not in static_section[0]:
         static_section[0]["__exec_suffix"] = ""
-    static_section[0]["__exec_suffix"] = static_section[0]["__exec_suffix"] + " | unique"
-    apply_generic_command(config=static_section[0], configs=static_section, key="__exec_suffix", ctype=CommandType.POST_FILTERING)
+    cmd = [CommandToApply(name="unique", args=[], key="__exec_suffix")]
+    apply_commands(static_section, cmd)
 
     # determine a list of subgroups within the static section
     static_groups = []

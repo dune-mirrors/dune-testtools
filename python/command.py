@@ -4,7 +4,7 @@ Some easy commands are defined and implemeted here. All others get imported from
 This is necessary to have a reliably full command registry.
 """
 
-from command_infrastructure import meta_ini_command, command_registry, CommandType, apply_generic_command
+from command_infrastructure import meta_ini_command, command_registry, CommandType, apply_commands, command_count
 
 # import all those modules that do define commands.
 # Only this way we can ensure that the registry is completely
@@ -54,7 +54,7 @@ def _get_convergence_test_key(config=None, key=None, value=None, pipecommands=""
     else:
         config[key] = value + "| unique" + pipecommands
 
-@meta_ini_command(name="convergence_test", ctype=CommandType.POST_PARSE, returnValue=False)
+@meta_ini_command(name="convergence_test", ctype=CommandType.PRE_EXPANSION, returnValue=False)
 def _get_convergence_test_key(config=None, key=None, value=None, pipecommands=""):
     config["__CONVERGENCE_TEST.__test_key"] = key
     if not "__output_extension" in config:

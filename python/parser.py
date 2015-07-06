@@ -2,7 +2,10 @@
 
 from pyparsing import Literal, Word, alphanums, Combine, OneOrMore, ZeroOrMore, QuotedString, Optional, restOfLine, printables, oneOf, Group, LineEnd
 from dotdict import DotDict
+from collections import namedtuple
 import os.path
+
+CommandToApply = namedtuple('CommandToApply', ['name', 'args', 'key'])
 
 class MetaIniParser(object):
     # Define a switch for logging information. This is very useful debugging the parser.
@@ -15,7 +18,8 @@ class MetaIniParser(object):
         self._currentDict = DotDict()
 
         # To avoid cyclic dependencies, we do NOT do this import in the module header
-        from command import command_registry
+        from command import command_registry, CommandType, command_count
+        self._foundCommands = { i:[] for i in range(command_count())}
         self._commands = " ".join(command_registry())
         self._parser = self.construct_bnf(assignment=assignment, commentChar=commentChar)
 
@@ -60,22 +64,26 @@ class MetaIniParser(object):
 
     def setKeyValuePair(self, origString, loc, tokens):
         self.log("Setting KV pair ('{}', '{}') within group '{}'".format(tokens[0].strip(), tokens[1].strip(), self._currentGroup))
-        if len(tokens) > 2:
-            self.log("Command tokens: '{}'".format(tokens[2:]))
+        # store the key value pair for the return dictionary
         self._currentDict[self._currentGroup + tokens[0].strip()] = tokens[1].strip()
-        # Get an intermediate working stage
+        # store the found commands
         for command in tokens[2:]:
-            self._currentDict[self._currentGroup + tokens[0].strip()] = self._currentDict[self._currentGroup + tokens[0].strip()] + " | " + " ".join(command)
+            self.log("  with an applied command: '{}'".format(command))
+            commandtuple = CommandToApply(command[0], command[1:], self._currentGroup + tokens[0].strip())
+            from command import command_registry
+            self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
 
     def setNonKeyValueLine(self, origString, loc, tokens):
         self.log("Setting Non-KV line: {}".format(tokens[0].strip()))
-        if len(tokens) > 1:
-            self.log("Command tokens: '{}'".format(tokens[1:]))
+        # store the given value under a special section
         self._currentDict['__local.conditionals.' + str(self._counter)] = tokens[0].strip()
-        # Get an intermediate working stage
+        # store the found commands
         for command in tokens[1:]:
-            self._currentDict['__local.conditionals.' + str(self._counter)] = self._currentDict['__local.conditionals.' + str(self._counter)] + " | " + " ".join(command)
-        # remove above
+            self.log("  with an applied command: '{}'".format(command))
+            commandtuple = CommandToApply(command[0], command[1:], '__local.conditionals.' + str(self._counter))
+            from command import command_registry
+            self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
+        # increase the counter
         self._counter = self._counter + 1
 
     def processInclude(self, origString, loc, tokens):
@@ -93,13 +101,16 @@ class MetaIniParser(object):
         self._parser.parseString(line)
 
     def result(self):
-        return self._currentDict
+        return (self._currentDict, self._foundCommands)
 
 # This is backwards compatibility, we could as  well skip it.
-def parse_ini_file(filename, assignment="=", commentChar="#"):
+def parse_ini_file(filename, assignment="=", commentChar="#", returnCommands=False):
     """ Take an inifile and parse it into a DotDict """
     parser = MetaIniParser(assignment=assignment, commentChar=commentChar, path=os.path.dirname(filename))
     file = open(filename, "r")
     for line in file:
         parser.apply(line)
-    return parser.result()
+    if returnCommands:
+        return parser.result()
+    else:
+        return parser.result()[0]

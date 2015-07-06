@@ -17,12 +17,12 @@ def test_parse2():
     # A file that contains non-key-value data
     parsed = parse_ini_file("./tests/parse2.ini")['__local.conditionals']
     assert(len(parsed) == 2)
-    assert(parsed['0'] == '{x} == {y} | toupper')
-    assert(parsed['1'] == '{x} == {y} | toupper')
+    assert(parsed['0'] == '{x} == {y}')
+    assert(parsed['1'] == '{x} == {y}')
 
 def test_parse3():
     # Testing all sorts of escapes
     parsed = parse_ini_file("./tests/parse3.ini")
-    assert(count_unescaped(parsed['a'], '|') == 1)
+    assert(count_unescaped(parsed['a'], '|') == 0)
     assert(count_unescaped(parsed['c'], ',') == 3)
     assert(count_unescaped(parsed['d'], '"') == 2)
