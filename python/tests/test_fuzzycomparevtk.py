@@ -1,7 +1,7 @@
 """ A test for the vtu fuzzy compare"""
 from __future__ import absolute_import
 
-from ..fuzzy_compare_vtk import compare_vtk
+from dune_testtools.fuzzy_compare_vtk import compare_vtk
 
 def test_0(dir):
     assert(compare_vtk(dir + "vtu1.vtu", dir + "vtu2.vtu") == 0)

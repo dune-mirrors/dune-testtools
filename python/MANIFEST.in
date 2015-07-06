@@ -1,1 +1,2 @@
-recursive-include dune_testtools *.py *.ini *.vtu
+recursive-include dune_testtools *.py
+
