@@ -17,6 +17,8 @@ Semicolons in the data need to be replaced by a different character, because
 CMake does use semicolons as list separators. The replacement is passed to CMake
 to undo the replacement.
 """
+from __future__ import absolute_import
+from __future__ import print_function
 
 def printForCMake(d):
     # Do all the error checking in the beginning and forget about it later
@@ -26,7 +28,7 @@ def printForCMake(d):
         try:
             str(x)
         except ValueError:
-            print "All data elements must be convertible to a string"
+            print("All data elements must be convertible to a string")
     def check_dict(a):
         for val in a:
             if isinstance(val, dict):

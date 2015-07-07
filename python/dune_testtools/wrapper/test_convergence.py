@@ -1,9 +1,11 @@
-from parseIni import parse_ini_file
-from metaini import expand_meta_ini, write_configuration_to_ini
-from convergencetest_metaini import extract_convergence_test_info
+from __future__ import absolute_import
+from ..parser import parse_ini_file
+from ..metaini import expand_meta_ini, write_configuration_to_ini
+from ..convergencetest_metaini import extract_convergence_test_info
 import os
 import sys
 from math import log
+from six.moves import range
 
 def call(metaini, testId):
     # the id of the test we are checking
@@ -21,10 +23,6 @@ def call(metaini, testId):
     for run in tests[testIdx]:
         run["__name"] = os.path.basename(run["__name"])
 
-    def strip_quotes(dqstring):
-        from ast import literal_eval
-        return literal_eval(literal_eval(dqstring))
-
     # parse the output files
     output = []
     for run in tests[testIdx]:
@@ -39,7 +37,7 @@ def call(metaini, testId):
             return 1
 
         # if it exists parse it
-        outDict = parse_ini_file(ininame, conversionList=(int, float, strip_quotes))
+        outDict = parse_ini_file(ininame)
         outDict["__testKey"] = run[testKey]
         outDict["__expectedRate"] = float(run["__CONVERGENCE_TEST.ExpectedRate"])
         outDict["__absDiff"] = float(run["__CONVERGENCE_TEST.AbsoluteDiff"])
@@ -50,10 +48,10 @@ def call(metaini, testId):
     test_failed = False
     # calculate the rate according to the outputted data
     for runIdx in range(len(tests[testIdx])-1):
-        norm1 = output[runIdx][output[runIdx]["__normType"]]
-        norm2 = output[runIdx+1][output[runIdx]["__normType"]]
-        hmax1 = output[runIdx][output[runIdx]["__quantityName"]]
-        hmax2 = output[runIdx+1][output[runIdx]["__quantityName"]]
+        norm1 = float(output[runIdx][output[runIdx]["__normType"]])
+        norm2 = float(output[runIdx+1][output[runIdx]["__normType"]])
+        hmax1 = float(output[runIdx][output[runIdx]["__quantityName"]])
+        hmax2 = float(output[runIdx+1][output[runIdx]["__quantityName"]])
         rate = log(norm2/norm1)/log(hmax2/hmax1)
         # compare the rate to the expected rate
         if abs(rate-output[runIdx]["__expectedRate"]) > output[runIdx]["__absDiff"]:
@@ -78,4 +76,3 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     sys.exit(call(args["ini"], args["test"]))
-    

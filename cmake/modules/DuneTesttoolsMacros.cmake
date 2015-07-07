@@ -93,8 +93,20 @@
 # will be a list of all created targets.
 
 find_package(PythonInterp)
+
+# Check the found python version
 if(PYTHON_VERSION_STRING VERSION_LESS 2.7)
   message(FATAL_ERROR "dune-testtools requires at least python 2.7")
+endif()
+
+# Check for the existence of the python-pyparsing package
+if(NOT CMAKE_CROSSCOMPILING)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pyparsing" RESULT_VARIABLE PYPARSING_RETURN)
+  if(NOT PYPARSING_RETURN STREQUAL "0")
+    message(FATAL_ERROR "dune-testtools requires the package python-pyparsing to be present on the system")
+  endif()
+else()
+  message(WARNING "Cross-compilation warning: Assuming existence of python-pyparsing on the target system!")
 endif()
 
 include(ParsePythonData)
@@ -112,7 +124,7 @@ function(add_static_variants)
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/static_metaini.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.static_metaini --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
@@ -163,11 +175,11 @@ function(add_system_test_per_target)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
-    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/metaini.py --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
+  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.metaini --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")
@@ -206,9 +218,12 @@ function(add_system_test_per_target)
       # get the extension of the ini file (can be user defined)
       get_filename_component(iniext ${inifile} EXT)
 
+      # if the script contains the py extension remove it because we execute it as a module
+      get_filename_component(module ${TARGVAR_SCRIPT} NAME_WE)
+
       if(${DOSOMETHING})
         add_test(NAME ${target}_${ininame}
-                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} ${TARGVAR_SCRIPT}
+                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
@@ -238,7 +253,7 @@ function(add_dune_system_test)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT SYSTEMTEST_SCRIPT)
-    set(SYSTEMTEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(SYSTEMTEST_SCRIPT call_executable)
   endif()
 
   # The above macros have been written in a way that allows us to use them
@@ -274,11 +289,11 @@ function(add_convergence_test_per_target)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
-    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${DUNE_TESTTOOLS_PATH}/python/convergencetest_metaini.py 
+  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.convergencetest_metaini
                     --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                     OUTPUT_VARIABLE output)
 
@@ -372,7 +387,7 @@ function(add_dune_convergence_test)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT CONVERGENCETEST_SCRIPT)
-    set(CONVERGENCETEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/wrapper/call_executable.py)
+    set(CONVERGENCETEST_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
 
   # throw an error if we neither SOURCE nor TARGET given.

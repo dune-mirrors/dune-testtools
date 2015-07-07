@@ -9,6 +9,7 @@ TODO:
 - A backslash cannot be escaped at the moment: I am not willing to spend
   another afternoon in escape hell.
 """
+from __future__ import absolute_import
 
 import re
 

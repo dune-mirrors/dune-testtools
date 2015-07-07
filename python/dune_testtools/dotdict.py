@@ -2,30 +2,29 @@
 
 d["a"]["b"] ==  d["a.b"]
 """
-
-from escapes import exists_unescaped, escaped_split
+from __future__ import absolute_import
 
 class DotDict(dict):
     def __init__(self, from_str=None, *args, **kwargs):
          if from_str:
              import ast
-             for k, v in ast.literal_eval(from_str).items():
+             for k, v in list(ast.literal_eval(from_str).items()):
                  self.__setitem__(k, v)
          else:
              dict.__init__(self, *args, **kwargs)
 
     def __getitem__(self, key):
         key = str(key)
-        if exists_unescaped(key, "."):
-            group, key = escaped_split(key, ".", maxsplit=1)
+        if "." in key:
+            group, key = key.split(".", 1)
             return dict.__getitem__(self, group)[key]
         else:
             return dict.__getitem__(self, key)
 
     def __setitem__(self, key, value):
         key = str(key)
-        if exists_unescaped(key, "."):
-            group, key = escaped_split(key, ".", maxsplit=1)
+        if "." in key:
+            group, key = key.split(".", 1)
             if not group in self:
                 dict.__setitem__(self, group, DotDict())
             dict.__getitem__(self, group).__setitem__(key, value)
@@ -34,8 +33,8 @@ class DotDict(dict):
 
     def __contains__(self, key):
         key = str(key)
-        if exists_unescaped(key, "."):
-            group, key = escaped_split(key, ".", maxsplit=1)
+        if "." in key:
+            group, key = key.split(".", 1)
             if not group in self:
                 return False
             return dict.__getitem__(self, group).__contains__(key)
@@ -44,8 +43,8 @@ class DotDict(dict):
 
     def __delitem__(self, key):
         key = str(key)
-        if exists_unescaped(key, "."):
-            group, key = escaped_split(key, ".", maxsplit=1)
+        if "." in key:
+            group, key = key.split(".", 1)
             dict.__getitem__(self, group).__delitem__(key)
             if len(dict.__getitem__(self, group)) is 0:
                 dict.__delitem__(self, group)
@@ -72,7 +71,7 @@ class DotDict(dict):
 
     def __str__(self):
         s = ""
-        for k, v in self.items():
+        for k, v in list(self.items()):
             s = s + "'" + str(k) + "': '" + str(v) + "', "
         return "{" + s[:-2] + "}"
 

@@ -4,6 +4,7 @@ The argument parser defines the interface between the cmake macros of
 dune-testtools and python test wrappers. All parameters listed here
 will be set by cmake correctly.
 """
+from __future__ import absolute_import
 
 import argparse
 

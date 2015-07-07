@@ -1,14 +1,16 @@
-from metaini import expand_meta_ini, write_configuration_to_ini
-from parseini import *
-from writeini import write_dict_to_ini
+from __future__ import absolute_import
+from .metaini import expand_meta_ini, write_configuration_to_ini
+from .parser import *
+from .writeini import write_dict_to_ini
 
-from command import meta_ini_command, CommandType
-from escapes import *
-from static_metaini import extract_static_info
+from .command import meta_ini_command, CommandType
+from .escapes import *
+from .static_metaini import extract_static_info
 
-from cmakeoutput import printForCMake
+from .cmakeoutput import printForCMake
 import argparse
 import sys
+from six.moves import range
 
 def extract_convergence_test_info(metaini):
     # get the key that will define the convergence test
@@ -30,7 +32,7 @@ def extract_convergence_test_info(metaini):
     dependentKeys = [testKey, "__name"]
 
     # also get keys that will be made unique
-    for key, value in parse.items():
+    for key, value in list(parse.items()):
         if ("| unique" in str(value)) or ("| output_name" in str(value)):
             dependentKeys.append(key)
 
@@ -52,7 +54,7 @@ def extract_convergence_test_info(metaini):
     # check if other keys depend on the test key
     def get_dependent_keys(parse, dependentKeys):
         needs_resolution = False
-        for key, value in parse.items():
+        for key, value in list(parse.items()):
            for dependentKey in dependentKeys:
                 if exists_delimited(str(value), dependentKey) and key not in dependentKeys:
                     dependentKeys.append(key)
@@ -70,7 +72,7 @@ def extract_convergence_test_info(metaini):
         isEqual = True
         if type(keys) is not list:
             keys = [keys]
-        for key, value in d1.items():
+        for key, value in list(d1.items()):
             if key in d2:
                 if key not in keys and not d2[key]==value:
                     isEqual = False

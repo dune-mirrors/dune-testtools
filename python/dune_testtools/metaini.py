@@ -47,68 +47,41 @@ The example produces a total of 6 ini files.
 Known issues:
 - the code could use a lot more error checking
 """
+from __future__ import absolute_import
 
-from escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from parseini import parse_ini_file
-from writeini import write_dict_to_ini
-from dotdict import DotDict
+from .escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
+from .parser import parse_ini_file, CommandToApply
+from .writeini import write_dict_to_ini
+from .dotdict import DotDict
 from copy import deepcopy
-from command import meta_ini_command, CommandType, apply_generic_command
-import uniquenames
+from .command import meta_ini_command, CommandType, apply_commands, command_count
+from .uniquenames import *
+from six.moves import range
 
 def uniquekeys():
     """ define those keys which are special and should always be made unique """
     return ["__name", "__exec_suffix"]
 
-def expand_key(c, keys, val, othercommands):
+def expand_key(c, keys):
     # first split all given value lists:
     splitted = []
-    for v in val:
-        splitted.append(escaped_split(v, ","))
+    for k in keys:
+        splitted.append(escaped_split(c[k], ","))
 
-    for conf_to_expand in c:
-        new_ones = [deepcopy(conf_to_expand) for i in range(len(splitted[0]))]
-        # now replace all keys correctly:
-        for i, k in enumerate(keys):
-            for j, config in enumerate(new_ones):
-                config[k] = splitted[i][j] + othercommands[i]
-        for conf in new_ones:
-            yield conf
+    new_ones = [deepcopy(c) for i in range(len(splitted[0]))]
+    # now replace all keys correctly:
+    for i, k in enumerate(keys):
+        for j, config in enumerate(new_ones):
+            config[k] = splitted[i][j]
+    for conf in new_ones:
+        yield conf
 
-@meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION, returnValue=False)
-def _expand_command(key=None, value=None, configs=None, args=None, othercommands=""):
-    # first check whether this is all product.
-    if len(args) == 0:
-        configs[:] = [c for c in expand_key(configs, [key], [value], [othercommands])]
-    else:
-        # collect a list of all keys that use the same identifier
-        keys_to_split = []
-        vals_to_split = []
-        command_list = []
-        # configs[0] is the parsed dict
-        for key, value in configs[0].items():
-            # search for the (first) expand command
-            parts = escaped_split(value, delimiter="|")
-            partiterator = iter(parts); next(partiterator)
-            command = []
-            for cmd in partiterator:
-                cmdargs = escaped_split(cmd)
-                if cmdargs[0] == "expand":
-                    command = cmdargs
-                    break
-            # if we have a simple expand command skip this key
-            if len(command) <= 1:
-                continue
-            # if the expand argument matches, add the key for expansion
-            if command[1] == args[0]:
-                keys_to_split.append(key)
-                vals_to_split.append(parts[0])
-                command_list.append(othercommands)
-
-        # Update the list of configurations by expanding one type of assignment
-        if len(keys_to_split) > 0:
-            configs[:] = [c for c in expand_key(configs, keys_to_split, vals_to_split, command_list)]
-    return None
+@meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION, returnConfigs=True)
+def _expand_command(key=None, configs=None):
+    retconfigs = []
+    for conf in configs:
+        retconfigs = retconfigs + list(expand_key(conf, key))
+    return retconfigs
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=None, blackFilter=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -140,27 +113,34 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     """
 
     # parse the ini file
-    parse = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, asStrings=True)
-
-    # HOOK: POST_PARSE
-    for k, v in parse.items():
-        apply_generic_command(config=parse, key=k, ctype=CommandType.POST_PARSE)
+    parse, cmds = parse_ini_file(filename, assignment=assignment, commentChar=commentChar, returnCommands=True)
 
     # initialize the list of configurations with the parsed configuration
     configurations = [parse]
 
     # HOOK: PRE_EXPANSION
-    for k, v in configurations[0].items():
-        apply_generic_command(config=configurations[0], key=k, ctype=CommandType.PRE_EXPANSION)
+    apply_commands(configurations, cmds[CommandType.PRE_EXPANSION])
 
-    # HOOK: AT_EXPANSION
-    for k, v in parse.items():
-        apply_generic_command(config=parse, key=k, configs=configurations, ctype=CommandType.AT_EXPANSION)
+    # Preprocessing expansion: Sort and group all expand commands by their argument:
+    expanddict = {}
+    expandlist = []
+    for expcmd in cmds[CommandType.AT_EXPANSION]:
+        if len(expcmd.args) == 0:
+            expandlist.append(CommandToApply("expand", [], [expcmd.key]))
+        else:
+            if expcmd.args[0] in expanddict:
+                expanddict[expcmd.args[0]].append(expcmd.key)
+            else:
+                expanddict[expcmd.args[0]] = [expcmd.key]
+    for ident, keylist in expanddict.items():
+        expandlist.append(CommandToApply("expand", [], keylist))
+    cmds[CommandType.AT_EXPANSION] = expandlist
+
+    # Now apply expansion through the machinery
+    apply_commands(configurations, cmds[CommandType.AT_EXPANSION])
 
     # HOOK: POST_EXPANSION
-    for c in configurations:
-        for k, v in c.items():
-            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_EXPANSION)
+    apply_commands(configurations, cmds[CommandType.POST_EXPANSION])
 
     # define functions needed for resolving key-dependent values
     def needs_resolution(d):
@@ -171,10 +151,9 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
         return False
 
     def check_for_unique(d, k):
-        if exists_unescaped(d[k], "|"):
-            cmds = escaped_split(d[k], "|")
-            if ("unique" in cmds[1:]) or (k in uniqueKeys()):
-                raise ValueError("You cannot have keys depend on keys which are marked unique. This is a chicken-egg situation!")
+        for cta in cmds[CommandType.POST_FILTERING]:
+            if (cta.key == k and cta.name == "unique") or (k in uniquekeys()):
+                 raise ValueError("You cannot have keys depend on keys which are marked unique. This is a chicken-egg situation!")
         return d[k]
 
     def resolve_key_dependencies(d):
@@ -185,28 +164,25 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
                 d[key] = replace_delimited(value, d, access_func=check_for_unique)
                 value = d[key]
 
+    # HOOK: PRE_RESOLUTION
+    apply_commands(configurations, cmds[CommandType.PRE_RESOLUTION])
+
     # resolve all key-dependent names present in the configurations
     for c in configurations:
-
-        # HOOK: PRE_RESOLUTION
-        for k, v in c.items():
-            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_RESOLUTION)
-
         # values might depend on keys, whose value also depend on other keys.
         # In a worst case scenario concerning the order of resolution,
         # a call to resolve_key_dependencies only resolves one such layer.
         # That is why we need to do this until all dependencies are resolved.
-        while needs_resolution(c) is True:
+        while needs_resolution(c):
             resolve_key_dependencies(c)
 
-        # HOOK: POST_RESOLUTION
-        for k, v in c.items():
-            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_RESOLUTION)
+    # HOOK: POST_RESOLUTION
+    apply_commands(configurations, cmds[CommandType.POST_RESOLUTION])
 
-    for c in configurations:
-        for k, v in c.items():
-            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.PRE_FILTERING)
+    # HOOK: PRE_FILTERING
+    apply_commands(configurations, cmds[CommandType.PRE_FILTERING])
 
+    # Apply filtering
     if blackFilter:
         # check whether a single filter has been given and make a tuple if so
         if not hasattr(blackFilter, '__iter__'):
@@ -230,18 +206,18 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
 
     # Implement the naming scheme through the special key __name
-    if addNameKey is True:
+    if addNameKey:
+        # circumvent the fact, that commands on non-existent keys are ignored
         if "__name" not in configurations[0]:
-            configurations[0]["__name"] = ""
-        configurations[0]["__name"] = configurations[0]["__name"] + " | unique"
+            configurations[0]["__name"] = ''
+        cmds[CommandType.POST_FILTERING].append(CommandToApply(name="unique", args=[], key="__name"))
     else:
         for c in configurations:
             if "__name" in c:
                 del c["__name"]
 
-    for c in configurations:
-        for k, v in c.items():
-            apply_generic_command(config=c, key=k, configs=configurations, ctype=CommandType.POST_FILTERING)
+    # HOOK: POST_FILTERING
+    apply_commands(configurations, cmds[CommandType.POST_FILTERING])
 
     return configurations
 
@@ -293,7 +269,6 @@ def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
 
     write_dict_to_ini(c, fn + "." + extension)
 
-
 # if this module is run as a script, expand a given meta ini file
 if __name__ == "__main__":
     import argparse
@@ -311,7 +286,7 @@ if __name__ == "__main__":
     metaini["names"] = []  # TODO this should  have underscores!
 
     # extract the static information from the meta ini file
-    from static_metaini import extract_static_info
+    from .static_metaini import extract_static_info
     static_info = extract_static_info(args["ini"])
 
     # write the configurations to the file specified in the name key.
@@ -319,5 +294,5 @@ if __name__ == "__main__":
         write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
-        from cmakeoutput import printForCMake
+        from .cmakeoutput import printForCMake
         printForCMake(metaini)
