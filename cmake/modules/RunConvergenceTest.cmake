@@ -8,9 +8,9 @@ string(REPLACE "+" ";" inis ${CONVERGENCE_TEST_INIS})
 
 foreach(ini ${inis})
   # Execute the test-executable
-  set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}:$ENV{PYTHONPATH}")
+  set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}/python:$ENV{PYTHONPATH}")
   get_filename_component(module ${CONVERGENCE_TEST_SCRIPT} NAME_WE)
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -m python.wrapper.${module} --exec ${CONVERGENCE_TEST_TARGET} --ini ${ini}
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module} --exec ${CONVERGENCE_TEST_TARGET} --ini ${ini}
                   RESULT_VARIABLE result ERROR_VARIABLE err_output OUTPUT_VARIABLE output)
 
   message(STATUS "${err_output}")
@@ -21,8 +21,8 @@ foreach(ini ${inis})
 endforeach()
 
 # run the evaluation script
-set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}:$ENV{PYTHONPATH}")
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m python.wrapper.test_convergence --ini ${CONVERGENCE_TEST_META_INI} --test ${CONVERGENCE_TEST_ID}
+set(ENV{PYTHONPATH} "${DUNE_TESTTOOLS_PATH}/python:$ENV{PYTHONPATH}")
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.test_convergence --ini ${CONVERGENCE_TEST_META_INI} --test ${CONVERGENCE_TEST_ID}
                   RESULT_VARIABLE result ERROR_VARIABLE output OUTPUT_VARIABLE output)
 
 # Check its return status

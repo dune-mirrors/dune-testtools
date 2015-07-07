@@ -1,6 +1,6 @@
 
 from __future__ import absolute_import
-from ..metaini import expand_meta_ini
+from dune_testtools.metaini import expand_meta_ini
 
 def test_metaini(dir):
     c = expand_meta_ini(dir + "command.ini")

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from ..parser import parse_ini_file
-from ..escapes import count_unescaped
+from dune_testtools.parser import parse_ini_file
+from dune_testtools.escapes import count_unescaped
 
 def test_parse1(dir):
     # A 'normal' ini file that uses all subgrouping mechanisms

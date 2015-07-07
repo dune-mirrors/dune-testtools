@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from ..metaini import *
+from dune_testtools.metaini import *
 
 def test_metaini1(dir):
     configs = expand_meta_ini(dir + "metaini1.mini")
