@@ -7,6 +7,7 @@ from .uniquenames import *
 import sys
 import argparse
 
+
 def extract_static_info(metaini):
     static_section = expand_meta_ini(metaini,  whiteFilter=("__STATIC", "__exec_suffix"), addNameKey=False)
 
@@ -48,6 +49,7 @@ def extract_static_info(metaini):
             static[conf["__exec_suffix"]] = conf["__STATIC"]
 
     return static
+
 
 if __name__ == "__main__":
     # read command line options

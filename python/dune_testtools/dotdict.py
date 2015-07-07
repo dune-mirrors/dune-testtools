@@ -4,14 +4,15 @@ d["a"]["b"] ==  d["a.b"]
 """
 from __future__ import absolute_import
 
+
 class DotDict(dict):
     def __init__(self, from_str=None, *args, **kwargs):
-         if from_str:
-             import ast
-             for k, v in list(ast.literal_eval(from_str).items()):
-                 self.__setitem__(k, v)
-         else:
-             dict.__init__(self, *args, **kwargs)
+        if from_str:
+            import ast
+            for k, v in list(ast.literal_eval(from_str).items()):
+                self.__setitem__(k, v)
+        else:
+            dict.__init__(self, *args, **kwargs)
 
     def __getitem__(self, key):
         key = str(key)
@@ -25,7 +26,7 @@ class DotDict(dict):
         key = str(key)
         if "." in key:
             group, key = key.split(".", 1)
-            if not group in self:
+            if group not in self:
                 dict.__setitem__(self, group, DotDict())
             dict.__getitem__(self, group).__setitem__(key, value)
         else:
@@ -35,7 +36,7 @@ class DotDict(dict):
         key = str(key)
         if "." in key:
             group, key = key.split(".", 1)
-            if not group in self:
+            if group not in self:
                 return False
             return dict.__getitem__(self, group).__contains__(key)
         else:
@@ -77,7 +78,6 @@ class DotDict(dict):
 
     def filter(self, filterList):
         d = DotDict()
-       # for k in sorted(self.keys()):
         for k in self:
             if True in [k.startswith(f) for f in filterList]:
                 d[k] = self[k]

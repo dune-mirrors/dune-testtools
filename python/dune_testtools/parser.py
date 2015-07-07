@@ -9,6 +9,7 @@ from .dotdict import DotDict
 
 CommandToApply = namedtuple('CommandToApply', ['name', 'args', 'key'])
 
+
 class MetaIniParser(object):
     # Define a switch for logging information. This is very useful debugging the parser.
     _logging = False
@@ -21,7 +22,7 @@ class MetaIniParser(object):
 
         # To avoid cyclic dependencies, we do NOT do this import in the module header
         from .command import command_registry, CommandType, command_count
-        self._foundCommands = { i:[] for i in range(command_count())}
+        self._foundCommands = {i: [] for i in range(command_count())}
         self._commands = " ".join(command_registry())
         self._parser = self.construct_bnf(assignment=assignment, commentChar=commentChar)
 
@@ -104,6 +105,7 @@ class MetaIniParser(object):
 
     def result(self):
         return (self._currentDict, self._foundCommands)
+
 
 # This is backwards compatibility, we could as  well skip it.
 def parse_ini_file(filename, assignment="=", commentChar="#", returnCommands=False):

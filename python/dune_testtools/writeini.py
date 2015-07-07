@@ -1,5 +1,6 @@
 """ A module for writing ini files to disc """
 
+
 def write_dict_to_ini(d, filename, assignment="="):
     """ Write a (nested) dictionary to a file following the ini file syntax:
 

@@ -2,20 +2,19 @@ from __future__ import absolute_import
 from .metaini import expand_meta_ini, write_configuration_to_ini
 from .parser import *
 from .writeini import write_dict_to_ini
-
 from .command import meta_ini_command, CommandType
 from .escapes import *
 from .static_metaini import extract_static_info
-
 from .cmakeoutput import printForCMake
 import argparse
 import sys
 from six.moves import range
 
+
 def extract_convergence_test_info(metaini):
     # get the key that will define the convergence test
     testKeyDict = expand_meta_ini(metaini, whiteFilter="__CONVERGENCE_TEST.__test_key", addNameKey=False)
-    
+
     # if no __CONVERGENCE_TEST.TestKey was found exit with parameter error message
     if len(testKeyDict[0]) == 0:
         sys.stderr.write("Parameter Error: No key was marked as test key with the '| convergence_test' command : in meta-inifile: " + str(metaini) + "\n")
@@ -45,7 +44,7 @@ def extract_convergence_test_info(metaini):
                 sys.stderr.write("Nested key dependencies currently not supported for the convergence test key.")
                 sys.exit(1)
             else:
-                if exists_unescaped(value.replace("{" + resultkey + "}",""), "{")  or exists_unescaped(value.replace("{" + resultkey + "}",""), "}"):
+                if exists_unescaped(value.replace("{" + resultkey + "}", ""), "{") or exists_unescaped(value.replace("{" + resultkey + "}", ""), "}"):
                     sys.stderr.write("Multiple key dependencies currently not supported for the convergence test key.")
                     sys.exit(1)
                 if resultkey not in dependentKeys:
@@ -55,14 +54,15 @@ def extract_convergence_test_info(metaini):
     def get_dependent_keys(parse, dependentKeys):
         needs_resolution = False
         for key, value in list(parse.items()):
-           for dependentKey in dependentKeys:
+            for dependentKey in dependentKeys:
                 if exists_delimited(str(value), dependentKey) and key not in dependentKeys:
                     dependentKeys.append(key)
                     needs_resolution = True
         return needs_resolution
 
     # then we resolve all other dependent keys
-    while get_dependent_keys(parse, dependentKeys): pass
+    while get_dependent_keys(parse, dependentKeys):
+        pass
 
     # expand the ini file
     configurations = expand_meta_ini(metaini)
@@ -74,7 +74,7 @@ def extract_convergence_test_info(metaini):
             keys = [keys]
         for key, value in list(d1.items()):
             if key in d2:
-                if key not in keys and not d2[key]==value:
+                if key not in keys and not d2[key] == value:
                     isEqual = False
             else:
                 isEqual = False
@@ -101,6 +101,7 @@ def extract_convergence_test_info(metaini):
     assert(count == len(newconfigurations))
     return newconfigurations
 
+
 if __name__ == "__main__":
     # read command line options
     parser = argparse.ArgumentParser()
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     # extract the convergence tests
     configurations = extract_convergence_test_info(args["ini"])
 
-     # extract the static information from the meta ini file
+    # extract the static information from the meta ini file
     static_info = extract_static_info(args["ini"])
 
     # initialize a data structure to pass the list of generated ini files to cmake

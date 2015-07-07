@@ -48,7 +48,6 @@ Known issues:
 - the code could use a lot more error checking
 """
 from __future__ import absolute_import
-
 from .escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
 from .parser import parse_ini_file, CommandToApply
 from .writeini import write_dict_to_ini
@@ -58,9 +57,11 @@ from .command import meta_ini_command, CommandType, apply_commands, command_coun
 from .uniquenames import *
 from six.moves import range
 
+
 def uniquekeys():
     """ define those keys which are special and should always be made unique """
     return ["__name", "__exec_suffix"]
+
 
 def expand_key(c, keys):
     # first split all given value lists:
@@ -76,12 +77,14 @@ def expand_key(c, keys):
     for conf in new_ones:
         yield conf
 
+
 @meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION, returnConfigs=True)
 def _expand_command(key=None, configs=None):
     retconfigs = []
     for conf in configs:
         retconfigs = retconfigs + list(expand_key(conf, key))
     return retconfigs
+
 
 def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=None, blackFilter=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
@@ -153,7 +156,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     def check_for_unique(d, k):
         for cta in cmds[CommandType.POST_FILTERING]:
             if (cta.key == k and cta.name == "unique") or (k in uniquekeys()):
-                 raise ValueError("You cannot have keys depend on keys which are marked unique. This is a chicken-egg situation!")
+                raise ValueError("You cannot have keys depend on keys which are marked unique. This is a chicken-egg situation!")
         return d[k]
 
     def resolve_key_dependencies(d):
@@ -193,7 +196,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     # always ignore the section called "__local". Its keys by definition do not influence the number of configuration.
     blackFilter = [f for f in blackFilter] + ["__local"]
     # remove all keys that match the given filtering
-    configurations = [c.filter([k for k in c if not True in [k.startswith(f) for f in blackFilter]]) for c in configurations]
+    configurations = [c.filter([k for k in c if True not in [k.startswith(f) for f in blackFilter]]) for c in configurations]
 
     if whiteFilter:
         # check whether a single filter has been given and make a tuple if so
@@ -220,6 +223,7 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     apply_commands(configurations, cmds[CommandType.POST_FILTERING])
 
     return configurations
+
 
 def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
     # get the unique ini name
@@ -268,6 +272,7 @@ def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
         del c["__STATIC"]
 
     write_dict_to_ini(c, fn + "." + extension)
+
 
 # if this module is run as a script, expand a given meta ini file
 if __name__ == "__main__":

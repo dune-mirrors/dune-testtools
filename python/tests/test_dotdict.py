@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from dune_testtools.dotdict import DotDict
 
+
 def test_dotdict():
     # define some arbitrary dotdict
     d = DotDict()
@@ -25,7 +26,7 @@ def test_dotdict():
 
     # __contains__
     assert("b.c" in d)
-    assert(not "d.e.f" in d)
+    assert("d.e.f" not in d)
 
     d_check = {'1': 5, 'b.d': 'x', 'b.c': 'bla', 'a': 'bla'}
     unmatched_item = set(d.items()) ^ set(d_check.items())

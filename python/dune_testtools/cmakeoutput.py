@@ -20,15 +20,18 @@ to undo the replacement.
 from __future__ import absolute_import
 from __future__ import print_function
 
+
 def printForCMake(d):
     # Do all the error checking in the beginning and forget about it later
     if not isinstance(d, dict):
         raise ValueError("Expected a dictionary for the Python-CMake interface")
+
     def check_str(x):
         try:
             str(x)
         except ValueError:
             print("All data elements must be convertible to a string")
+
     def check_dict(a):
         for val in a:
             if isinstance(val, dict):
@@ -48,6 +51,7 @@ def printForCMake(d):
     delimiter = ";"
     # find a character that is ASCII, has no special meaning in CMake and does not appear in the data
     specialChars = ["&", "#", "!", "?", "/"]
+
     def does_not_appear(d, c):
         for val in d:
             if isinstance(val, list):

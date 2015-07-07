@@ -7,6 +7,7 @@ import sys
 from math import log
 from six.moves import range
 
+
 def call(metaini, testId):
     # the id of the test we are checking
     testIdx = int(testId)
@@ -57,8 +58,8 @@ def call(metaini, testId):
         if abs(rate-output[runIdx]["__expectedRate"]) > output[runIdx]["__absDiff"]:
             test_failed = True
             sys.stderr.write("Test failed because the absolute difference between the \
-                calculated rate: " + str(rate) + " and the expected rate: " + \
-                str(output[runIdx]["__expectedRate"]) + " was too large.\n")
+                             calculated rate: " + str(rate) + " and the expected rate: " +
+                             str(output[runIdx]["__expectedRate"]) + " was too large.\n")
 
     # return appropriate returncode
     if test_failed:

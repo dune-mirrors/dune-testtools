@@ -6,6 +6,7 @@ from ..parser import parse_ini_file
 import subprocess
 import sys
 
+
 def call(executable, inifile=None):
     # If we have an inifile, parse it and look for special keys that modify the execution
     command = ["./" + executable]
@@ -17,6 +18,7 @@ def call(executable, inifile=None):
         command.append(iniargument)
 
     return subprocess.call(command)
+
 
 # This is also used as the standard wrapper by cmake
 if __name__ == "__main__":

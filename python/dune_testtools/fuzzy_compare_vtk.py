@@ -6,13 +6,13 @@ using absolute and/or relative difference comparison.
 
 """
 from __future__ import absolute_import
-
 import argparse
 import xml.etree.ElementTree as ET
 from operator import attrgetter, itemgetter
 import sys
 from six.moves import range
 from six.moves import zip
+
 
 # fuzzy compare VTK tree from VTK strings
 def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
@@ -50,28 +50,35 @@ def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
     else:
         return 1
 
+
 # fuzzy compare of VTK nodes
 def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
-    
+
     for node1child, node2child in zip(node1.iter(), node2.iter()):
         if node1.tag != node2.tag:
-            if verbose: sys.stderr.write('The name of the node differs in ' + node1.tag + ' and ' + node2.tag)
+            if verbose:
+                sys.stderr.write('The name of the node differs in ' + node1.tag + ' and ' + node2.tag)
             return False
         if list(node1.attrib.items()) != list(node2.attrib.items()):
-            if verbose: sys.stderr.write('Attributes differ in node ' + node1.tag)
+            if verbose:
+                sys.stderr.write('Attributes differ in node ' + node1.tag)
             return False
         if len(list(node1.iter())) != len(list(node2.iter())):
-            if verbose: sys.stderr.write('Number of children differs in node ' + node1.tag)
+            if verbose:
+                sys.stderr.write('Number of children differs in node ' + node1.tag)
             return False
         if node1child.text or node2child.text:
             if not is_fuzzy_equal_text(node1child.text, node2child.text, absolute, relative, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
-                    if verbose: sys.stderr.write('Data differs in parameter ' + node1child.attrib["Name"])
+                    if verbose:
+                        sys.stderr.write('Data differs in parameter ' + node1child.attrib["Name"])
                     return False
                 else:
-                    if verbose: sys.stderr.write('Comparing different parameters' + node1child.attrib["Name"] + ' and ' + node2child.attrib["Name"])
+                    if verbose:
+                        sys.stderr.write('Comparing different parameters' + node1child.attrib["Name"] + ' and ' + node2child.attrib["Name"])
                     return False
     return True
+
 
 # fuzzy compare of text (in the xml sense) consisting of whitespace separated numbers
 def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
@@ -87,34 +94,39 @@ def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
         if not number2 == 0.0:
             # check for the relative difference
             if number2 == 0.0 or abs(abs(number1 / number2) - 1.0) > relative:
-                if verbose: sys.stderr.write('Relative difference is too large between' + str(number1) + ' and ' + str(number2))
+                if verbose:
+                    sys.stderr.write('Relative difference is too large between' + str(number1) + ' and ' + str(number2))
                 return False
         else:
             # check for the absolute difference
             if abs(number1 - number2) > absolute:
-                if verbose: sys.stderr.write('Absolute difference is too large between' + str(number1) + ' and ' + str(number2))
+                if verbose:
+                    sys.stderr.write('Absolute difference is too large between' + str(number1) + ' and ' + str(number2))
                 return False
     return True
+
 
 def sort_by_name(elem):
     name = elem.get('Name')
     if name:
-        try: 
+        try:
             return str(name)
         except ValueError:
             return ''
     return ''
 
+
 # sorts attributes of an item and returns a sorted item
 def sort_attributes(item, sorteditem):
     attrkeys = sorted(item.keys())
     for key in attrkeys:
-        sorteditem.set(key, item.get(key)) 
+        sorteditem.set(key, item.get(key))
+
 
 def sort_elements(items, newroot):
     items = sorted(items, key=sort_by_name)
     items = sorted(items, key=attrgetter('tag'))
- 
+
     # Once sorted, we sort each of the items
     for item in items:
         # Create a new item to represent the sorted version
@@ -122,15 +134,16 @@ def sort_elements(items, newroot):
         newitem = ET.Element(item.tag)
         if item.text and item.text.isspace() == False:
             newitem.text = item.text
- 
+
         # Copy the attributes (sorted by key) to the new item
         sort_attributes(item, newitem)
- 
+
         # Copy the children of item (sorted) to the new item
         sort_elements(list(item), newitem)
- 
+
         # Append this sorted item to the sorted root
-        newroot.append(newitem) 
+        newroot.append(newitem)
+
 
 # has to sort all Cell and Point Data after the attribute "Name"!
 def sort_vtk(root):
@@ -143,10 +156,12 @@ def sort_vtk(root):
     sort_attributes(root, newroot)
     sort_elements(list(root), newroot)
     # return the sorted element tree
-    return newroot 
+    return newroot
+
 
 def is_different_grid_order(root1, root2):
     return is_fuzzy_equal_node(root1.find(".//Points"), root2.find(".//Points"), 1e-2, 1e-9)
+
 
 # sorts the data by point coordinates so that it is independent of index numbering
 def sort_vtk_by_coordinates(root1, root2):
@@ -234,6 +249,7 @@ def sort_vtk_by_coordinates(root1, root2):
                 dataArray.text = dataArrays[dataArray.attrib["Name"]]
 
     return (root1, root2)
+
 
 # main program if called as script return appropriate error codes
 if __name__ == "__main__":

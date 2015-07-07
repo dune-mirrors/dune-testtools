@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from dune_testtools.parser import parse_ini_file
 from dune_testtools.escapes import count_unescaped
 
+
 def test_parse1(dir):
     # A 'normal' ini file that uses all subgrouping mechanisms
     parsed = parse_ini_file(dir + "parse1.ini")
@@ -14,12 +15,14 @@ def test_parse1(dir):
     assert(parsed['group.subgroup.y'] == 'str')
     assert(parsed['group.subgroup.z'] == '1')
 
+
 def test_parse2(dir):
     # A file that contains non-key-value data
     parsed = parse_ini_file(dir + "parse2.ini")['__local.conditionals']
     assert(len(parsed) == 2)
     assert(parsed['0'] == '{x} == {y}')
     assert(parsed['1'] == '{x} == {y}')
+
 
 def test_parse3(dir):
     # Testing all sorts of escapes

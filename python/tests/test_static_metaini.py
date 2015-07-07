@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 from dune_testtools.static_metaini import *
 
+
 def test_empty_static(dir):
     static = extract_static_info(dir + "metaini1.mini")
     # reading static information from a file without such should result in exactly one configuration.
     assert(len(static['__CONFIGS']) == 1)
+
 
 def test_static1(dir):
     static = extract_static_info(dir + "static1.mini")

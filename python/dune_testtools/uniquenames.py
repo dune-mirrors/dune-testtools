@@ -4,9 +4,9 @@ This is needed to implement the naming of ini files and static configurations al
 a naming scheme might be given, but it may not be unique.
 """
 from __future__ import absolute_import
-
 from .command import meta_ini_command, CommandType
 from .escapes import escaped_split
+
 
 @meta_ini_command(name="unique", ctype=CommandType.POST_FILTERING, returnValue=False)
 def make_key_unique(configs=None, key=None):
