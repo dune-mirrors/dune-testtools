@@ -9,4 +9,4 @@ def _exclude(configs=None, key=None):
 @meta_ini_command(name="label", argc=2, argdefaults=[None, "PRIORITY"], returnValue=False)
 def _label(config=None, value=None, args=None):
     if eval(value):
-        config["__STATIC.LABELS." + args[1]] = args[0]
+        config["__LABELS." + args[1]] = args[0]

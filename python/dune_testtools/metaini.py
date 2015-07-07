@@ -284,6 +284,7 @@ if __name__ == "__main__":
     # initialize a data structure to pass the list of generated ini files to cmake
     metaini = {}
     metaini["names"] = []  # TODO this should  have underscores!
+    metaini["labels"] = {}
 
     # extract the static information from the meta ini file
     from .static_metaini import extract_static_info
@@ -291,6 +292,10 @@ if __name__ == "__main__":
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
+        # Discard label groups from the data
+        if "__LABELS" in c:
+            c["__LABELS"] = list(c["__LABELS"].values())
+            metaini["labels"][c["__name"]] = c["__LABELS"]
         write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
