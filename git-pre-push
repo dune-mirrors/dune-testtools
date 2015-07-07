@@ -12,6 +12,10 @@ then
   rm dune_testtools/*.pyc && rm dune_testtools/wrapper/*.pyc && rm tests/*.pyc
   echo "Run testsuite with python executable"
   python -m pytest tests
+  if [ $? -ne 0 ]
+  then
+    exit $?
+  fi
   echo "Run testsuite with python3 executable"
   python3 -m pytest tests
   exit $?
