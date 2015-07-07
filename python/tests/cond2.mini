@@ -1,0 +1,8 @@
+x = 1, 2 | expand
+y = 3, 4 | expand
+
+{x} == 1 | label NIGHTLY
+
+1 | label DEF CUSTOM
+{x} == 1 and {y} == 3 | label BLA CUSTOM
+{x} == 2 | label BLUBB CUSTOM
