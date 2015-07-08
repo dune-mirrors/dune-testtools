@@ -21,8 +21,48 @@ def test_quoting_magic(dir):
     assert(eval_boolean("x == 'x'"))
     assert(eval_boolean("'x' == 'x'"))
     assert(not eval_boolean("ax == x"))
-    assert(len(expand_meta_ini(dir + "cond3.mini", whiteFilter=["a"])) == 1)
-    assert(len(expand_meta_ini(dir + "cond3.mini", whiteFilter=["b"])) == 1)
-    assert(len(expand_meta_ini(dir + "cond3.mini", whiteFilter=["c"])) == 1)
-    assert(len(expand_meta_ini(dir + "cond3.mini", whiteFilter=["d"])) == 1)
-    assert(len(expand_meta_ini(dir + "cond3.mini", whiteFilter=["e"])) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("a = 2, 3 | expand \n {a} == 2 | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("b = 2, 3 | expand \n {b} > 2 | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("c = 2, 3 | expand \n 2 < {c} | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("d = 2, 3 | expand \n \"2 == {d}\" | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("e = 2.55, 12.55 | expand \n {e} < 10 | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("f = bla, blubb | expand \n {f} == bla | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("g = bla, blubb | expand \n {g} == 'bla' | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("h = bla, blubb | expand \n '{h}' == 'bla' | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
+
+    f = open(dir + "tmp.mini", 'w')
+    f.write("i = bla, blubb | expand \n '{i}' == bla | exclude")
+    f.close()
+    assert(len(expand_meta_ini(dir + "tmp.mini")) == 1)
