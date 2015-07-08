@@ -83,7 +83,7 @@ def _expand_command(key=None, configs=None):
         retconfigs = retconfigs + list(expand_key(conf, key))
     return retconfigs
 
-def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=None, blackFilter=None, addNameKey=True):
+def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None, blackFilter=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -95,8 +95,8 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     ------------------
     assignment : string
         The standard assignment operator
-    commentChar: list
-        A list of characters that define comments. Everything on a line
+    commentChar: string
+        A  character that defines comments. Everything on a line
         after such character is ignored during the parsing process.
     whiteFilter : tuple
         Filter the given keys. The elements of the returned set of
