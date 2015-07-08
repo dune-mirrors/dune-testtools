@@ -202,8 +202,8 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
         # remove all keys that do not match the given filtering
         configurations = [c.filter(whiteFilter) for c in configurations]
 
-    # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
-    configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
+    # remove duplicate configurations - we added hashing to the DotDict class just for this purpose.
+    configurations = [c for c in set(configurations)]
 
     # Implement the naming scheme through the special key __name
     if addNameKey:

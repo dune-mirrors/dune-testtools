@@ -5,13 +5,8 @@ d["a"]["b"] ==  d["a.b"]
 from __future__ import absolute_import
 
 class DotDict(dict):
-    def __init__(self, from_str=None, *args, **kwargs):
-         if from_str:
-             import ast
-             for k, v in list(ast.literal_eval(from_str).items()):
-                 self.__setitem__(k, v)
-         else:
-             dict.__init__(self, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
 
     def __getitem__(self, key):
         key = str(key)
@@ -82,6 +77,9 @@ class DotDict(dict):
             if True in [k.startswith(f) for f in filterList]:
                 d[k] = self[k]
         return d
+
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
 
     def get(self, key, default=None):
         try:
