@@ -9,8 +9,6 @@ import os
 
 
 def check_parser(ini):
-    # try parsing the ini file
-    ini = args["inifile"][0]
     try:
         parsed = parse_ini_file(ini)
     except:
