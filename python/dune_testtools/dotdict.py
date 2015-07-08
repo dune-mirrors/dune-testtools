@@ -81,6 +81,9 @@ class DotDict(dict):
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
 
+    def __eq__(self, other):
+        return tuple(sorted(self.items())) == tuple(sorted(other.items()))
+
     def get(self, key, default=None):
         try:
             return self[key]
