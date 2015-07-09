@@ -140,13 +140,9 @@ function(add_static_variants)
     add_executable(${tname} "${STATVAR_SOURCE}")
     list(APPEND targetlist "${tname}")
 
-    # TODO all groups to be recognized in the static section must be implemented here
-    # similar to the compile definitions group.
-
     # treat compile definitions
     foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-      set_property(TARGET ${tname} APPEND PROPERTY
-        COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_${cd}}")
+      target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
     endforeach()
 
     # maybe output debug information
