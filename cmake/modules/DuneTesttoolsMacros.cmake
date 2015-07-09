@@ -228,6 +228,7 @@ function(add_system_test_per_target)
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                 )
+        set_property(TEST ${target}_${ininame} PROPERTY LABELS ${iniinfo_labels_${ininame}})
       endif()
     endforeach()
   endforeach()

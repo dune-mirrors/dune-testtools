@@ -85,8 +85,7 @@ def _expand_command(key=None, configs=None):
         retconfigs = retconfigs + list(expand_key(conf, key))
     return retconfigs
 
-
-def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=None, blackFilter=None, addNameKey=True):
+def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None, blackFilter=None, addNameKey=True):
     """ take a meta ini file and construct the set of ini files it defines
 
     Arguments:
@@ -98,8 +97,8 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
     ------------------
     assignment : string
         The standard assignment operator
-    commentChar: list
-        A list of characters that define comments. Everything on a line
+    commentChar: string
+        A  character that defines comments. Everything on a line
         after such character is ignored during the parsing process.
     whiteFilter : tuple
         Filter the given keys. The elements of the returned set of
@@ -205,8 +204,8 @@ def expand_meta_ini(filename, assignment="=", commentChar=("#",), whiteFilter=No
         # remove all keys that do not match the given filtering
         configurations = [c.filter(whiteFilter) for c in configurations]
 
-    # remove duplicate configurations (by doing weird and evil stuff because dicts are not hashable)
-    configurations = [DotDict(from_str=s) for s in set([str(c) for c in configurations])]
+    # remove duplicate configurations - we added hashing to the DotDict class just for this purpose.
+    configurations = [c for c in set(configurations)]
 
     # Implement the naming scheme through the special key __name
     if addNameKey:
@@ -289,6 +288,7 @@ if __name__ == "__main__":
     # initialize a data structure to pass the list of generated ini files to cmake
     metaini = {}
     metaini["names"] = []  # TODO this should  have underscores!
+    metaini["labels"] = {}
 
     # extract the static information from the meta ini file
     from .static_metaini import extract_static_info
@@ -296,6 +296,10 @@ if __name__ == "__main__":
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
+        # Discard label groups from the data
+        if "__LABELS" in c:
+            c["__LABELS"] = list(c["__LABELS"].values())
+            metaini["labels"][c["__name"]] = c["__LABELS"]
         write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
