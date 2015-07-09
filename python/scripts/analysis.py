@@ -23,7 +23,7 @@ def check_parser(ini):
         for line in file:
             try:
                 parser.apply(line)
-            except :
+            except:
                 print("ERROR Malformed line: '{}'".format(line))
                 # TODO give some info about how its malformed: Needs inspection of the exception.
         sys.exit(1)
@@ -32,12 +32,12 @@ def check_parser(ini):
     print("Parsing the ini file was successful...")
     return parsed
 
-    
+
 def check_misusage(ini):
     # Check some common misusage patterns:
     for k, v in ini.items():
         if v[0] == "=":
-            print("WARNING: '{}={}' parsed as key-value-pair. Use double quotes to enforce a conditional.".format(k,v))
+            print("WARNING: '{}={}' parsed as key-value-pair. Use double quotes to enforce a conditional.".format(k, v))
 
 
 def check_expansion(ini):
@@ -71,9 +71,9 @@ def inspect_interactive(configs):
 
         inputKey = input().lower()
         if inputKey == "n":
-            current = (current + 1)%len(configs)
+            current = (current + 1) % len(configs)
         if inputKey == "p":
-            current = (current - 1)%len(configs)
+            current = (current - 1) % len(configs)
         if inputKey == "f":
             current = 0
 
@@ -84,9 +84,9 @@ def analysis(ini, interactive=False):
     configs = check_expansion(ini)
     print("\nDo you want to interactively inspect the expanded configurations? [y/n]")
     if interactive or input().lower() == "y":
-        inspect_interactive(configs) 
+        inspect_interactive(configs)
 
-    
+
 # define the argument parser for this script
 parser = argparse.ArgumentParser()
 parser.add_argument('inifile', type=str, nargs=1)

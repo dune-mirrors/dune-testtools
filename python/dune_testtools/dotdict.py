@@ -4,6 +4,7 @@ d["a"]["b"] ==  d["a.b"]
 """
 from __future__ import absolute_import
 
+
 class DotDict(dict):
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)

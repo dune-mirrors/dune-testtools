@@ -10,7 +10,7 @@ To implement a custom command you have to do the following:
   * config : The configuration dictionary
   * configs : The list of all configurations
   * args : The list of arguments givne to the command
-  * argdefaults : A list of default arguments to apply, if the arguments are missing in the meta ini file. 
+  * argdefaults : A list of default arguments to apply, if the arguments are missing in the meta ini file.
 - decorate it with @meta_ini_command. meta_ini_command itself takes some arguments:
   * name : How to use this command from a meta ini file (mandatory)
   * ctype : the command type, a.k.a. when to execute the command. defaults to CommandType.POST_RESOLUTION, which is after all curly brackets in the file have been resolved.

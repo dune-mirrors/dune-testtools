@@ -1,5 +1,6 @@
 """ A module for writing ini files to disc """
 
+
 def write_to_stream(d, stream, assignment="="):
     def traverse_dict(stream, d, prefix):
         # first traverse all non-group values (they would otherwise be considered part of a group)
@@ -25,6 +26,7 @@ def write_to_stream(d, stream, assignment="="):
 
     prefix = []
     traverse_dict(stream, d, prefix)
+
 
 def write_dict_to_ini(d, filename, assignment="="):
     """ Write a (nested) dictionary to a file following the ini file syntax:
