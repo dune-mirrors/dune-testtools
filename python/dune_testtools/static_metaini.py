@@ -17,35 +17,23 @@ def extract_static_info(metaini):
     cmd = [CommandToApply(name="unique", args=[], key="__exec_suffix")]
     apply_commands(static_section, cmd)
 
-    # determine a list of subgroups within the static section
-    static_groups = []
-    for conf in static_section:
-        # check for __STATIC section. Who knows who may call this without having the section in the metaini-file
-        if "__static" in conf:
-            for key in dict.__iter__(conf["__static"]):
-                if (isinstance(conf["__static"][key], dict)) and (key not in static_groups):
-                    static_groups.append(key)
-
     # construct a dictionary from the static information. This can be passed to CMake
     static = {}
-
+    # we need a list of extracted compile definitions names
+    static["__COMPILE_DEFINITIONS"] = []
     # The special key __CONFIGS holds a list of configuration names
     static["__CONFIGS"] = []
-    # introduce a special key for all subgroups
-    for group in static_groups:
-        static["__" + group] = []
 
+    # extract the data from the configurations
     for conf in static_section:
         static["__CONFIGS"].append(conf["__exec_suffix"])
 
-        # check for key/value pairs in subgroups and add lists to the dictionary
-        for group in static_groups:
-            for key in conf["__static"][group]:
-                if key not in static["__" + group]:
-                    static["__" + group].append(key)
-
         # copy the entire data
         if "__static" in conf:
+            for key in conf["__static"]:
+                if key not in static["__COMPILE_DEFINITIONS"]:
+                    static["__COMPILE_DEFINITIONS"].append(key)
+
             static[conf["__exec_suffix"]] = conf["__static"]
 
     return static

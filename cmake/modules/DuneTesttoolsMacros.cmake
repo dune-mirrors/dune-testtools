@@ -146,7 +146,7 @@ function(add_static_variants)
     # treat compile definitions
     foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
       set_property(TARGET ${tname} APPEND PROPERTY
-        COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_COMPILE_DEFINITIONS_${cd}}")
+        COMPILE_DEFINITIONS "${cd}=${STATINFO_${conf}_${cd}}")
     endforeach()
 
     # maybe output debug information

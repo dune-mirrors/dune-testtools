@@ -1,4 +1,4 @@
-__exec_suffix = {__static.COMPILE_DEFINITIONS.GRID}
+__exec_suffix = {__static.GRID}
 
 gridtype = structured, structured, unstructured | expand 1
 
@@ -6,6 +6,6 @@ gridtype = structured, structured, unstructured | expand 1
 structured = Solver1a, Solver1b | expand
 unstructured = Solver2
 
-[__static.COMPILE_DEFINITIONS]
+[__static]
 GRID = G1, G2, G3 | expand 1
 SOLVER = {sol.{gridtype}}

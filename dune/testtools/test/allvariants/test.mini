@@ -4,5 +4,5 @@ something = 1, 2 | expand
 
 someother = bla, bli | expand 1
 
-[__static.COMPILE_DEFINITIONS]
+[__static]
 SOMEVAR = 1,2 | expand 1

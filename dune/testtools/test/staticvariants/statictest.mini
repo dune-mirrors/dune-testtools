@@ -1,5 +1,5 @@
 __exec_suffix = 1, 2 | expand 1
 
-[__static.COMPILE_DEFINITIONS]
+[__static]
 GRID = YASP, UG | expand 1
 
