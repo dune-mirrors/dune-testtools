@@ -242,9 +242,9 @@ def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
     # This is done by looking through the list of available static configurations and looking for a match.
     # This procedure is necessary because we cannot reproduce the naming scheme for exec_suffixes in the
     # much larger set of static + dynamic variations.
-    if "__STATIC" in c:
+    if "__static" in c:
         for sc in static_info["__CONFIGS"]:
-            if static_info[sc] == c["__STATIC"]:
+            if static_info[sc] == c["__static"]:
                 metaini[prefix + fn + "." + extension + "_suffix"] = sc
     else:
         metaini[prefix + fn + "." + extension + "_suffix"] = ""
@@ -267,8 +267,8 @@ def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
         del c["__name"]
     if ("__exec_suffix" in c) and (not args["cmake"]):
         del c["__exec_suffix"]
-    if ("__STATIC" in c) and (not args["cmake"]):
-        del c["__STATIC"]
+    if ("__static" in c) and (not args["cmake"]):
+        del c["__static"]
 
     write_dict_to_ini(c, fn + "." + extension)
 

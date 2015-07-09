@@ -9,7 +9,7 @@ import argparse
 
 
 def extract_static_info(metaini):
-    static_section = expand_meta_ini(metaini,  whiteFilter=("__STATIC", "__exec_suffix"), addNameKey=False)
+    static_section = expand_meta_ini(metaini,  whiteFilter=("__static", "__exec_suffix"), addNameKey=False)
 
     # make the found exec suffixes unique
     if "__exec_suffix" not in static_section[0]:
@@ -21,9 +21,9 @@ def extract_static_info(metaini):
     static_groups = []
     for conf in static_section:
         # check for __STATIC section. Who knows who may call this without having the section in the metaini-file
-        if "__STATIC" in conf:
-            for key in dict.__iter__(conf["__STATIC"]):
-                if (isinstance(conf["__STATIC"][key], dict)) and (key not in static_groups):
+        if "__static" in conf:
+            for key in dict.__iter__(conf["__static"]):
+                if (isinstance(conf["__static"][key], dict)) and (key not in static_groups):
                     static_groups.append(key)
 
     # construct a dictionary from the static information. This can be passed to CMake
@@ -40,13 +40,13 @@ def extract_static_info(metaini):
 
         # check for key/value pairs in subgroups and add lists to the dictionary
         for group in static_groups:
-            for key in conf["__STATIC"][group]:
+            for key in conf["__static"][group]:
                 if key not in static["__" + group]:
                     static["__" + group].append(key)
 
         # copy the entire data
-        if "__STATIC" in conf:
-            static[conf["__exec_suffix"]] = conf["__STATIC"]
+        if "__static" in conf:
+            static[conf["__exec_suffix"]] = conf["__static"]
 
     return static
 
