@@ -109,6 +109,14 @@ else()
   message(WARNING "Cross-compilation warning: Assuming existence of python-pyparsing on the target system!")
 endif()
 
+# Generate a string containing "DEBUG" if we want to debug macros
+if(DEBUG_MACRO_TESTS)
+  set(DEBUG_MACRO_TESTS DEBUG)
+else()
+  set(DEBUG_MACRO_TESTS)
+endif()
+include(DuneCMakeAssertion)
+
 include(ParsePythonData)
 
 function(add_static_variants)
@@ -227,7 +235,7 @@ function(add_system_test_per_target)
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                 )
-        set_property(TEST ${target}_${ininame} PROPERTY LABELS ${iniinfo_labels_${ininame}})
+        set_property(TEST ${target}_${ininame} PROPERTY LABELS ${iniinfo_labels_${ininame}} DUNE_SYSTEMTEST)
       endif()
     endforeach()
   endforeach()
