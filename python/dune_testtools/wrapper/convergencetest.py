@@ -1,18 +1,25 @@
 from __future__ import absolute_import
-from ..parser import parse_ini_file
-from ..metaini import expand_meta_ini
+from ..parser import *
+from ..metaini import *
+from ..command import meta_ini_command, CommandType
+from ..command_infrastructure import *
 from ..writeini import write_dict_to_ini
 import os
 import sys
 import math
 import subprocess
 
-@meta_ini_command(name="convergence_test", argc=1, returnValue=False)
-def _get_convergence_test(config=None, key=None, value=None):
+class ConvergenceTestFactory:
+    index = 0
+
+@meta_ini_command(name="convergencetest", argc=1, ctype=CommandType.POST_EXPANSION)
+def _get_convergence_test(config=None, key=None, value=None, args=None, configs=None):
     """This command outputs a set of meta ini files each configuring a convergence test"""
-    if not argc[0]:
+    if not args[0]:
         # No argument given defaults to test key. This is converted to expand making the result and expandable meta ini file
         config[key] = value + "| expand"
+        config["__convergencetest.testid"] = ConvergenceTestFactory.index
+        ConvergenceTestFactory.index = ConvergenceTestFactory.index + 1
         # specify all default keys if not specified already
         if "__convergencetest.absolutedifference" not in config:
             config["__convergencetest.absolutedifference"] = 0.1
@@ -24,16 +31,19 @@ def _get_convergence_test(config=None, key=None, value=None):
             config["__convergencetest.output_extension"] = 'out'
 
     # write as key value pairs in a private section
-    if argc[0] == "rate":
+    if args[0] == "rate":
         config["__convergencetest.expectedrate"] = value
-    elif argc[0] == "diff":
+    elif args[0] == "diff":
         config["__convergencetest.absolutedifference"] = value
-    elif argc[0] == "norm_outputkey":
+    elif args[0] == "norm_outputkey":
         config["__convergencetest.normkey"] = value
-    elif argc[0] == "scale_outputkey":
+    elif args[0] == "scale_outputkey":
         config["__convergencetest.scalekey"] = value
-    elif argc[0] == "output_extension":
+    elif args[0] == "output_extension":
         config["__convergencetest.output_extension"] = value
+
+    # expand the key
+    apply_commands(configs, CommandToApply("expand", None, key))
 
 
 def call(executable, metaini=None):
@@ -73,7 +83,7 @@ def call(executable, metaini=None):
         os.remove("temp.ini")
 
     # calculate the rate according to the outputted data
-    for idx, c in list(enumerate(configurations))[1:]
+    for idx, c in list(enumerate(configurations))[:-1]:
         norm1 = float(output[idx]["__convergencetest.normkey"])
         norm2 = float(output[idx+1]["__convergencetest.normkey"])
         hmax1 = float(output[idx]["__convergencetest.scalekey"])
