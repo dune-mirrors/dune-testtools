@@ -1,79 +1,97 @@
 from __future__ import absolute_import
 from ..parser import parse_ini_file
-from ..metaini import expand_meta_ini, write_configuration_to_ini
-from ..convergencetest_metaini import extract_convergence_test_info
+from ..metaini import expand_meta_ini
+from ..writeini import write_dict_to_ini
 import os
 import sys
-from math import log
-from six.moves import range
+import math
+import subprocess
+
+@meta_ini_command(name="convergence_test", argc=1, returnValue=False)
+def _get_convergence_test(config=None, key=None, value=None):
+    """This command outputs a set of meta ini files each configuring a convergence test"""
+    if not argc[0]:
+        # No argument given defaults to test key. This is converted to expand making the result and expandable meta ini file
+        config[key] = value + "| expand"
+        # specify all default keys if not specified already
+        if "__convergencetest.absolutedifference" not in config:
+            config["__convergencetest.absolutedifference"] = 0.1
+        if "__convergencetest.normkey" not in config:
+            config["__convergencetest.normkey"] = 'norm'
+        if "__convergencetest.scalekey" not in config:
+            config["__convergencetest.scalekey"] = 'hmax'
+        if "__convergencetest.output_extension" not in config:
+            config["__convergencetest.output_extension"] = 'out'
+
+    # write as key value pairs in a private section
+    if argc[0] == "rate":
+        config["__convergencetest.expectedrate"] = value
+    elif argc[0] == "diff":
+        config["__convergencetest.absolutedifference"] = value
+    elif argc[0] == "norm_outputkey":
+        config["__convergencetest.normkey"] = value
+    elif argc[0] == "scale_outputkey":
+        config["__convergencetest.scalekey"] = value
+    elif argc[0] == "output_extension":
+        config["__convergencetest.output_extension"] = value
 
 
-def call(metaini, testId):
-    # the id of the test we are checking
-    testIdx = int(testId)
+def call(executable, metaini=None):
+    # check for the meta ini file
+    if not metaini:
+        sys.stderr.write("No meta ini file found for this convergence test!")
+        return 1
 
-    # get the convergence test info from the meta ini file
-    testKeyDict = expand_meta_ini(metaini, whiteFilter="__CONVERGENCE_TEST.__test_key", addNameKey=False)
-    testKey = testKeyDict[0]["__CONVERGENCE_TEST.__test_key"]
+    # expand the meta ini file
+    configurations = expand_meta_ini(metaini)
 
-    # get the convergence tests
-    tests = extract_convergence_test_info(metaini)
-
-    # assume we are in the same directory as the test was executed
-    # manipulate the __name key accordingly
-    for run in tests[testIdx]:
-        run["__name"] = os.path.basename(run["__name"])
-
-    # parse the output files
+    # execute all runs with temporary ini files and process the temporary output
     output = []
-    for run in tests[testIdx]:
-        try:
-            ininame = os.path.basename(run["__output_name"]) + "." + run["__output_extension"]
-        except KeyError:
-            ininame = os.path.basename(run["__name"]) + "." + run["__output_extension"]
+    for c in configurations:
+        # write a temporary ini file
+        write_dict_to_ini(c, "temp.ini")
 
-        # check if the output file exists
-        if not os.path.isfile(ininame):
-            sys.stderr.write("The output file to process does not exist (" + ininame + ")")
+        # execute the run
+        command = ['./' + executable]
+        iniinfo = parse_ini_file(metaini)
+        if "__inifile_optionkey" in iniinfo:
+            command.append(iniinfo["__inifile_optionkey"])
+        command.append('temp.ini')
+
+        if subprocess.call(command):
             return 1
 
-        # if it exists parse it
-        outDict = parse_ini_file(ininame)
-        outDict["__testKey"] = run[testKey]
-        outDict["__expectedRate"] = float(run["__CONVERGENCE_TEST.ExpectedRate"])
-        outDict["__absDiff"] = float(run["__CONVERGENCE_TEST.AbsoluteDiff"])
-        outDict["__normType"] = run["__CONVERGENCE_TEST.NormType"]
-        outDict["__quantityName"] = run["__CONVERGENCE_TEST.QuantityName"]
-        output.append(outDict)
+        # collect the information from the output file
+        try:
+            output.append(parse_ini_file(os.path.basename(c["__name"]) + "." + c["__convergencetest.output_extension"])[0])
+        except Exception as e:
+            raise e
+            return 1
 
-    test_failed = False
+        # remove temporary files
+        os.remove(os.path.basename(c["__name"]) + "." + c["__convergencetest.output_extension"])
+        os.remove("temp.ini")
+
     # calculate the rate according to the outputted data
-    for runIdx in range(len(tests[testIdx])-1):
-        norm1 = float(output[runIdx][output[runIdx]["__normType"]])
-        norm2 = float(output[runIdx+1][output[runIdx]["__normType"]])
-        hmax1 = float(output[runIdx][output[runIdx]["__quantityName"]])
-        hmax2 = float(output[runIdx+1][output[runIdx]["__quantityName"]])
-        rate = log(norm2/norm1)/log(hmax2/hmax1)
+    for idx, c in list(enumerate(configurations))[1:]
+        norm1 = float(output[idx]["__convergencetest.normkey"])
+        norm2 = float(output[idx+1]["__convergencetest.normkey"])
+        hmax1 = float(output[idx]["__convergencetest.scalekey"])
+        hmax2 = float(output[idx+1]["__convergencetest.scalekey"])
+        rate = math.log(norm2/norm1)/log(hmax2/hmax1)
         # compare the rate to the expected rate
-        if abs(rate-output[runIdx]["__expectedRate"]) > output[runIdx]["__absDiff"]:
-            test_failed = True
+        if math.fabs(rate-output[idx]["__convergencetest.expectedrate"]) > output[idx]["__convergencetest.absolutedifference"]:
             sys.stderr.write("Test failed because the absolute difference between the \
-                             calculated rate: " + str(rate) + " and the expected rate: " +
-                             str(output[runIdx]["__expectedRate"]) + " was too large.\n")
+                             calculated convergence rate ({}) and the expected convergence rate ({}) was too \
+                             large.\n".format(rate, output[idx]["__convergencetest.expectedrate"]))
+            return 1
 
-    # return appropriate returncode
-    if test_failed:
-        return 1
-    else:
-        return 0
+    # if we got here everything passed
+    return 0
 
-# This is also used as the standard wrapper by cmake
+# The script called by cmake
 if __name__ == "__main__":
     # Parse the given arguments
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
-    parser.add_argument('-t', '--test', help='The identifier of the test we are checking', required=True)
-    args = vars(parser.parse_args())
-
-    sys.exit(call(args["ini"], args["test"]))
+    from .argumentparser import get_args
+    args = get_args()
+    sys.exit(call(args["exec"], args["ini"]))
