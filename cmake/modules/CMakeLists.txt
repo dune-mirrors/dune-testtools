@@ -1,3 +1,5 @@
-set(modules "DuneTesttoolsMacros.cmake")
-
-install(FILES ${modules} DESTINATION ${DUNE_INSTALL_MODULEDIR})
+install(FILES ConditionalIncludes.cmake
+              DuneTesttoolsMacros.cmake
+              ParsePythonData.cmake
+              RunConvergenceTest.cmake
+        DESTINATION ${DUNE_INSTALL_MODULEDIR})
