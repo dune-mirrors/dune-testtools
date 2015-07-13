@@ -122,6 +122,9 @@ function(add_static_variants)
     message(WARNING "add_static_variants: Encountered unparsed arguments: This often indicates typos in named arguments")
   endif()
 
+  # Configure a bogus file from the meta ini file. This is a trick to retrigger configuration on meta ini changes.
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/tmp_${STATVAR_INIFILE})
+
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
   execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.static_metaini --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
@@ -288,6 +291,9 @@ function(add_convergence_test_per_target)
   if(NOT TARGVAR_SCRIPT)
     set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
   endif()
+
+  # Configure a bogus file from the meta ini file. This is a trick to retrigger configuration on meta ini changes.
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/tmp_${TARGVAR_INIFILE})
 
   # expand the given meta ini file into the build tree
   execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.convergencetest_metaini
