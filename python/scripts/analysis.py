@@ -13,7 +13,7 @@ def check_parser(ini):
         parsed = parse_ini_file(ini)
     except:
         try:
-            file = open(filename, "r")
+            file = open(ini, "r")
         except:
             print("Reading the source file failed. Did you give a correct path?")
             sys.exit(1)
