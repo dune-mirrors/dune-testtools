@@ -97,7 +97,7 @@ class RegisteredCommand:
         return self._func(**{k: v for (k, v) in list(kwargs.items()) if k in self._func.__code__.co_varnames})
 
 
-def apply_commands(configurations, cmds):
+def apply_commands(configurations, cmds, all_cmds=[]):
     """ Apply the given command
 
     Arguments:
@@ -106,15 +106,17 @@ def apply_commands(configurations, cmds):
         The list of current configurations
     cmds: list of CommandToApply
         The list of commands, as a list of named tuple CommandToApply. This information is extracted by the parser.
+    all_cmds: the list of CommandToApply retrieved by parsing the meta ini file
+        This enables commands to add commands at runtime
     """
     for cmd in cmds:
         # check whether the command ist still applicable. The key could have been filtered away!
         if cmd.key in configurations[0] or cmd.name == 'expand':
             if _registry[cmd.name]._returnConfigs:
-                configurations[:] = _registry[cmd.name](args=cmd.args, key=cmd.key, configs=configurations)
+                configurations[:] = _registry[cmd.name](args=cmd.args, key=cmd.key, configs=configurations, commands=all_cmds)
             elif _registry[cmd.name]._returnValue:
                 for c in configurations:
-                    c[cmd.key] = _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations)
+                    c[cmd.key] = _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations, commands=all_cmds)
             else:
                 for c in configurations:
-                    _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations)
+                    _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations, commands=all_cmds)
