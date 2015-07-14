@@ -25,7 +25,7 @@ def _get_convergence_test(key=None, value=None, config=None, args=None, commands
             config["__output_extension"] = 'out'
         config["__local.__convergencetest.value"] = value
         commands[CommandType.POST_RESOLUTION].append(CommandToApply(name="convergencetest_retrieve", args=[], key=key))
-        return "\\{" + key + "\\}" # escape the resolution brackets as we don't want them to be resolved now
+        return "\\{" + key + "\\}"  # escape the resolution brackets as we don't want them to be resolved now
     else:
         # write as key value pairs in a private section
         if args[0] == "rate":
@@ -38,7 +38,7 @@ def _get_convergence_test(key=None, value=None, config=None, args=None, commands
             config["__convergencetest.scalekey"] = value
         elif args[0] == "output_extension":
             config["__output_extension"] = value
-        return "placeholder" # the key is going to be deleted later as nkv are parsed into the __local section
+        return "placeholder"  # the key is going to be deleted later as nkv are parsed into the __local section
 
 
 @meta_ini_command(name="convergencetest_retrieve", ctype=CommandType.POST_RESOLUTION)
