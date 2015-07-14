@@ -222,6 +222,15 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
     # HOOK: POST_FILTERING
     apply_commands(configurations, cmds[CommandType.POST_FILTERING])
 
+    # Strip escapes TODO: Which charaters should be escaped not to mess with our code?
+    possibly_escaped_chars = "[]{}="
+    for c in configurations:
+        for k, v in list(c.items()):
+            escaped_value = v
+            for char in possibly_escaped_chars:
+                escaped_value = strip_escapes(escaped_value, char)
+            c[k] = escaped_value
+
     return configurations
 
 
