@@ -9,41 +9,43 @@ import sys
 import math
 import subprocess
 
-class ConvergenceTestFactory:
-    index = 0
 
-@meta_ini_command(name="convergencetest", argc=1, ctype=CommandType.POST_EXPANSION)
-def _get_convergence_test(config=None, key=None, value=None, args=None, configs=None):
-    """This command outputs a set of meta ini files each configuring a convergence test"""
+@meta_ini_command(name="convergencetest", argc=1, ctype=CommandType.PRE_EXPANSION)
+def _get_convergence_test(key=None, value=None, config=None, args=None, commands=None):
+    """This command overwrites convergencetest key to fool resolution"""
     if not args[0]:
-        # No argument given defaults to test key. This is converted to expand making the result and expandable meta ini file
-        config[key] = value + "| expand"
-        config["__convergencetest.testid"] = ConvergenceTestFactory.index
-        ConvergenceTestFactory.index = ConvergenceTestFactory.index + 1
         # specify all default keys if not specified already
         if "__convergencetest.absolutedifference" not in config:
-            config["__convergencetest.absolutedifference"] = 0.1
+            config["__convergencetest.absolutedifference"] = '0.1'
         if "__convergencetest.normkey" not in config:
             config["__convergencetest.normkey"] = 'norm'
         if "__convergencetest.scalekey" not in config:
             config["__convergencetest.scalekey"] = 'hmax'
-        if "__convergencetest.output_extension" not in config:
-            config["__convergencetest.output_extension"] = 'out'
+        if "__output_extension" not in config:
+            config["__output_extension"] = 'out'
+        config["__local.__convergencetest.value"] = value
+        commands[CommandType.POST_RESOLUTION].append(CommandToApply(name="convergencetest_retrieve", args=[], key=key))
+        return "\\{" + key + "\\}" # escape the resolution brackets as we don't want them to be resolved now
+    else:
+        # write as key value pairs in a private section
+        if args[0] == "rate":
+            config["__convergencetest.expectedrate"] = value
+        elif args[0] == "diff":
+            config["__convergencetest.absolutedifference"] = value
+        elif args[0] == "norm_outputkey":
+            config["__convergencetest.normkey"] = value
+        elif args[0] == "scale_outputkey":
+            config["__convergencetest.scalekey"] = value
+        elif args[0] == "output_extension":
+            config["__output_extension"] = value
+        return "placeholder" # the key is going to be deleted later as nkv are parsed into the __local section
 
-    # write as key value pairs in a private section
-    if args[0] == "rate":
-        config["__convergencetest.expectedrate"] = value
-    elif args[0] == "diff":
-        config["__convergencetest.absolutedifference"] = value
-    elif args[0] == "norm_outputkey":
-        config["__convergencetest.normkey"] = value
-    elif args[0] == "scale_outputkey":
-        config["__convergencetest.scalekey"] = value
-    elif args[0] == "output_extension":
-        config["__convergencetest.output_extension"] = value
 
-    # expand the key
-    apply_commands(configs, CommandToApply("expand", None, key))
+@meta_ini_command(name="convergencetest_retrieve", ctype=CommandType.POST_RESOLUTION)
+def _get_convergence_test(key=None, value=None, config=None):
+    """This command replaces the convergence test key by the original unexpanded value
+       leaving a metaini file configuring a convergence test"""
+    return config["__local.__convergencetest.value"] + " | expand"
 
 
 def call(executable, metaini=None):
@@ -72,28 +74,24 @@ def call(executable, metaini=None):
             return 1
 
         # collect the information from the output file
-        try:
-            output.append(parse_ini_file(os.path.basename(c["__name"]) + "." + c["__convergencetest.output_extension"])[0])
-        except Exception as e:
-            raise e
-            return 1
+        output.append([parse_ini_file(os.path.basename(c["__name"]) + "." + c["__output_extension"])][0])
 
         # remove temporary files
-        os.remove(os.path.basename(c["__name"]) + "." + c["__convergencetest.output_extension"])
+        os.remove(os.path.basename(c["__name"]) + "." + c["__output_extension"])
         os.remove("temp.ini")
 
     # calculate the rate according to the outputted data
     for idx, c in list(enumerate(configurations))[:-1]:
-        norm1 = float(output[idx]["__convergencetest.normkey"])
-        norm2 = float(output[idx+1]["__convergencetest.normkey"])
-        hmax1 = float(output[idx]["__convergencetest.scalekey"])
-        hmax2 = float(output[idx+1]["__convergencetest.scalekey"])
-        rate = math.log(norm2/norm1)/log(hmax2/hmax1)
+        norm1 = float(output[idx][c["__convergencetest.normkey"]])
+        norm2 = float(output[idx+1][c["__convergencetest.normkey"]])
+        hmax1 = float(output[idx][c["__convergencetest.scalekey"]])
+        hmax2 = float(output[idx+1][c["__convergencetest.scalekey"]])
+        rate = math.log(norm2/norm1)/math.log(hmax2/hmax1)
         # compare the rate to the expected rate
-        if math.fabs(rate-output[idx]["__convergencetest.expectedrate"]) > output[idx]["__convergencetest.absolutedifference"]:
+        if math.fabs(rate-float(c["__convergencetest.expectedrate"])) > float(c["__convergencetest.absolutedifference"]):
             sys.stderr.write("Test failed because the absolute difference between the \
                              calculated convergence rate ({}) and the expected convergence rate ({}) was too \
-                             large.\n".format(rate, output[idx]["__convergencetest.expectedrate"]))
+                             large.\n".format(rate, c["__convergencetest.expectedrate"]))
             return 1
 
     # if we got here everything passed
