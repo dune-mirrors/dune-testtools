@@ -83,6 +83,8 @@ else()
   message(WARNING "Cross-compilation warning: Assuming existence of python-pyparsing on the target system!")
 endif()
 
+find_package(MPI)
+
 # Generate a string containing "DEBUG" if we want to debug macros
 if(DEBUG_MACRO_TESTS)
   set(DEBUG_MACRO_TESTS DEBUG)
@@ -209,13 +211,27 @@ function(add_system_test_per_target)
       get_filename_component(module ${TARGVAR_SCRIPT} NAME_WE)
 
       if(${DOSOMETHING})
-        add_test(NAME ${target}_${ininame}
-                 COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
+        if(NOT ${MPI_CXX_FOUND})
+          add_test(NAME ${target}_${ininame}
+                   COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
-                )
+                  )
+        else()
+          add_test(NAME ${target}_${ininame}
+                   COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
+                    --exec ${target}
+                    --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
+                    --source ${CMAKE_CURRENT_SOURCE_DIR}
+                    --mpi-exec "${MPIEXEC}"
+                    --mpi-numprocflag=${MPIEXEC_NUMPROC_FLAG}
+                    --mpi-preflags "${MPIEXEC_PREFLAGS}"
+                    --mpi-postflags "${MPIEXEC_POSTFLAGS}"
+                  )
+        endif()
         set_property(TEST ${target}_${ininame} PROPERTY LABELS ${iniinfo_labels_${ininame}} DUNE_SYSTEMTEST)
+        set_tests_properties(${target}_${ininame} PROPERTIES SKIP_RETURN_CODE "77")
       endif()
     endforeach()
   endforeach()
