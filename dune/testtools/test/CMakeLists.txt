@@ -6,6 +6,7 @@ add_subdirectory(staticvariants)
 add_subdirectory(dynamicvariants)
 add_subdirectory(onemacrodynamicvariants)
 add_subdirectory(allvariants)
+add_subdirectory(parallel)
 add_subdirectory(convergencetest)
 
 add_executable("outputtreetest" outputtreetest.cc)
