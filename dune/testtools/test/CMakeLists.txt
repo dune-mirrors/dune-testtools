@@ -4,6 +4,7 @@ add_subdirectory(constructiontest)
 add_subdirectory(cmakepython)
 add_subdirectory(staticvariants)
 add_subdirectory(dynamicvariants)
+add_subdirectory(onemacrodynamicvariants)
 add_subdirectory(allvariants)
 add_subdirectory(convergencetest)
 
