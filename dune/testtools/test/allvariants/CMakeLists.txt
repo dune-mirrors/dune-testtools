@@ -1,4 +1,4 @@
-add_dune_system_test(SOURCE source.cc BASENAME allvariants INIFILE test.mini TARGETS output ${DEBUG_MACRO_TESTS})
+add_dune_system_test(SOURCE source.cc BASENAME allvariants INIFILE test.mini CREATED_TARGETS output ${DEBUG_MACRO_TESTS})
 
 dune_assert(COND TARGET allvariants_1 MESSAGE "allvariants: A target named allvariants_1 should have been generated")
 dune_assert(COND TARGET allvariants_2 MESSAGE "allvariants: A target named allvariants_2 should have been generated")
