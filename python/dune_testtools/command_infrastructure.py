@@ -120,3 +120,10 @@ def apply_commands(configurations, cmds, all_cmds=[]):
             else:
                 for c in configurations:
                     _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations, commands=all_cmds)
+
+
+def replace_command_key(commands, key, newkey):
+    for cmdtype, cmdlist in list(commands.items()):
+        for idx, cmd in list(enumerate(cmdlist)):
+            if cmd.key == key:
+                commands[cmdtype][idx] = cmd._replace(key=newkey)

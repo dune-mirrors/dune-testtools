@@ -23,22 +23,33 @@ def _get_convergence_test(key=None, value=None, config=None, args=None, commands
             config["__convergencetest.scalekey"] = 'hmax'
         if "__output_extension" not in config:
             config["__output_extension"] = 'out'
+
         config["__local.__convergencetest.value"] = value
+        # move possible commands to the new key
+        replace_command_key(commands, key, newkey="__local.__convergencetest.value")
+        # add the command that will retrieve the original convergence test value after expansion and resolution
         commands[CommandType.POST_RESOLUTION].append(CommandToApply(name="convergencetest_retrieve", args=[], key=key))
-        return "\\{" + key + "\\}"  # escape the resolution brackets as we don't want them to be resolved now
+        # escape the resolution brackets as we don't want them to be resolved now
+        return "\\{" + key + "\\}"
     else:
         # write as key value pairs in a private section
         if args[0] == "rate":
             config["__convergencetest.expectedrate"] = value
+            replace_command_key(commands, key, newkey="__convergencetest.expectedrate")
         elif args[0] == "diff":
             config["__convergencetest.absolutedifference"] = value
+            replace_command_key(commands, key, newkey="__convergencetest.absolutedifference")
         elif args[0] == "norm_outputkey":
             config["__convergencetest.normkey"] = value
+            replace_command_key(commands, key, newkey="__convergencetest.normkey")
         elif args[0] == "scale_outputkey":
             config["__convergencetest.scalekey"] = value
+            replace_command_key(commands, key, newkey="__convergencetest.scalekey")
         elif args[0] == "output_extension":
             config["__output_extension"] = value
-        return "placeholder"  # the key is going to be deleted later as nkv are parsed into the __local section
+            replace_command_key(commands, key, newkey="__output_extension")
+        # the key is going to be deleted later as nkv are parsed into the __local section so out in a place holder
+        return "__placeholder"
 
 
 @meta_ini_command(name="convergencetest_retrieve", ctype=CommandType.POST_RESOLUTION)
