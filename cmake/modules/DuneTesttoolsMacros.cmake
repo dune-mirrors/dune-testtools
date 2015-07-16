@@ -122,20 +122,25 @@ function(add_static_variants)
       set(tname ${tname}_${conf})
     endif()
     # add the executable with that configurations
-    add_executable(${tname} "${STATVAR_SOURCE}")
-    list(APPEND targetlist "${tname}")
+    if(NOT TARGET ${tname})
+      add_executable(${tname} "${STATVAR_SOURCE}")
 
-    # treat compile definitions
-    foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-      target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
-    endforeach()
+      # treat compile definitions
+      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+        target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
+      endforeach()
 
-    # maybe output debug information
-    if(${STATVAR_DEBUG})
-      message("Generated target ${tname}")
-      get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
-      message("  with COMPILE_DEFINITIONS: ${cd}")
+      # maybe output debug information
+      if(${STATVAR_DEBUG})
+        message("Generated target ${tname}")
+        get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
+        message("  with COMPILE_DEFINITIONS: ${cd}")
+      endif()
     endif()
+    if(${STATVAR_DEBUG})
+      message("Generating target ${tname} skipped because it already existed!")
+    endif()
+    list(APPEND targetlist "${tname}")
   endforeach()
 
   # export the list of created targets
