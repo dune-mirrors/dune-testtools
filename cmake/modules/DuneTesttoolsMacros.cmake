@@ -187,10 +187,11 @@ function(add_system_test_per_target)
       # or in case no suffix is given (we have only one target) when the target is matching the
       # target basename
       set(DOSOMETHING FALSE)
-      if("${TARGVAR_TARGETBASENAME}" STREQUAL "${target}")
+      # ugly CMake bug gets fixed by adding a random prefix to the compared strings
+      if("compare_${TARGVAR_TARGETBASENAME}" STREQUAL "compare_${target}")
         set(DOSOMETHING TRUE)
       endif()
-      if("${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "${target}")
+      if("compare_${TARGVAR_TARGETBASENAME}_${iniinfo_${inifile}_suffix}" STREQUAL "compare_${target}")
         set(DOSOMETHING TRUE)
       endif()
       if(NOT DEFINED TARGVAR_TARGETBASENAME)
