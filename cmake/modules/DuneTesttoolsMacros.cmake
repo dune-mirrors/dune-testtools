@@ -269,6 +269,14 @@ function(add_dune_system_test)
                                ${DEBUG}
                                TARGETBASENAME ${SYSTEMTEST_BASENAME})
   else()
+    execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE}
+                    ${DUNE_TESTTOOLS_PATH}/python/scripts/has_static_section.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}
+                    RESULT_VARIABLE res)
+    if(${res})
+      message(STATUS "The meta ini file specifies static variations!")
+      message(FATAL_ERROR "The TARGET signature can be only used for dynamic variations.")
+    endif()
+
     if(SYSTEMTEST_BASENAME)
       message(WARNING "A BASENAME is given for the TARGET signature. The argument is ignored!")
     endif()
