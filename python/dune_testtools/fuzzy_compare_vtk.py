@@ -15,7 +15,7 @@ from six.moves import zip
 
 
 # fuzzy compare VTK tree from VTK strings
-def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
+def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2, verbose=True):
     """ take two vtk files and compare them. Returns an exit key as returnvalue.
 
     Arguments:
@@ -40,12 +40,17 @@ def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
     sortedroot1 = sort_vtk(root1)
     sortedroot2 = sort_vtk(root2)
 
+    if verbose:
+        print("Comparing {} and {}".format(vtk1, vtk2))
+        print("Absolute tolerance: {}".format(absolute))
+        print("Relative tolerance: {}".format(relative))
+
     # sort the vtk file so that the comparison is independent of the
     # index numbering (coming e.g. from different grid managers)
-    sortedroot1, sortedroot2 = sort_vtk_by_coordinates(sortedroot1, sortedroot2)
+    sortedroot1, sortedroot2 = sort_vtk_by_coordinates(sortedroot1, sortedroot2, verbose)
 
     # do the fuzzy compare
-    if is_fuzzy_equal_node(sortedroot1, sortedroot2, absolute, relative):
+    if is_fuzzy_equal_node(sortedroot1, sortedroot2, absolute, relative, verbose):
         return 0
     else:
         return 1
@@ -54,30 +59,41 @@ def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2):
 # fuzzy compare of VTK nodes
 def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
 
+    is_equal = True
     for node1child, node2child in zip(node1.iter(), node2.iter()):
         if node1.tag != node2.tag:
             if verbose:
-                sys.stderr.write('The name of the node differs in ' + node1.tag + ' and ' + node2.tag)
-            return False
+                sys.stderr.write('The name of the node differs in: {} and {}!'.format(node1.tag, node2.tag))
+                is_equal = False
+            else:
+                return False
         if list(node1.attrib.items()) != list(node2.attrib.items()):
             if verbose:
-                sys.stderr.write('Attributes differ in node ' + node1.tag)
-            return False
+                sys.stderr.write('Attributes differ in node: {}!'.format(node1.tag))
+                is_equal = False
+            else:
+                return False
         if len(list(node1.iter())) != len(list(node2.iter())):
             if verbose:
-                sys.stderr.write('Number of children differs in node ' + node1.tag)
-            return False
+                sys.stderr.write('Number of children differs in node: {}!'.format(node1.tag))
+                is_equal = False
+            else:
+                return False
         if node1child.text or node2child.text:
             if not is_fuzzy_equal_text(node1child.text, node2child.text, absolute, relative, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
                     if verbose:
-                        sys.stderr.write('Data differs in parameter ' + node1child.attrib["Name"])
-                    return False
+                        sys.stderr.write('Data differs in parameter: {}!'.format(node1child.attrib["Name"]))
+                        is_equal = False
+                    else:
+                        return False
                 else:
                     if verbose:
-                        sys.stderr.write('Comparing different parameters' + node1child.attrib["Name"] + ' and ' + node2child.attrib["Name"])
-                    return False
-    return True
+                        sys.stderr.write('Comparing different parameters: {} and {}!'.format( node1child.attrib["Name"], node2child.attrib["Name"]))
+                        is_equal = False
+                    else:
+                        return False
+    return is_equal
 
 
 # fuzzy compare of text (in the xml sense) consisting of whitespace separated numbers
@@ -88,22 +104,34 @@ def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
     if (list1 == list2):
         return True
     # compare number by number
+    is_equal = True
+    max_relative_difference = 0.0
+    max_absolute_difference = 0.0
     for number1, number2 in zip(list1, list2):
         number1 = float(number1)
         number2 = float(number2)
         if not number2 == 0.0:
             # check for the relative difference
-            if number2 == 0.0 or abs(abs(number1 / number2) - 1.0) > relative:
+            if number2 == 0.0 or abs(abs(number1 / number2) - 1.0) > relative and not abs(number1 - number2) < absolute:
                 if verbose:
-                    sys.stderr.write('Relative difference is too large between' + str(number1) + ' and ' + str(number2))
-                return False
+                    sys.stderr.write('Relative difference is too large between: {} and {}!'.format(number1, number2))
+                    max_relative_difference = max(max_relative_difference, abs(abs(number1 / number2) - 1.0))
+                    is_equal = False
+                else:
+                    return False
         else:
             # check for the absolute difference
             if abs(number1 - number2) > absolute:
                 if verbose:
-                    sys.stderr.write('Absolute difference is too large between' + str(number1) + ' and ' + str(number2))
-                return False
-    return True
+                    sys.stderr.write('Absolute difference is too large between: {} and {}!'.format(number1, number2))
+                    max_absolute_difference = max(max_absolute_difference, abs(number1 - number2))
+                    is_equal = False
+                else:
+                    return False
+    if verbose:
+        sys.stderr.write('Maximum absolute difference: {}!'.format(max_absolute_difference))
+        sys.stderr.write('Maximum relative difference: {}!'.format(max_relative_difference))
+    return is_equal
 
 
 def sort_by_name(elem):
@@ -159,13 +187,11 @@ def sort_vtk(root):
     return newroot
 
 
-def is_different_grid_order(root1, root2):
-    return is_fuzzy_equal_node(root1.find(".//Points"), root2.find(".//Points"), 1e-2, 1e-9)
-
-
 # sorts the data by point coordinates so that it is independent of index numbering
-def sort_vtk_by_coordinates(root1, root2):
+def sort_vtk_by_coordinates(root1, root2, verbose=True):
     if not is_fuzzy_equal_node(root1.find(".//Points/DataArray"), root2.find(".//Points/DataArray"), 1e-2, 1e-9, False):
+        if verbose:
+            print("Sorting vtu by coordinates...")
         for root in [root1, root2]:
             # parse all DataArrays in a dictionary
             pointDataArrays = []
@@ -262,6 +288,7 @@ if __name__ == "__main__":
     parser.add_argument('vtk_file_2', type=str, help='second file to compare')
     parser.add_argument('-r', '--relative', type=float, default=1e-2, help='maximum relative error (default=1e-2)')
     parser.add_argument('-a', '--absolute', type=float, default=1e-9, help='maximum absolute error (default=1e-9)')
+    parser.add_argument('-v', '--verbose', type=bool, default=True, help='verbosity of the script')
     args = vars(parser.parse_args())
 
-    sys.exit(compare_vtk(args["vtk_file_1"], args["vtk_file_2"], args["absolute"], args["relative"]))
+    sys.exit(compare_vtk(args["vtk_file_1"], args["vtk_file_2"], args["absolute"], args["relative"], args["verbose"]))
