@@ -206,7 +206,7 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
         configurations = [c.filter(whiteFilter) for c in configurations]
 
     # remove duplicate configurations - we added hashing to the DotDict class just for this purpose.
-    configurations = [c for c in set(configurations)]
+    configurations = [c for c in sorted(set(configurations))]
 
     # Implement the naming scheme through the special key __name
     if addNameKey:

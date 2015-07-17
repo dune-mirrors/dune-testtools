@@ -84,6 +84,14 @@ class DotDict(dict):
     def __eq__(self, other):
         return tuple(sorted(self.items())) == tuple(sorted(other.items()))
 
+    def __lt__(self, other):
+        """ make the DotDict orderable to enforce an order on a list of ini files
+        This is only well-defined for dicts sharing the set of keys.
+        """
+        if tuple(sorted(self.keys())) != tuple(sorted(other.keys())):
+            return tuple(sorted(self.keys())) < tuple(sorted(other.keys()))
+        return True not in [self[k] >= other[k] for k in sorted(self.keys())]
+
     def get(self, key, default=None):
         try:
             return self[key]
