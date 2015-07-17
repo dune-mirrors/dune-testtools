@@ -9,7 +9,7 @@ import sys
 
 def call(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postflags, inifile=None):
     # If we have an inifile, parse it and look for special keys that modify the execution
-    num_processes = 4  # a default
+    num_processes = 2  # a default
     command = [mpi_exec, mpi_numprocflag, num_processes]
     if mpi_preflags:
         command += mpi_preflags
