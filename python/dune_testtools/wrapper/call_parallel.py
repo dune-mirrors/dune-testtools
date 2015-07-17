@@ -25,8 +25,6 @@ def call(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postflags, ini
         if "__num_processes" in iniinfo:
             command[2] = iniinfo["__num_processes"]
 
-    print(command)
-
     return subprocess.call(command)
 
 
