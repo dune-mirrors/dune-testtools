@@ -8,4 +8,4 @@ Version: 0.0
 Maintainer: dominic.kempf@iwr.uni-heidelberg.de;timo.koch@iws.uni-stuttgart.de
 #depending on
 Depends: dune-common
-Suggests: dune-grid
+Suggests: dune-grid dune-alugrid

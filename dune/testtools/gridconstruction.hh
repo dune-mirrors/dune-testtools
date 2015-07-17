@@ -25,6 +25,12 @@
 #include<dune/grid/io/file/dgfparser/dgfug.hh>
 #endif
 
+// ALUGrid specific includes
+#if HAVE_DUNE_ALUGRID
+#include<dune/alugrid/grid.hh>
+#include<dune/alugrid/dgf.hh>
+#endif
+
 /**
  * \file A factory class combining all methods of grid construction under
  *       the umbrella of ini file construction.
@@ -83,76 +89,66 @@ public:
 
   IniGridFactory(const Dune::ParameterTree& params)
   {
-    try
+    // When restoring, no further work is necessary
+    if (params.hasKey("yaspgrid.loadFromFile")) {
+      grid = std::shared_ptr < Grid
+          > (Dune::BackupRestoreFacility<Grid>::restore(
+              params.get<std::string>("yaspgrid.loadFromFile")));
+      return;
+    }
+
+    if (params.hasKey("yaspgrid.dgfFile"))
     {
-      if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = std::shared_ptr < Grid
-            > (Dune::BackupRestoreFacility<Grid>::restore(
-                params.get<std::string>("yaspgrid.loadFromFile")));
+      std::string dgffile = params.get<std::string>("yaspgrid.dgfFile");
+      Dune::GridPtr<Grid> gridptr(dgffile);
+      grid = std::shared_ptr<Grid>(gridptr.release());
+
+    } else {
+
+      // extract all constructor parameters from the ini file
+      // upper right corner
+      Dune::FieldVector<ct, dim> extension = params.get<
+          Dune::FieldVector<ct, dim> >("yaspgrid.extension");
+
+      // number of cells per direction
+      std::array<int, dim> cells = params.get<std::array<int, dim> >(
+          "yaspgrid.cells");
+
+      // periodicity
+      std::bitset<dim> periodic;
+      periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
+
+      // overlap cells
+      int overlap = params.get<int>("yaspgrid.overlap", 1);
+
+      // (eventually) a non-standard load balancing
+      bool default_lb = true;
+      std::array<int, dim> partitioning;
+      if (params.hasKey("yaspgrid.partitioning"))
+      {
+        default_lb = false;
+        partitioning = params.get<std::array<int, dim> >(
+            "yaspgrid.partitioning");
+      }
+
+      // build the actual grid
+      if (default_lb)
+        grid = std::make_shared<Grid> (extension, cells, periodic, overlap);
       else
-        DUNE_THROW(Dune::Exception, "Execute catch in that case");
-    }
-    catch (...)
-    {
-      try
       {
-        if (params.hasKey("yaspgrid.dgfFile"))
-        {
-          std::string dgffile = params.get<std::string>("yaspgrid.dgfFile");
-          Dune::GridPtr<Grid> gridptr(dgffile);
-          grid = std::shared_ptr<Grid>(gridptr.release());
-        }
-        else
-          DUNE_THROW(Dune::Exception, "Execute catch block in that case");
+        typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
+        grid = std::make_shared<Grid> (extension, cells, periodic, overlap,
+            typename Grid::CollectiveCommunicationType(), &lb);
       }
-      catch (...)
-      {
-        // extract all constructor parameters from the ini file
-        // upper right corner
-        Dune::FieldVector<ct, dim> extension = params.get<
-            Dune::FieldVector<ct, dim> >("yaspgrid.extension");
-
-        // number of cells per direction
-        std::array<int, dim> cells = params.get<std::array<int, dim> >(
-            "yaspgrid.cells");
-
-        // periodicity
-        std::bitset<dim> periodic;
-        periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
-
-        // overlap cells
-        int overlap = params.get<int>("yaspgrid.overlap", 1);
-
-        // (eventually) a non-standard load balancing
-        bool default_lb = true;
-        std::array<int, dim> partitioning;
-        if (params.hasKey("yaspgrid.partitioning"))
-        {
-          default_lb = false;
-          partitioning = params.get<std::array<int, dim> >(
-              "yaspgrid.partitioning");
-        }
-
-        // build the actual grid
-        if (default_lb)
-          grid = std::make_shared < Grid
-              > (extension, cells, periodic, overlap);
-        else
-        {
-          typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
-          grid =
-              std::make_shared < Grid
-                  > (extension, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
-        }
-      }
-
-      bool keepPhysicalOverlap = params.get<bool>(
-          "yaspgrid.keepPhysicalOverlap", true);
-      grid->refineOptions(keepPhysicalOverlap);
-
-      int refinement = params.get<int>("yaspgrid.refinement", 0);
-      grid->globalRefine(refinement);
     }
+
+    // do refinement
+    bool keepPhysicalOverlap = params.get<bool>(
+        "yaspgrid.keepPhysicalOverlap", true);
+    grid->refineOptions(keepPhysicalOverlap);
+
+    int refinement = params.get<int>("yaspgrid.refinement", 0);
+    grid->globalRefine(refinement);
   }
 
   std::shared_ptr<Grid> getGrid()
@@ -190,73 +186,69 @@ public:
 
   IniGridFactory(const Dune::ParameterTree& params)
   {
-    try
-    {
-      if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = std::shared_ptr < Grid
-            > (Dune::BackupRestoreFacility<Grid>::restore(
-                params.get<std::string>("yaspgrid.loadFromFile")));
-      else
-        DUNE_THROW(Dune::Exception, "Execute catch in that case");
+    if (params.hasKey("yaspgrid.loadFromFile")) {
+      grid = std::shared_ptr < Grid
+          > (Dune::BackupRestoreFacility<Grid>::restore(
+              params.get<std::string>("yaspgrid.loadFromFile")));
+      return;
     }
-    catch (...)
+
+    // extract all constructor parameters from the ini file
+    // upper right corner
+    Dune::FieldVector<ct, dim> lowerleft = params.get<
+        Dune::FieldVector<ct, dim> >("yaspgrid.lowerleft");
+
+    Dune::FieldVector<ct, dim> upperright(lowerleft);
+    if (params.hasKey("upperright"))
+      upperright = params.get<Dune::FieldVector<ct, dim> >(
+          "yaspgrid.upperright");
+    else
     {
-      // extract all constructor parameters from the ini file
-      // upper right corner
-      Dune::FieldVector<ct, dim> lowerleft = params.get<
-          Dune::FieldVector<ct, dim> >("yaspgrid.lowerleft");
-
-      Dune::FieldVector<ct, dim> upperright(lowerleft);
-      if (params.hasKey("upperright"))
-        upperright = params.get<Dune::FieldVector<ct, dim> >(
-            "yaspgrid.upperright");
-      else
-      {
-        Dune::FieldVector<ct, dim> extension = params.get<
-            Dune::FieldVector<ct, dim> >("yaspgrid.extension");
-        upperright += extension;
-      }
-
-      // number of cells per direction
-      std::array<int, dim> cells = params.get<std::array<int, dim> >(
-          "yaspgrid.cells");
-
-      // periodicity
-      std::bitset<dim> periodic;
-      periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
-
-      // overlap cells
-      int overlap = params.get<int>("yaspgrid.overlap", 1);
-
-      // (eventually) a non-standard load balancing
-      bool default_lb = true;
-      std::array<int, dim> partitioning;
-      if (params.hasKey("yaspgrid.partitioning"))
-      {
-        default_lb = false;
-        partitioning = params.get<std::array<int, dim> >(
-            "yaspgrid.partitioning");
-      }
-
-      // build the actual grid
-      if (default_lb)
-        grid = std::make_shared < Grid
-            > (lowerleft, upperright, cells, periodic, overlap);
-      else
-      {
-        typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
-        grid =
-            std::make_shared < Grid
-                > (lowerleft, upperright, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
-      }
-
-      bool keepPhysicalOverlap = params.get<bool>(
-          "yaspgrid.keepPhysicalOverlap", true);
-      grid->refineOptions(keepPhysicalOverlap);
-
-      int refinement = params.get<int>("yaspgrid.refinement", 0);
-      grid->globalRefine(refinement);
+      Dune::FieldVector<ct, dim> extension = params.get<
+          Dune::FieldVector<ct, dim> >("yaspgrid.extension");
+      upperright += extension;
     }
+
+    // number of cells per direction
+    std::array<int, dim> cells = params.get<std::array<int, dim> >(
+        "yaspgrid.cells");
+
+    // periodicity
+    std::bitset<dim> periodic;
+    periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
+
+    // overlap cells
+    int overlap = params.get<int>("yaspgrid.overlap", 1);
+
+    // (eventually) a non-standard load balancing
+    bool default_lb = true;
+    std::array<int, dim> partitioning;
+    if (params.hasKey("yaspgrid.partitioning"))
+    {
+      default_lb = false;
+      partitioning = params.get<std::array<int, dim> >(
+          "yaspgrid.partitioning");
+    }
+
+    // build the actual grid
+    if (default_lb)
+      grid = std::make_shared < Grid
+          > (lowerleft, upperright, cells, periodic, overlap);
+    else
+    {
+      typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
+      grid =
+          std::make_shared < Grid
+              > (lowerleft, upperright, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
+    }
+
+    bool keepPhysicalOverlap = params.get<bool>(
+        "yaspgrid.keepPhysicalOverlap", true);
+    grid->refineOptions(keepPhysicalOverlap);
+
+    int refinement = params.get<int>("yaspgrid.refinement", 0);
+    std::cout << "refining " << refinement << std::endl;
+    grid->globalRefine(refinement);
   }
 
   std::shared_ptr<Grid> getGrid()
@@ -289,60 +281,56 @@ public:
 
   IniGridFactory(const Dune::ParameterTree& params)
   {
-    try
-    {
-      if (params.hasKey("yaspgrid.loadFromFile"))
-        grid = std::shared_ptr < Grid
-            > (Dune::BackupRestoreFacility<Grid>::restore(
-                params.get<std::string>("yaspgrid.loadFromFile")));
-      else
-        DUNE_THROW(Dune::Exception, "Execute catch in that case");
+    if (params.hasKey("yaspgrid.loadFromFile")) {
+      grid = std::shared_ptr < Grid
+          > (Dune::BackupRestoreFacility<Grid>::restore(
+              params.get<std::string>("yaspgrid.loadFromFile")));
+      return;
     }
-    catch (...)
+
+    std::array<std::vector<ct>, dim> coordinates;
+    for (int i = 0; i < dim; ++i)
     {
-      std::array<std::vector<ct>, dim> coordinates;
-      for (int i = 0; i < dim; ++i)
-      {
-        std::ostringstream key_str;
-        key_str << "yaspgrid.coordinates" << i;
-        coordinates[i] = params.get<std::vector<ct> >(key_str.str());
-      }
-
-      // periodicity
-      std::bitset<dim> periodic;
-      periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
-
-      // overlap cells
-      int overlap = params.get<int>("yaspgrid.overlap", 1);
-
-      // (eventually) a non-standard load balancing
-      bool default_lb = true;
-      std::array<int, dim> partitioning;
-      if (params.hasKey("yaspgrid.partitioning"))
-      {
-        default_lb = false;
-        partitioning = params.get<std::array<int, dim> >(
-            "yaspgrid.partitioning");
-      }
-
-      // build the actual grid
-      if (default_lb)
-        grid = std::make_shared < Grid > (coordinates, periodic, overlap);
-      else
-      {
-        typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
-        grid =
-            std::make_shared < Grid
-                > (coordinates, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
-      }
-
-      bool keepPhysicalOverlap = params.get<bool>(
-          "yaspgrid.keepPhysicalOverlap", true);
-      grid->refineOptions(keepPhysicalOverlap);
-
-      int refinement = params.get<int>("yaspgrid.refinement", 0);
-      grid->globalRefine(refinement);
+      std::ostringstream key_str;
+      key_str << "yaspgrid.coordinates" << i;
+      coordinates[i] = params.get<std::vector<ct> >(key_str.str());
     }
+
+    // periodicity
+    std::bitset<dim> periodic;
+    periodic = params.get<std::bitset<dim> >("yaspgrid.periodic", periodic);
+
+    // overlap cells
+    int overlap = params.get<int>("yaspgrid.overlap", 1);
+
+    // (eventually) a non-standard load balancing
+    bool default_lb = true;
+    std::array<int, dim> partitioning;
+    if (params.hasKey("yaspgrid.partitioning"))
+    {
+      default_lb = false;
+      partitioning = params.get<std::array<int, dim> >(
+          "yaspgrid.partitioning");
+    }
+
+    // build the actual grid
+    if (default_lb)
+      grid = std::make_shared < Grid > (coordinates, periodic, overlap);
+    else
+    {
+      typename Dune::YaspFixedSizePartitioner<dim> lb(partitioning);
+      grid =
+          std::make_shared < Grid
+              > (coordinates, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
+    }
+
+    bool keepPhysicalOverlap = params.get<bool>(
+        "yaspgrid.keepPhysicalOverlap", true);
+    grid->refineOptions(keepPhysicalOverlap);
+
+    int refinement = params.get<int>("yaspgrid.refinement", 0);
+    std::cout << "refining " << refinement << std::endl;
+    grid->globalRefine(refinement);
   }
 
   std::shared_ptr<Grid> getGrid()
@@ -386,70 +374,48 @@ public:
   IniGridFactory(const Dune::ParameterTree& params)
   {
     // try building an ug grid by taking a gmshfile from the ini file
-    try
+
+    if (params.hasKey("ug.gmshFile"))
     {
-      if (params.hasKey("ug.gmshFile"))
-      {
-        std::string gmshfile = params.get<std::string>("ug.gmshFile");
+      std::string gmshfile = params.get<std::string>("ug.gmshFile");
 
-        bool verbose = params.get<bool>("ug.verbose", false);
-        bool boundarySegments = params.get<bool>("ug.boundarySegments", false);
+      bool verbose = params.get<bool>("ug.verbose", false);
+      bool boundarySegments = params.get<bool>("ug.boundarySegments", false);
 
-        grid =
-            std::shared_ptr < Grid
-                > (Dune::GmshReader<Grid>::read(gmshfile, verbose,
-                    boundarySegments));
-      }
-      else
-        DUNE_THROW(Dune::Exception, "Execute catch in that case");
+      grid =
+          std::shared_ptr < Grid
+              > (Dune::GmshReader<Grid>::read(gmshfile, verbose,
+                  boundarySegments));
     }
-    // otherwise, try other methods
-    catch (...)
+    else if (params.hasKey("ug.dgfFile"))
     {
-      // try building an ug grid by taking a dgf file from the ini file
-      try
-      {
-        if (params.hasKey("ug.dgfFile"))
-        {
-          std::string dgffile = params.get<std::string>("ug.dgfFile");
-          Dune::GridPtr<Grid> gridptr(dgffile);
-          grid = std::shared_ptr < Grid > (gridptr.release());
-        }
-        else
-          DUNE_THROW(Dune::Exception, "Execute catch in that case");
-      }
-      // otherwise, try other methods
-      catch (...)
-      {
-        // TODO construct a structured grid with the given geometry type and extensions:
+      std::string dgffile = params.get<std::string>("ug.dgfFile");
+      Dune::GridPtr<Grid> gridptr(dgffile);
+      grid = std::shared_ptr < Grid > (gridptr.release());
+    } else {
+      Dune::FieldVector<ct, dim> lowerleft = params.get<
+          Dune::FieldVector<ct, dim> >("ug.lowerleft",
+          Dune::FieldVector<ct, dim>(0.0));
+      Dune::FieldVector<ct, dim> upperright = params.get<
+          Dune::FieldVector<ct, dim> >("ug.upperright");
 
-        Dune::FieldVector<ct, dim> lowerleft = params.get<
-            Dune::FieldVector<ct, dim> >("ug.lowerleft",
-            Dune::FieldVector<ct, dim>(0.0));
-        Dune::FieldVector<ct, dim> upperright = params.get<
-            Dune::FieldVector<ct, dim> >("ug.upperright");
+      std::array<unsigned int, dim> elements;
+      std::fill(elements.begin(), elements.end(), 1);
+      if (params.hasKey("ug.elements"))
+        elements = params.get<std::array<unsigned int, dim> >("ug.elements");
 
-        std::array<unsigned int, dim> elements;
-        std::fill(elements.begin(), elements.end(), 1);
-        if (params.hasKey("ug.elements"))
-          elements = params.get<std::array<unsigned int, dim> >("ug.elements");
+      std::string elemType = params.get<std::string>("ug.elementType",
+          "quadrilateral");
 
-        std::string elemType = params.get<std::string>("ug.elementType",
-            "quadrilateral");
-
-        Dune::StructuredGridFactory<Grid> factory;
-        // TODO maybe add some synonymous descriptions of quadrilateral grids here.
-        if (elemType == "quadrilateral")
-          grid = factory.createCubeGrid(lowerleft, upperright, elements);
-        else
-        {
-          if (elemType == "simplical")
-            grid = factory.createSimplexGrid(lowerleft, upperright, elements);
-          else
-            DUNE_THROW(Dune::GridError,
-                "Specified an invalid element type in ini file.");
-        }
-      }
+      Dune::StructuredGridFactory<Grid> factory;
+      // TODO maybe add some synonymous descriptions of quadrilateral grids here.
+      if (elemType == "quadrilateral")
+        grid = factory.createCubeGrid(lowerleft, upperright, elements);
+      else if (elemType == "simplical")
+        grid = factory.createSimplexGrid(lowerleft, upperright, elements);
+      else
+        DUNE_THROW(Dune::GridError,
+            "Specified an invalid element type in ini file.");
     }
 
     // given we have successfully created a grid, maybe perform some operations on it
@@ -469,5 +435,77 @@ private:
 };
 
 #endif // HAVE_UG
+
+#if HAVE_DUNE_ALUGRID
+/** An IniGridFactory for an ALUGrid
+ *
+ * All keys are expected to be in group alu.
+ *
+ * The grid is constructed through different mechanism with
+ * the following priority order:
+ * 1) GMSH import
+ * 2) construct a structured grid from the given parameters
+ *
+ * The following keys are recognized:
+ * - gmshFile : A gmsh file to load from
+ * - lowerleft : lowerleft corner of a structured grid
+ * - upperright : upperright corner of a structured grid
+ * - elements : number of elements in a structured grid
+ * - refinement : the number of global refines to perform
+ * - verbose : whether the grid construction should output to standard out
+ * - boundarySegments : whether to insert boundary segments into the grid
+ */
+template<int griddim, int worlddim, Dune::ALUGridElementType elType, Dune::ALUGridRefinementType refinementType>
+class IniGridFactory<Dune::ALUGrid<griddim, worlddim, elType, refinementType> >
+{
+public:
+  typedef typename Dune::ALUGrid<griddim, worlddim, elType, refinementType> Grid;
+
+  IniGridFactory(const Dune::ParameterTree& params)
+  {
+
+    if (params.hasKey("alu.gmshFile"))
+    {
+      std::string gmshfile = params.get<std::string>("alu.gmshFile");
+
+      bool verbose = params.get<bool>("alu.verbose", false);
+      bool boundarySegments = params.get<bool>("alu.boundarySegments", false);
+
+      grid = std::shared_ptr < Grid
+              > (Dune::GmshReader<Grid>::read(gmshfile, verbose,
+                  boundarySegments));
+    }
+    else if (params.hasKey("alu.dgfFile"))
+    {
+      std::string dgffile = params.get<std::string>("alu.dgfFile");
+      Dune::GridPtr<Grid> gridptr(dgffile);
+      grid = std::shared_ptr < Grid > (gridptr.release());
+    } else {
+
+      typedef Dune::FieldVector<typename Grid::ctype,worlddim> Coord;
+      Coord lowerLeft = params.get<Coord>("alu.lowerleft", Coord(0));
+      Coord upperRight = params.get<Coord>("alu.upperright", Coord(1));
+      std::array<unsigned int,griddim> elements;
+      std::fill(elements.begin(), elements.end(), 1);
+      if (params.hasKey("alu.elements"))
+        elements = params.get<std::array<unsigned int, griddim> >("alu.elements");
+
+      grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(lowerLeft, upperRight, elements);
+    }
+    grid->loadBalance();
+    int refinement = params.get<int>("alu.refinement", 0);
+    grid->globalRefine(refinement);
+  }
+
+  std::shared_ptr<Grid> getGrid()
+  {
+    return grid;
+  }
+
+private:
+  std::shared_ptr<Grid> grid;
+};
+
+#endif //HAVE_DUNE_ALUGRID
 
 #endif
