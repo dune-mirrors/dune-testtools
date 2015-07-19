@@ -8,7 +8,7 @@ def test_0(dir):
 
 
 def test_1(dir):
-    assert(compare_vtk(dir + "vtu1.vtu", dir + "vtu21.vtu") == 1)
+    assert(compare_vtk(dir + "vtu1.vtu", dir + "vtu21.vtu") == 0)
 
 
 def test_2(dir):

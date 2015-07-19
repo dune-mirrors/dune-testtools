@@ -63,33 +63,33 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
     for node1child, node2child in zip(node1.iter(), node2.iter()):
         if node1.tag != node2.tag:
             if verbose:
-                sys.stderr.write('The name of the node differs in: {} and {}!'.format(node1.tag, node2.tag))
+                sys.stderr.write('The name of the node differs in: {} and {}\n'.format(node1.tag, node2.tag))
                 is_equal = False
             else:
                 return False
         if list(node1.attrib.items()) != list(node2.attrib.items()):
             if verbose:
-                sys.stderr.write('Attributes differ in node: {}!'.format(node1.tag))
+                sys.stderr.write('Attributes differ in node: {}\n'.format(node1.tag))
                 is_equal = False
             else:
                 return False
         if len(list(node1.iter())) != len(list(node2.iter())):
             if verbose:
-                sys.stderr.write('Number of children differs in node: {}!'.format(node1.tag))
+                sys.stderr.write('Number of children differs in node: {}\n'.format(node1.tag))
                 is_equal = False
             else:
                 return False
         if node1child.text or node2child.text:
-            if not is_fuzzy_equal_text(node1child.text, node2child.text, absolute, relative, verbose):
+            if not is_fuzzy_equal_text(node1child.text, node2child.text, node1child.attrib["Name"], absolute, relative, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
                     if verbose:
-                        sys.stderr.write('Data differs in parameter: {}!'.format(node1child.attrib["Name"]))
+                        sys.stderr.write('Data differs in parameter: {}\n'.format(node1child.attrib["Name"]))
                         is_equal = False
                     else:
                         return False
                 else:
                     if verbose:
-                        sys.stderr.write('Comparing different parameters: {} and {}!'.format( node1child.attrib["Name"], node2child.attrib["Name"]))
+                        sys.stderr.write('Comparing different parameters: {} and {}\n'.format(node1child.attrib["Name"], node2child.attrib["Name"]))
                         is_equal = False
                     else:
                         return False
@@ -97,7 +97,7 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
 
 
 # fuzzy compare of text (in the xml sense) consisting of whitespace separated numbers
-def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
+def is_fuzzy_equal_text(text1, text2, parameter, absolute, relative, verbose=True):
     list1 = text1.split()
     list2 = text2.split()
     # difference only in whitespace?
@@ -112,9 +112,9 @@ def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
         number2 = float(number2)
         if not number2 == 0.0:
             # check for the relative difference
-            if number2 == 0.0 or abs(abs(number1 / number2) - 1.0) > relative and not abs(number1 - number2) < absolute:
+            if abs(abs(number1 / number2) - 1.0) > relative and not abs(number1 - number2) < absolute:
                 if verbose:
-                    sys.stderr.write('Relative difference is too large between: {} and {}!'.format(number1, number2))
+                    sys.stderr.write('Relative difference is too large between: {} and {}\n'.format(number1, number2))
                     max_relative_difference = max(max_relative_difference, abs(abs(number1 / number2) - 1.0))
                     is_equal = False
                 else:
@@ -123,14 +123,16 @@ def is_fuzzy_equal_text(text1, text2, absolute, relative, verbose=True):
             # check for the absolute difference
             if abs(number1 - number2) > absolute:
                 if verbose:
-                    sys.stderr.write('Absolute difference is too large between: {} and {}!'.format(number1, number2))
+                    sys.stderr.write('Absolute difference is too large between: {} and {}\n'.format(number1, number2))
                     max_absolute_difference = max(max_absolute_difference, abs(number1 - number2))
                     is_equal = False
                 else:
                     return False
     if verbose:
-        sys.stderr.write('Maximum absolute difference: {}!'.format(max_absolute_difference))
-        sys.stderr.write('Maximum relative difference: {}!'.format(max_relative_difference))
+        if max_absolute_difference != 0.0:
+            sys.stderr.write('Maximum absolute difference for parameter {}: {}\n'.format(parameter, max_absolute_difference))
+        if max_relative_difference != 0.0:
+            sys.stderr.write('Maximum relative difference for parameter {}: {:.2%}\n'.format(parameter, max_relative_difference))
     return is_equal
 
 
