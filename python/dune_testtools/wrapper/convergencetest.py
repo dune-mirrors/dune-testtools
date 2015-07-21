@@ -94,12 +94,12 @@ def call(executable, metaini=None):
     # calculate the rate according to the outputted data
     for idx, c in list(enumerate(configurations))[:-1]:
         norm1 = float(output[idx][c["__convergencetest.normkey"]])
-        norm2 = float(output[idx+1][c["__convergencetest.normkey"]])
+        norm2 = float(output[idx + 1][c["__convergencetest.normkey"]])
         hmax1 = float(output[idx][c["__convergencetest.scalekey"]])
-        hmax2 = float(output[idx+1][c["__convergencetest.scalekey"]])
-        rate = math.log(norm2/norm1)/math.log(hmax2/hmax1)
+        hmax2 = float(output[idx + 1][c["__convergencetest.scalekey"]])
+        rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
         # compare the rate to the expected rate
-        if math.fabs(rate-float(c["__convergencetest.expectedrate"])) > float(c["__convergencetest.absolutedifference"]):
+        if math.fabs(rate - float(c["__convergencetest.expectedrate"])) > float(c["__convergencetest.absolutedifference"]):
             sys.stderr.write("Test failed because the absolute difference between the \
                              calculated convergence rate ({}) and the expected convergence rate ({}) was too \
                              large.\n".format(rate, c["__convergencetest.expectedrate"]))

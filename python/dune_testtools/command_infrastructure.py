@@ -68,7 +68,7 @@ class RegisteredCommand:
         self._ctype = ctype
         self._argc = argc
         if argdefaults:
-            self._argdefaults = argdefaults + [None for i in range(argc-len(argdefaults))]
+            self._argdefaults = argdefaults + [None for i in range(argc - len(argdefaults))]
         else:
             self._argdefaults = list(None for x in range(argc))
         self._returnConfigs = returnConfigs
@@ -90,7 +90,7 @@ class RegisteredCommand:
 
     def __call__(self, **kwargs):
         # apply default arguments to the given arguments
-        kwargs["args"] = kwargs["args"] + [None for i in range(self._argc-len(kwargs["args"]))]
+        kwargs["args"] = kwargs["args"] + [None for i in range(self._argc - len(kwargs["args"]))]
         kwargs["args"] = [a if kwargs["args"][i] is None else kwargs["args"][i] for i, a in enumerate(self._argdefaults)]
 
         # apply the original function by filtering all keyword arguments that it needs:
