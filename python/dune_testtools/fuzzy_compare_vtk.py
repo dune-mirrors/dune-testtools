@@ -42,8 +42,6 @@ def compare_vtk(vtk1, vtk2, absolute=1e-9, relative=1e-2, verbose=True):
 
     if verbose:
         print("Comparing {} and {}".format(vtk1, vtk2))
-        print("Absolute tolerance: {}".format(absolute))
-        print("Relative tolerance: {}".format(relative))
 
     # sort the vtk file so that the comparison is independent of the
     # index numbering (coming e.g. from different grid managers)
@@ -63,19 +61,19 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
     for node1child, node2child in zip(node1.iter(), node2.iter()):
         if node1.tag != node2.tag:
             if verbose:
-                sys.stderr.write('The name of the node differs in: {} and {}\n'.format(node1.tag, node2.tag))
+                print('The name of the node differs in: {} and {}'.format(node1.tag, node2.tag))
                 is_equal = False
             else:
                 return False
         if list(node1.attrib.items()) != list(node2.attrib.items()):
             if verbose:
-                sys.stderr.write('Attributes differ in node: {}\n'.format(node1.tag))
+                print('Attributes differ in node: {}'.format(node1.tag))
                 is_equal = False
             else:
                 return False
         if len(list(node1.iter())) != len(list(node2.iter())):
             if verbose:
-                sys.stderr.write('Number of children differs in node: {}\n'.format(node1.tag))
+                print('Number of children differs in node: {}'.format(node1.tag))
                 is_equal = False
             else:
                 return False
@@ -83,13 +81,13 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, verbose=True):
             if not is_fuzzy_equal_text(node1child.text, node2child.text, node1child.attrib["Name"], absolute, relative, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
                     if verbose:
-                        sys.stderr.write('Data differs in parameter: {}\n'.format(node1child.attrib["Name"]))
+                        print('Data differs in parameter: {}'.format(node1child.attrib["Name"]))
                         is_equal = False
                     else:
                         return False
                 else:
                     if verbose:
-                        sys.stderr.write('Comparing different parameters: {} and {}\n'.format(node1child.attrib["Name"], node2child.attrib["Name"]))
+                        print('Comparing different parameters: {} and {}'.format(node1child.attrib["Name"], node2child.attrib["Name"]))
                         is_equal = False
                     else:
                         return False
@@ -114,7 +112,7 @@ def is_fuzzy_equal_text(text1, text2, parameter, absolute, relative, verbose=Tru
             # check for the relative difference
             if abs(abs(number1 / number2) - 1.0) > relative and not abs(number1 - number2) < absolute:
                 if verbose:
-                    sys.stderr.write('Relative difference is too large between: {} and {}\n'.format(number1, number2))
+                    # print('Relative difference is too large between: {} and {}'.format(number1, number2))
                     max_relative_difference = max(max_relative_difference, abs(abs(number1 / number2) - 1.0))
                     is_equal = False
                 else:
@@ -123,16 +121,16 @@ def is_fuzzy_equal_text(text1, text2, parameter, absolute, relative, verbose=Tru
             # check for the absolute difference
             if abs(number1 - number2) > absolute:
                 if verbose:
-                    sys.stderr.write('Absolute difference is too large between: {} and {}\n'.format(number1, number2))
+                    # print('Absolute difference is too large between: {} and {}'.format(number1, number2))
                     max_absolute_difference = max(max_absolute_difference, abs(number1 - number2))
                     is_equal = False
                 else:
                     return False
     if verbose:
         if max_absolute_difference != 0.0:
-            sys.stderr.write('Maximum absolute difference for parameter {}: {}\n'.format(parameter, max_absolute_difference))
+            print('Maximum absolute difference for parameter {}: {}'.format(parameter, max_absolute_difference))
         if max_relative_difference != 0.0:
-            sys.stderr.write('Maximum relative difference for parameter {}: {:.2%}\n'.format(parameter, max_relative_difference))
+            print('Maximum relative difference for parameter {}: {:.2%}'.format(parameter, max_relative_difference))
     return is_equal
 
 
@@ -178,7 +176,7 @@ def sort_elements(items, newroot):
 # has to sort all Cell and Point Data after the attribute "Name"!
 def sort_vtk(root):
     if(root.tag != "VTKFile"):
-        sys.stderr.write('Format is not a VTKFile. Sorting will most likely fail!')
+        print('Format is not a VTKFile. Sorting will most likely fail!')
     # create a new root for the sorted tree
     newroot = ET.Element(root.tag)
     # create the sorted copy
@@ -212,8 +210,8 @@ def sort_vtk_by_coordinates(root1, root2, verbose=True):
             coords = dataArrays["Coordinates"].split()
             # group the coordinates into coordinate tuples
             dim = int(numberOfComponents["Coordinates"])
-            for i in range(len(coords)//dim):
-                vertexArray.append([float(c) for c in coords[i*dim:i*dim+dim]])
+            for i in range(len(coords) // dim):
+                vertexArray.append([float(c) for c in coords[i * dim: i * dim + dim]])
 
             # obtain a vertex index map
             vMap = []
@@ -247,8 +245,8 @@ def sort_vtk_by_coordinates(root1, root2, verbose=True):
                 # convert if vector
                 num = int(numberOfComponents[name])
                 newitems = []
-                for i in range(len(items)//num):
-                    newitems.append([i for i in items[i*num:i*num+num]])
+                for i in range(len(items) // num):
+                    newitems.append([i for i in items[i * num: i * num + num]])
                 items = newitems
                 # sort the items: we have either vertex or cell data
                 if name in pointDataArrays:
