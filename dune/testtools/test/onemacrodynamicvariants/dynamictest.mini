@@ -4,3 +4,6 @@ level = 1, 2, 3 | expand
 
 permeability = scalar, tensor | expand 1
 solver = solver1, solver2 | expand 1
+
+[__static]
+GRIDDIM = 2

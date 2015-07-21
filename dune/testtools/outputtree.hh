@@ -35,27 +35,19 @@ namespace Dune
     OutputTree(const std::string& filename) : _filename(filename)
     {}
 
-    /** \brief Constructor for an output tree
+    /** \brief Constructor for an output tree from an ini file
      *  \param params a Dune::ParameterTree aka the parsed ini file
      */
     OutputTree(const Dune::ParameterTree& params) : _params(params)
     {
-      // if not output name is specified the ini name is the default
-      if(params.hasKey("__output_name"))
-        _filename = params["__output_name"];
-      else
-      {
-        if(!params.hasKey("__name"))
-          DUNE_THROW(Dune::IOError, "The meta ini syntax requires a __name key!");
-
-        _filename = params["__name"];
-      }
-
-      // add the file extension
-      _filename += ".";
+      // the ini name is used for output data
+      if(!params.hasKey("__name"))
+          DUNE_THROW(Dune::IOError, "__name key is required!");
       if(!params.hasKey("__output_extension"))
-          DUNE_THROW(Dune::IOError, "Mandatory parameter __output_extension not set!");
+          DUNE_THROW(Dune::IOError, "__output_extension not set!");
 
+      _filename = params["__name"];
+      _filename += ".";
       _filename += params["__output_extension"];
     }
 
@@ -73,13 +65,14 @@ namespace Dune
     template<typename T1, typename T2>
     void setConvergenceData(const T1& norm, const T2& quantity)
     {
-      if(!_params.hasKey("__CONVERGENCE_TEST.NormType"))
-        DUNE_THROW(Dune::IOError, "Mandatory parameter __CONVERGENCE_TEST.NormType is not set!");
-      if(!_params.hasKey("__CONVERGENCE_TEST.QuantityName"))
-        DUNE_THROW(Dune::IOError, "Mandatory parameter __CONVERGENCE_TEST.QuantityName is not set!");
+      // some error handling
+      if(!_params.hasKey("__convergencetest.normkey"))
+        DUNE_THROW(Dune::IOError, "__convergencetest.normkey is not set!");
+      if(!_params.hasKey("__convergencetest.scalekey"))
+        DUNE_THROW(Dune::IOError, "__convergencetest.scalekey is not set!");
 
-      set<T1>(_params["__CONVERGENCE_TEST.NormType"], norm);
-      set<T2>(_params["__CONVERGENCE_TEST.QuantityName"], quantity);
+      set<T1>(_params["__convergencetest.normkey"], norm);
+      set<T2>(_params["__convergencetest.scalekey"], quantity);
     }
 
     template<typename T>

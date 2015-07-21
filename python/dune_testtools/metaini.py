@@ -122,7 +122,7 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
     configurations = [parse]
 
     # HOOK: PRE_EXPANSION
-    apply_commands(configurations, cmds[CommandType.PRE_EXPANSION])
+    apply_commands(configurations, cmds[CommandType.PRE_EXPANSION], all_cmds=cmds)
 
     # Preprocessing expansion: Sort and group all expand commands by their argument:
     expanddict = {}
@@ -140,10 +140,10 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
     cmds[CommandType.AT_EXPANSION] = expandlist
 
     # Now apply expansion through the machinery
-    apply_commands(configurations, cmds[CommandType.AT_EXPANSION])
+    apply_commands(configurations, cmds[CommandType.AT_EXPANSION], all_cmds=cmds)
 
     # HOOK: POST_EXPANSION
-    apply_commands(configurations, cmds[CommandType.POST_EXPANSION])
+    apply_commands(configurations, cmds[CommandType.POST_EXPANSION], all_cmds=cmds)
 
     # define functions needed for resolving key-dependent values
     def needs_resolution(d):
@@ -168,7 +168,7 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
                 value = d[key]
 
     # HOOK: PRE_RESOLUTION
-    apply_commands(configurations, cmds[CommandType.PRE_RESOLUTION])
+    apply_commands(configurations, cmds[CommandType.PRE_RESOLUTION], all_cmds=cmds)
 
     # resolve all key-dependent names present in the configurations
     for c in configurations:
@@ -180,10 +180,10 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
             resolve_key_dependencies(c)
 
     # HOOK: POST_RESOLUTION
-    apply_commands(configurations, cmds[CommandType.POST_RESOLUTION])
+    apply_commands(configurations, cmds[CommandType.POST_RESOLUTION], all_cmds=cmds)
 
     # HOOK: PRE_FILTERING
-    apply_commands(configurations, cmds[CommandType.PRE_FILTERING])
+    apply_commands(configurations, cmds[CommandType.PRE_FILTERING], all_cmds=cmds)
 
     # Apply filtering
     if blackFilter:
@@ -206,7 +206,7 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
         configurations = [c.filter(whiteFilter) for c in configurations]
 
     # remove duplicate configurations - we added hashing to the DotDict class just for this purpose.
-    configurations = [c for c in set(configurations)]
+    configurations = [c for c in sorted(set(configurations))]
 
     # Implement the naming scheme through the special key __name
     if addNameKey:
@@ -221,6 +221,15 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
 
     # HOOK: POST_FILTERING
     apply_commands(configurations, cmds[CommandType.POST_FILTERING])
+
+    # Strip escapes TODO: Which charaters should be escaped not to mess with our code?
+    possibly_escaped_chars = "[]{}="
+    for c in configurations:
+        for k, v in list(c.items()):
+            escaped_value = v
+            for char in possibly_escaped_chars:
+                escaped_value = strip_escapes(escaped_value, char)
+            c[k] = escaped_value
 
     return configurations
 
