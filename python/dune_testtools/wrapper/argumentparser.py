@@ -13,4 +13,8 @@ def get_args():
     parser.add_argument('-e', '--exec', help='The executable', required=True)
     parser.add_argument('-i', '--ini', help='The inifile', required=True)
     parser.add_argument('-s', '--source', help='The source directory')
+    parser.add_argument('--mpi-exec', help='The mpi executable')
+    parser.add_argument('--mpi-numprocflag', help='The flag for setting the number of processes')
+    parser.add_argument('--mpi-preflags', nargs='*', help='The mpi preflags')
+    parser.add_argument('--mpi-postflags', nargs='*', help='The mpi preflags')
     return vars(parser.parse_args())
