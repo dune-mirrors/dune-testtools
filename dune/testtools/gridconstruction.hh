@@ -353,7 +353,7 @@ private:
  *
  * The following keys are recognized:
  * - gmshFile : A gmsh file to load from
- * - dgfFile : A DGF File to load from
+ * - dgfFile : a DGF file to load from
  * - lowerleft : lowerleft corner of a structured grid
  * - upperright : upperright corner of a structured grid
  * - elements : number of elements in a structured grid
@@ -442,10 +442,12 @@ private:
  * The grid is constructed through different mechanism with
  * the following priority order:
  * 1) GMSH import
+ * 2) DGF import
  * 2) construct a structured grid from the given parameters
  *
  * The following keys are recognized:
  * - gmshFile : A gmsh file to load from
+ * - dgfFile : a DGF file to load from
  * - lowerleft : lowerleft corner of a structured grid
  * - upperright : upperright corner of a structured grid
  * - elements : number of elements in a structured grid
