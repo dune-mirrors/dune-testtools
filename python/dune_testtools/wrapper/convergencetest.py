@@ -1,9 +1,9 @@
 from __future__ import absolute_import
-from ..parser import *
-from ..metaini import *
-from ..command import meta_ini_command, CommandType
-from ..command_infrastructure import *
-from ..writeini import write_dict_to_ini
+from dune_testtools.parser import *
+from dune_testtools.metaini import *
+from dune_testtools.command import meta_ini_command, CommandType
+from dune_testtools.command_infrastructure import *
+from dune_testtools.writeini import write_dict_to_ini
 import os
 import sys
 import math

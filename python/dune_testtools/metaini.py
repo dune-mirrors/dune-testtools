@@ -48,13 +48,13 @@ Known issues:
 - the code could use a lot more error checking
 """
 from __future__ import absolute_import
-from .escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from .parser import parse_ini_file, CommandToApply
-from .writeini import write_dict_to_ini
-from .dotdict import DotDict
+from dune_testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
+from dune_testtools.parser import parse_ini_file, CommandToApply
+from dune_testtools.writeini import write_dict_to_ini
+from dune_testtools.dotdict import DotDict
 from copy import deepcopy
-from .command import meta_ini_command, CommandType, apply_commands, command_count
-from .uniquenames import *
+from dune_testtools.command import meta_ini_command, CommandType, apply_commands, command_count
+from dune_testtools.uniquenames import *
 from six.moves import range
 
 
