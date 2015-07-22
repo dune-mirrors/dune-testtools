@@ -6,3 +6,7 @@ if (dune-alugrid_FOUND)
 endif(dune-alugrid_FOUND)
 target_link_libraries(constructiontest ${DUNE_LIBS})
 add_test(constructiontest constructiontest)
+
+if(MPI_FOUND)
+  add_test(NAME constructiontest-parallel COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} "2" constructiontest)
+endif(MPI_FOUND)
