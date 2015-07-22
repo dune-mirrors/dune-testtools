@@ -490,7 +490,14 @@ public:
       if (params.hasKey("alu.elements"))
         elements = params.get<std::array<unsigned int, griddim> >("alu.elements");
 
-      grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(lowerLeft, upperRight, elements);
+      Dune::StructuredGridFactory<Grid> factory;
+      if (elType == Dune::simplex)
+        grid = factory.createSimplexGrid(lowerLeft, upperRight, elements);
+      else if (elType == Dune::cube)
+        grid = factory.createCubeGrid(lowerLeft, upperRight, elements);
+      else
+        DUNE_THROW(Dune::GridError,
+            "The element type specified for the grid is unknown to the IniGridFactory!");
     }
     grid->loadBalance();
     int refinement = params.get<int>("alu.refinement", 0);
