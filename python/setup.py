@@ -32,4 +32,5 @@ setup(name='dune-testtools',
       packages=['dune_testtools', 'dune_testtools.wrapper'],
       install_requires=['pyparsing'],
       tests_require=['pytest'],
-      cmdclass={'test': PyTest})
+      cmdclass={'test': PyTest},
+      scripts=['./scripts/expand_metaini.py', './scripts/extract_static.py', './scripts/analysis.py', './scripts/has_static_section.py'])

@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+
 from dune_testtools.metaini import expand_meta_ini, write_configuration_to_ini
 from dune_testtools.static_metaini import extract_static_info
 import argparse
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -8,6 +11,7 @@ def get_args():
     parser.add_argument('-d', '--dir', help='The directory to put the output in')
     parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from cmake and should return data to it')
     return vars(parser.parse_args())
+
 
 # analyse the given arguments
 args = get_args()
@@ -21,7 +25,6 @@ metaini["names"] = []  # TODO this should  have underscores!
 metaini["labels"] = {}
 
 # extract the static information from the meta ini file
-from dune_testtools.static_metaini import extract_static_info
 static_info = extract_static_info(args["ini"])
 
 # write the configurations to the file specified in the name key.

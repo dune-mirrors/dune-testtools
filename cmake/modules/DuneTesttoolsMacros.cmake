@@ -111,7 +111,7 @@ function(add_static_variants)
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.static_metaini --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+  execute_process(COMMAND extract_static.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
@@ -167,7 +167,7 @@ function(add_system_test_per_target)
   endif()
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.metaini --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
+  execute_process(COMMAND expand_metaini.py --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")
@@ -286,8 +286,7 @@ function(add_dune_system_test)
                                ${DEBUG}
                                TARGETBASENAME ${SYSTEMTEST_BASENAME})
   else()
-    execute_process(COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE}
-                    ${DUNE_TESTTOOLS_PATH}/python/scripts/has_static_section.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}
+    execute_process(COMMAND has_static_section.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}
                     RESULT_VARIABLE res)
     if(${res})
       message(STATUS "The meta ini file specifies static variations!")
