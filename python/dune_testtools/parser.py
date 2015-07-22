@@ -73,7 +73,7 @@ class MetaIniParser(object):
         for command in tokens[2:]:
             self.log("  with an applied command: '{}'".format(command))
             commandtuple = CommandToApply(command[0], command[1:], self._currentGroup + tokens[0].strip())
-            from .command import command_registry
+            from dune_testtools.command import command_registry
             self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
 
     def setNonKeyValueLine(self, origString, loc, tokens):
@@ -84,7 +84,7 @@ class MetaIniParser(object):
         for command in tokens[1:]:
             self.log("  with an applied command: '{}'".format(command))
             commandtuple = CommandToApply(command[0], command[1:], '__local.conditionals.' + str(self._counter))
-            from .command import command_registry
+            from dune_testtools.command import command_registry
             self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
         # increase the counter
         self._counter = self._counter + 1

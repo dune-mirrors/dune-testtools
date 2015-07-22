@@ -111,6 +111,6 @@ def call(executable, metaini=None):
 # The script called by cmake
 if __name__ == "__main__":
     # Parse the given arguments
-    from .argumentparser import get_args
+    from dune_testtools.wrapper.argumentparser import get_args
     args = get_args()
     sys.exit(call(args["exec"], args["ini"]))

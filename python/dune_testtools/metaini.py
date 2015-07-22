@@ -301,7 +301,7 @@ if __name__ == "__main__":
     metaini["labels"] = {}
 
     # extract the static information from the meta ini file
-    from .static_metaini import extract_static_info
+    from dune_testtools.static_metaini import extract_static_info
     static_info = extract_static_info(args["ini"])
 
     # write the configurations to the file specified in the name key.
@@ -313,5 +313,5 @@ if __name__ == "__main__":
         write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
-        from .cmakeoutput import printForCMake
+        from dune_testtools.cmakeoutput import printForCMake
         printForCMake(metaini)
