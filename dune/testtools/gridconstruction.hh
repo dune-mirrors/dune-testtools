@@ -247,7 +247,6 @@ public:
     grid->refineOptions(keepPhysicalOverlap);
 
     int refinement = params.get<int>("yaspgrid.refinement", 0);
-    std::cout << "refining " << refinement << std::endl;
     grid->globalRefine(refinement);
   }
 
@@ -329,7 +328,6 @@ public:
     grid->refineOptions(keepPhysicalOverlap);
 
     int refinement = params.get<int>("yaspgrid.refinement", 0);
-    std::cout << "refining " << refinement << std::endl;
     grid->globalRefine(refinement);
   }
 

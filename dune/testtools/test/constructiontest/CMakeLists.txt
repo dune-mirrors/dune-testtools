@@ -1,5 +1,5 @@
 add_executable(constructiontest constructiontest.cc)
-dune_symlink_to_source_files(FILES tree1.ini)
+dune_symlink_to_source_files(FILES ini test.msh)
 add_dune_ug_flags(constructiontest)
 if (dune-alugrid_FOUND)
   add_dune_dune_alugrid_flags(constructiontest)
