@@ -4,6 +4,7 @@ import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
+
 def dune_testtools_scripts():
     return ['./scripts/analysis.py',
             './scripts/expand_metaini.py',
@@ -13,6 +14,7 @@ def dune_testtools_scripts():
             './wrapper/execute.py',
             './wrapper/execute_parallel.py',
             './wrapper/vtkcompare.py']
+
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -31,6 +33,7 @@ class PyTest(TestCommand):
         import pytest
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
+
 
 setup(name='dune-testtools',
       version='0.1',
