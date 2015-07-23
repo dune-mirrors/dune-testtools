@@ -2,8 +2,8 @@ add_dune_system_test(SOURCE source.cc
 	                 BASENAME parallel
 	                 INIFILE test.mini
 	                 CREATED_TARGETS output
-	                 SCRIPT "${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_parallel.py"
-	                 DEBUG)
+	                 SCRIPT execute_parallel.py
+	                 ${DEBUG_MACRO_TESTS})
 
 dune_assert(COND TARGET parallel_1 MESSAGE "parallel: A target named parallel_1 should have been generated")
 dune_assert(COND TARGET parallel_2 MESSAGE "parallel: A target named parallel_2 should have been generated")

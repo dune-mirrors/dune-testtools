@@ -163,7 +163,7 @@ function(add_system_test_per_target)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
-    set(TARGVAR_SCRIPT ${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_executable.py)
+    set(TARGVAR_SCRIPT execute.py)
   endif()
 
   # expand the given meta ini file into the build tree
@@ -207,20 +207,17 @@ function(add_system_test_per_target)
       # get the extension of the ini file (can be user defined)
       get_filename_component(iniext ${inifile} EXT)
 
-      # if the script contains the py extension remove it because we execute it as a module
-      get_filename_component(module ${TARGVAR_SCRIPT} NAME_WE)
-
       if(${DOSOMETHING})
         if(NOT ${MPI_CXX_FOUND})
           add_test(NAME ${target}_${ininame}
-                   COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
+                   COMMAND ${TARGVAR_SCRIPT}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                   )
         else()
           add_test(NAME ${target}_${ininame}
-                   COMMAND env PYTHONPATH=$PYTHONPATH:${DUNE_TESTTOOLS_PATH}/python ${PYTHON_EXECUTABLE} -m dune_testtools.wrapper.${module}
+                   COMMAND ${TARGVAR_SCRIPT}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}

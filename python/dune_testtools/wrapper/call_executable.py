@@ -4,7 +4,6 @@ from __future__ import absolute_import
 from dune_testtools.wrapper.argumentparser import get_args
 from dune_testtools.parser import parse_ini_file
 import subprocess
-import sys
 
 
 def call(executable, inifile=None):
@@ -18,10 +17,3 @@ def call(executable, inifile=None):
         command.append(iniargument)
 
     return subprocess.call(command)
-
-
-# This is also used as the standard wrapper by cmake
-if __name__ == "__main__":
-    # Parse the given arguments
-    args = get_args()
-    sys.exit(call(args["exec"], args["ini"]))

@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
+
 from __future__ import absolute_import
 from dune_testtools.metaini import expand_meta_ini
 import argparse

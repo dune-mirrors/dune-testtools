@@ -4,6 +4,15 @@ import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
+def dune_testtools_scripts():
+    return ['./scripts/analysis.py',
+            './scripts/expand_metaini.py',
+            './scripts/extract_static.py',
+            './scripts/has_static_section.py',
+            './wrapper/convergencetest.py',
+            './wrapper/execute.py',
+            './wrapper/execute_parallel.py',
+            './wrapper/vtkcompare.py']
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -33,4 +42,4 @@ setup(name='dune-testtools',
       install_requires=['pyparsing'],
       tests_require=['pytest'],
       cmdclass={'test': PyTest},
-      scripts=['./scripts/expand_metaini.py', './scripts/extract_static.py', './scripts/analysis.py', './scripts/has_static_section.py'])
+      scripts=dune_testtools_scripts())
