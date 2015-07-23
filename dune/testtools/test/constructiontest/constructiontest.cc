@@ -7,7 +7,7 @@
 
 #include<dune/testtools/gridconstruction.hh>
 
-void test_ini(char* filename) {
+void test_ini(std::string filename) {
 
   std::cout << std::endl << "******** starting ini file: " << filename << std::endl;
 
