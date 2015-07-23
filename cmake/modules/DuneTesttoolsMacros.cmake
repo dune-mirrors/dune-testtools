@@ -254,7 +254,7 @@ function(add_dune_system_test)
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT SYSTEMTEST_SCRIPT)
-    set(SYSTEMTEST_SCRIPT call_executable)
+    set(SYSTEMTEST_SCRIPT execute.py)
   endif()
 
   # we provide two signatures: either a source(s) is given or a target(s)
