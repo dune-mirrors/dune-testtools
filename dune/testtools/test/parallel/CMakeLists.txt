@@ -2,8 +2,8 @@ add_dune_system_test(SOURCE source.cc
 	                 BASENAME parallel
 	                 INIFILE test.mini
 	                 CREATED_TARGETS output
-	                 SCRIPT "${DUNE_TESTTOOLS_PATH}/python/dune_testtools/wrapper/call_parallel.py"
-	                 DEBUG)
+	                 SCRIPT execute_parallel.py
+	                 ${DEBUG_MACRO_TESTS})
 
 add_dune_mpi_flags(${output})
 

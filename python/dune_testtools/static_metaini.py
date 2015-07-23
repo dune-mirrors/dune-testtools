@@ -36,16 +36,3 @@ def extract_static_info(metaini):
             static[conf["__exec_suffix"]] = conf["__static"]
 
     return static
-
-
-if __name__ == "__main__":
-    # read command line options
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
-    args = vars(parser.parse_args())
-
-    # call the macro
-    static = extract_static_info(args["ini"])
-
-    # print to CMake
-    printForCMake(static)

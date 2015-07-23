@@ -1,5 +1,5 @@
-#!/usr/bin/python3
-from __future__ import absolute_import
+#!/usr/bin/env python
+
 from dune_testtools.metaini import expand_meta_ini
 import argparse
 import sys
@@ -9,7 +9,7 @@ import sys
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--ini', help='The inifile', required=True)
 args = vars(parser.parse_args())
-configurations = expand_meta_ini(args['ini'], whiteFilter=("__static"), addNameKey=False)
+configurations = expand_meta_ini(args['ini'], whiteFilter=("__static",), addNameKey=False)
 if len(configurations) > 1:
         sys.exit(1)
 sys.exit(0)
