@@ -5,7 +5,7 @@
 import sys
 
 from dune_testtools.wrapper.argumentparser import get_args
-from dune_testtools.wrapper.call_parallel import call
+from dune_testtools.wrapper.call_executable import call_parallel
 
 
 # Parse the given arguments
