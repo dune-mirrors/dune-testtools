@@ -1,9 +1,9 @@
 from __future__ import absolute_import
-from ..parser import *
-from ..metaini import *
-from ..command import meta_ini_command, CommandType
-from ..command_infrastructure import *
-from ..writeini import write_dict_to_ini
+from dune_testtools.parser import *
+from dune_testtools.metaini import *
+from dune_testtools.command import meta_ini_command, CommandType
+from dune_testtools.command_infrastructure import *
+from dune_testtools.writeini import write_dict_to_ini
 import os
 import sys
 import math
@@ -111,6 +111,6 @@ def call(executable, metaini=None):
 # The script called by cmake
 if __name__ == "__main__":
     # Parse the given arguments
-    from .argumentparser import get_args
+    from dune_testtools.wrapper.argumentparser import get_args
     args = get_args()
     sys.exit(call(args["exec"], args["ini"]))

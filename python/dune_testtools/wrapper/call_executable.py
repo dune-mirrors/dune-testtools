@@ -1,8 +1,8 @@
 """ A module that manages the call to C++ executables """
 from __future__ import absolute_import
 
-from .argumentparser import get_args
-from ..parser import parse_ini_file
+from dune_testtools.wrapper.argumentparser import get_args
+from dune_testtools.parser import parse_ini_file
 import subprocess
 import sys
 

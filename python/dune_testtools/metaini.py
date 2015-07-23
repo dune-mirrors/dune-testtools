@@ -48,13 +48,13 @@ Known issues:
 - the code could use a lot more error checking
 """
 from __future__ import absolute_import
-from .escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from .parser import parse_ini_file, CommandToApply
-from .writeini import write_dict_to_ini
-from .dotdict import DotDict
+from dune_testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
+from dune_testtools.parser import parse_ini_file, CommandToApply
+from dune_testtools.writeini import write_dict_to_ini
+from dune_testtools.dotdict import DotDict
 from copy import deepcopy
-from .command import meta_ini_command, CommandType, apply_commands, command_count
-from .uniquenames import *
+from dune_testtools.command import meta_ini_command, CommandType, apply_commands, command_count
+from dune_testtools.uniquenames import *
 from six.moves import range
 
 
@@ -301,7 +301,7 @@ if __name__ == "__main__":
     metaini["labels"] = {}
 
     # extract the static information from the meta ini file
-    from .static_metaini import extract_static_info
+    from dune_testtools.static_metaini import extract_static_info
     static_info = extract_static_info(args["ini"])
 
     # write the configurations to the file specified in the name key.
@@ -313,5 +313,5 @@ if __name__ == "__main__":
         write_configuration_to_ini(c, metaini, static_info, args)
 
     if args["cmake"]:
-        from .cmakeoutput import printForCMake
+        from dune_testtools.cmakeoutput import printForCMake
         printForCMake(metaini)
