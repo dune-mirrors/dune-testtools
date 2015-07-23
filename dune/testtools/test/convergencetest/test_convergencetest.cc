@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 	Dune::ParameterTreeParser::readINITree(argv[1], params);
 
     // get some keys
-	int level = std::stoi(params["grid.level"]);
+	int level = params.get<int>("grid.level");
 	//////////////////////////////////////////////
 	// here the programme could do grid refinement
 	//////////////////////////////////////////////
