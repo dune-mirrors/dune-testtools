@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import, print_function
 from dune_testtools.metaini import expand_meta_ini
 from dune_testtools.parser import parse_ini_file, MetaIniParser
 from dune_testtools.writeini import write_to_stream
 import argparse
 import sys
 import os
+
+# python 2/3 compatibility
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 def check_parser(ini):
