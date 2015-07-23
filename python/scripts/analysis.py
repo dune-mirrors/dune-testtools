@@ -11,7 +11,8 @@ import os
 try:
     input = raw_input
 except NameError:
-     pass
+    pass
+
 
 def check_parser(ini):
     try:
