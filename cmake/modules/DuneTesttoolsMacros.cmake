@@ -73,9 +73,6 @@ if(PYTHON_VERSION_STRING VERSION_LESS 2.7)
   message(FATAL_ERROR "dune-testtools requires at least python 2.7")
 endif()
 
-# We want to run the python test suite during make test
-add_test(NAME pytest COMMAND ${PYTHON_EXECUTABLE} -m pytest tests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python)
-
 # Check for the existence of the python-pyparsing package
 if(NOT CMAKE_CROSSCOMPILING)
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pyparsing" RESULT_VARIABLE PYPARSING_RETURN)
