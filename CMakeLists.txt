@@ -23,6 +23,8 @@ set(DUNE_TEST_MAGIC OFF)
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
+dune_install_python_package(PATH python)
+
 add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("cmake/modules")
