@@ -15,10 +15,11 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules"
 #include the dune macros
 include(DuneMacros)
 
-# disable the upstream testing magic
-set(DUNE_TEST_MAGIC OFF)
 # start a dune project with information from dune.module
 dune_project()
+
+# disable the upstream testing magic
+set(DUNE_TEST_MAGIC OFF)
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
