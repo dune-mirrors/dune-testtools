@@ -90,7 +90,11 @@ class DotDict(dict):
         """
         if tuple(sorted(self.keys())) != tuple(sorted(other.keys())):
             return tuple(sorted(self.keys())) < tuple(sorted(other.keys()))
-        return True not in [self[k] >= other[k] for k in sorted(self.keys())]
+        for k in sorted(self.keys()):
+            if self[k] < other[k]:
+                return True
+            if self[k] > other[k]:
+                return False
 
     def get(self, key, default=None):
         try:

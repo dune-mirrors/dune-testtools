@@ -32,3 +32,8 @@ def expect_exception(excepttype, f, *args):
 
 def test_exception_on_depending_on_unique_key(dir):
     assert(expect_exception(ValueError, expand_meta_ini, dir + "wrongunique.ini"))
+
+def test_total_order_on_configs(dir):
+    configs = expand_meta_ini(dir + "metaini1.mini", addNameKey=True)
+    for i in range(len(configs)-1):
+        assert(configs[i] < configs[i+1])
