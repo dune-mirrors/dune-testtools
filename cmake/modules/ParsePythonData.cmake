@@ -1,13 +1,29 @@
-# A CMake module defining macros to parse data from python scripts
+# A CMake module defining the interface to read data from python
 #
-# parse_python_data(PREFIX prefix
-#                   INPUT input
-#                  )
+# .. note::
+#    This is intended for internal use only.
 #
-# The <prefix> will be used for the variables. For each <key> in the data,
-# a variable <prefix>_<key> will be available in the scope of the call.
-# input: The string coming from the python output. Note, that it has to be
-# put in double quotes.
+# .. cmake_function:: parse_python_data
+#
+#    .. cmake_param:: PREFIX
+#       :single:
+#       :required:
+#
+#       The prefix to give to the CMake variables.
+#
+#    .. cmake_param:: INPUT
+#       :single:
+#       :required:
+#
+#       The input string, which is the stdout of a python script
+#       that used the :code:`printForCMake` function from :code:`dune.testtools`
+#
+#    The function that implements the data interface between python and
+#    cmake from the cmake side.
+#
+#    .. note::
+#       This is intended for internal use only.
+#
 
 function(parse_python_data)
   set(SINGLE PREFIX)
