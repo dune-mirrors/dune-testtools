@@ -1,12 +1,5 @@
 .. title:: dune-testtools CMake reference
 
-Manual
-======
-.. toctree::
-   :maxdepth: 1
-
-   manual
-
 CMake Command reference
 =======================
 .. toctree::
