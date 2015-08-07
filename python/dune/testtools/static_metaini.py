@@ -1,8 +1,8 @@
 from __future__ import absolute_import
-from dune_testtools.parser import CommandToApply
-from dune_testtools.metaini import expand_meta_ini
-from dune_testtools.cmakeoutput import printForCMake
-from dune_testtools.command import apply_commands
+from dune.testtools.parser import CommandToApply
+from dune.testtools.metaini import expand_meta_ini
+from dune.testtools.cmakeoutput import printForCMake
+from dune.testtools.command import apply_commands
 import sys
 import argparse
 

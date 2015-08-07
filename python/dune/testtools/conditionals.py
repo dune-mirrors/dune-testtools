@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from pyparsing import alphanums, printables, Word, Literal, restOfLine, SkipTo
-from dune_testtools.command import meta_ini_command, CommandType
+from dune.testtools.command import meta_ini_command, CommandType
 
 
 def _grammar(key):

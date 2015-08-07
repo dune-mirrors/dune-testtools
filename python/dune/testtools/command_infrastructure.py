@@ -30,7 +30,7 @@ x = caps
 """
 
 from __future__ import absolute_import
-from dune_testtools.escapes import escaped_split
+from dune.testtools.escapes import escaped_split
 
 _registry = {}
 

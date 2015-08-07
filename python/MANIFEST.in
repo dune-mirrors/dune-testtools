@@ -1,2 +1,2 @@
-recursive-include dune_testtools *.py
+recursive-include dune/testtools *.py
 

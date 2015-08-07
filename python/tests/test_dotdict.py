@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from dune_testtools.dotdict import DotDict
+from dune.testtools.dotdict import DotDict
 
 
 def test_dotdict():

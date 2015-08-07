@@ -35,13 +35,14 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-setup(name='dune-testtools',
+setup(name='dune.testtools',
       version='0.1',
+      namespace_packages=['dune'],
       description='Python testtools for systemtesting in DUNE',
       author='Dominic Kempf <dominic.kempf@iwr.uni-heidelberg.de>, Timo Koch <timo.koch@iws.uni-stuttgart.de>',
       author_email='no_mailinglist_yet@dune-testtools.de',
       url='http://conan2.iwr.uni-heidelberg.de/git/quality/dune-testtools',
-      packages=['dune_testtools', 'dune_testtools.wrapper'],
+      packages=['dune.testtools', 'dune.testtools.wrapper'],
       install_requires=['pyparsing', 'six'],
       tests_require=['pytest'],
       cmdclass={'test': PyTest},

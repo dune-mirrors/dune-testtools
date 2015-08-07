@@ -5,7 +5,7 @@ from __future__ import print_function
 from pyparsing import Literal, Word, alphanums, Combine, OneOrMore, ZeroOrMore, QuotedString, Optional, restOfLine, printables, oneOf, Group, LineEnd
 from collections import namedtuple
 import os.path
-from dune_testtools.dotdict import DotDict
+from dune.testtools.dotdict import DotDict
 
 CommandToApply = namedtuple('CommandToApply', ['name', 'args', 'key'])
 
@@ -21,7 +21,7 @@ class MetaIniParser(object):
         self._currentDict = DotDict()
 
         # To avoid cyclic dependencies, we do NOT do this import in the module header
-        from dune_testtools.command import command_registry, CommandType, command_count
+        from dune.testtools.command import command_registry, CommandType, command_count
         self._foundCommands = {i: [] for i in range(command_count())}
         self._commands = " ".join(command_registry())
         self._parser = self.construct_bnf(assignment=assignment, commentChar=commentChar)
@@ -73,7 +73,7 @@ class MetaIniParser(object):
         for command in tokens[2:]:
             self.log("  with an applied command: '{}'".format(command))
             commandtuple = CommandToApply(command[0], command[1:], self._currentGroup + tokens[0].strip())
-            from dune_testtools.command import command_registry
+            from dune.testtools.command import command_registry
             self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
 
     def setNonKeyValueLine(self, origString, loc, tokens):
@@ -84,7 +84,7 @@ class MetaIniParser(object):
         for command in tokens[1:]:
             self.log("  with an applied command: '{}'".format(command))
             commandtuple = CommandToApply(command[0], command[1:], '__local.conditionals.' + str(self._counter))
-            from dune_testtools.command import command_registry
+            from dune.testtools.command import command_registry
             self._foundCommands[command_registry()[command[0]]._ctype].append(commandtuple)
         # increase the counter
         self._counter = self._counter + 1

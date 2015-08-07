@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-from dune_testtools.static_metaini import extract_static_info
-from dune_testtools.cmakeoutput import printForCMake
+from dune.testtools.static_metaini import extract_static_info
+from dune.testtools.cmakeoutput import printForCMake
 
 
 def get_args():

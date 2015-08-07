@@ -1,5 +1,5 @@
-from dune_testtools.metaini import expand_meta_ini
-from dune_testtools.conditionals import eval_boolean
+from dune.testtools.metaini import expand_meta_ini
+from dune.testtools.conditionals import eval_boolean
 
 
 def test_cond1(dir):
