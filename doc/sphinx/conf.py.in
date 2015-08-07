@@ -24,6 +24,8 @@ import shlex
 
 # -- General configuration ------------------------------------------------
 
+sys.path.append('@DUNE_SPHINX_EXT_PATH@')
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
@@ -38,6 +40,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx_cmake_dune'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
