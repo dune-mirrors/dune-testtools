@@ -12,7 +12,7 @@
       </PointData>
       <CellData Scalars="small">
         <DataArray type="Float32" Name="small" NumberOfComponents="1" format="ascii">
-          1e-16 1e-15
+          1e-9 1e-15
         </DataArray>
       </CellData>
       <Points>
