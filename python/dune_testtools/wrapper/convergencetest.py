@@ -71,15 +71,16 @@ def call(executable, metaini=None):
     # execute all runs with temporary ini files and process the temporary output
     output = []
     for c in configurations:
-        # write a temporary ini file
-        write_dict_to_ini(c, "temp.ini")
+        # write a temporary ini file. Prefix them with the name key to be unique
+        tmp_file = c["__name"] + "_tmp.ini"
+        write_dict_to_ini(c, tmp_file)
 
         # execute the run
         command = ['./' + executable]
         iniinfo = parse_ini_file(metaini)
         if "__inifile_optionkey" in iniinfo:
             command.append(iniinfo["__inifile_optionkey"])
-        command.append('temp.ini')
+        command.append(tmp_file)
 
         if subprocess.call(command):
             return 1
@@ -89,7 +90,7 @@ def call(executable, metaini=None):
 
         # remove temporary files
         os.remove(os.path.basename(c["__name"]) + "." + c["__output_extension"])
-        os.remove("temp.ini")
+        os.remove(tmp_file)
 
     # calculate the rate according to the outputted data
     for idx, c in list(enumerate(configurations))[:-1]:
