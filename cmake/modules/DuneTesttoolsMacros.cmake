@@ -12,10 +12,6 @@
 #    and debugging dune-testtools.
 #
 
-
-message("PYTHON2_EXECUTABLE ${PYTHON2_EXECUTABLE}")
-message("PYTHON2_VERSION_STRING ${PYTHON2_VERSION_STRING}")
-
 dune_require_python_version(2.7)
 #TODO: What is our minimum python3.x requirement?
 
