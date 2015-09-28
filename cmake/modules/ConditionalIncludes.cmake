@@ -1,5 +1,10 @@
 # A module managing conditional includes for the cmake build system
 #
+# .. note::
+#
+#    This currently not used productively. The alternative is to use
+#    the ninja generator, which does dependency extraction different.
+#
 # CMake does not rely on the compiler to determine the dependencies of a
 # target. Unfortunately, it does not provide a full c preprocessor standard
 # implementation either. The issue is documented here:
@@ -15,24 +20,49 @@
 # that grid.
 #
 # This module introduces a work-around based on the target property
-# IMPLICIT_DEPENDS_INCLUDE_TRANSFORM, which allows giving preprocessor macros
+# :code:`IMPLICIT_DEPENDS_INCLUDE_TRANSFORM`, which allows giving preprocessor macros
 # to the cmake dependency parser. Those macros are applied to include lines only.
 #
 # Usage:
 #
 # The following code snippet, one would usually use
 #
-# #ifdef SOME_VAR
-# #include <some/header.hh>
-# #endif
+# ::
+#
+#    #ifdef SOME_VAR
+#    #include <some/header.hh>
+#    #endif
 #
 # translate to the following statement:
 #
-# #include SOME_VAR_CONDITIONAL_INCLUDE(some/header.hh)
+# ::
 #
-# The new syntax is only valid, if the macro resolve_conditional_includes has been
+#    #include SOME_VAR_CONDITIONAL_INCLUDE(some/header.hh)
+#
+# The new syntax is only valid, if the macro :code:`resolve_conditional_includes` has been
 # called with the target (AFTER all compile definitions are added) and the list of
 # compile definitions, that should be resolved.
+#
+# .. cmake_function:: resolve_conditional_includes
+#
+#    .. cmake_param:: target
+#       :required:
+#       :single:
+#       :positional:
+#
+#       The CMake target to operate on.
+#
+#    .. cmake_param:: definitions
+#       :required:
+#       :single:
+#       :positional:
+#
+#       The list of preprocessor defines that includes depend on.
+#
+#    Implement a special mechanism for the resolution of conditional
+#    includes. For a description of the problem and the proposed solution
+#    see :ref:`ConditionalIncludes`
+#
 
 macro(resolve_conditional_includes target definitions)
   # get the compile definitions currently set on the target

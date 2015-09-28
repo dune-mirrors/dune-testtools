@@ -1,60 +1,40 @@
-""" A module for expanding meta ini files into sets of ini files.
+"""
+.. module:: metaini
+    :synopsis: A module for expanding meta ini files into sets of ini files.
 
 This module provides methods to expand a meta ini files into a set
-of corresponding ini files. The meta ini file format is defined as
-follows.
-
-- The syntax of a regular ini file with "=" as assignment operator for
-  key/value pairs is entirely valid. Every ini file is also a meta ini file.
-- A user can use an arbitrary amount of additional assignment operators.
-  These must be of the form "=<type>=", where <type> is any string identifying
-- Such custom assignment operators are followed by a comma separated list of
-  values instead of a single value. All assignments using the same operator
-  must use the same number of values.
-- For each assignment operator present in the meta ini file <n> sets of key/value pairs
-  are generated, where <n> is the number of entries in the lists after that
-  assignment operator.
-- The sets of key/value pairs from different assignment operators are combined
-  to larger set by taking the cartesian product of the individual sets.
-- The assignment operator "==" (<type> is empty) is special, in the sense,
-  that it will always build a product, even with other key/value pairs using "=="
-- You can have values depending on other key/value pairs. The syntax for such dependency
-  is having a key (use dots for nested keys) in curly brackets inside the value.
-  Those values are replaced by the actual value after expanding the meta ini file
-  into the set of ini files.
-- The output ini files use the meta ini name as a base name. By default, an
-  increasing number is appended to the basename.
-- You can also set a custom name for the generated ini file by setting the
-  reserved key "__name" in your meta ini file and use the {} syntax for meaningful naming.
-- The characters '=', ',',' {','}','[' and ']' must be escaped with a backslash in order
-  to be used in keys or values. You are even better off avoiding them.
+of corresponding ini files.
 
 This is an example aiming at showing the full power of the meta ini syntax:
 
-==== START example
-__name = {model.parameters}_gridlevel{grid.level}
+.. code-block:: ini
+   :caption: An example ini file
 
-[grid]
-level =grid= 3, 4, 5
-screenOutput =grid= 1, 0, 0 #screen output for level >= 4 kills me
+    __name = {model.parameters}_gridlevel{grid.level}
 
-[model]
-parameters == simple, complex
-==== END example
+    [grid]
+    level = 3, 4, 5 | expand out
+    screenOutput = 1, 0, 0 | expand out #screen output for level >= 4 kills me
 
-The example produces a total of 6 ini files.
+    [model]
+    parameters = simple, complex | expand
+
+.. note::
+
+   The example produces a total of 6 ini files.
 
 Known issues:
+
 - the code could use a lot more error checking
 """
 from __future__ import absolute_import
-from dune_testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
-from dune_testtools.parser import parse_ini_file, CommandToApply
-from dune_testtools.writeini import write_dict_to_ini
-from dune_testtools.dotdict import DotDict
+from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
+from dune.testtools.parser import parse_ini_file, CommandToApply
+from dune.testtools.writeini import write_dict_to_ini
+from dune.testtools.dotdict import DotDict
 from copy import deepcopy
-from dune_testtools.command import meta_ini_command, CommandType, apply_commands, command_count
-from dune_testtools.uniquenames import *
+from dune.testtools.command import meta_ini_command, CommandType, apply_commands, command_count
+from dune.testtools.uniquenames import *
 from six.moves import range
 
 
@@ -87,32 +67,32 @@ def _expand_command(key=None, configs=None):
 
 
 def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None, blackFilter=None, addNameKey=True):
-    """ take a meta ini file and construct the set of ini files it defines
+    """
+    Take a meta ini file and construct the set of ini files it defines
 
-    Arguments:
-    ----------
-    filename : string
-        The filename of the meta ini file
+    Required Arguments:
 
-    Keyword Arguments:
-    ------------------
-    assignment : string
-        The standard assignment operator
-    commentChar: string
-        A  character that defines comments. Everything on a line
-        after such character is ignored during the parsing process.
-    whiteFilter : tuple
-        Filter the given keys. The elements of the returned set of
-        configurations will be unique.
-    blackFilter : tuple
-        Remove the given keys from the output. The elements of the returned set of
-        configurations will be unique. If both the whiteFilter and the blackFilter
-        option are used, the blackFilter will be applied first.
-    addNameKey : bool
-        Whether a key __name should be in the output. Defaults to true, where
-        a unique name key is generated from the given name key and added to the
-        file (even when no generation pattern is given). If set to false, no
-        name key will be in the output, whether a scheme was given or not.
+    :param filename: The filename of the meta ini file
+    :type filename:  string
+
+    Optional Arguments:
+
+    :type commentChar:  string
+    :param commentChar: A  character that defines comments. Everything on a line
+                        after such character is ignored during the parsing process.
+
+    :type whiteFilter:  tuple
+    :param whiteFilter: Filter the given keys. The elements of the returned set of
+                        configurations will be unique.
+
+    :type blackFilter:  tuple
+    :param blackFilter: The standard assignment operator
+
+    :type addNameKey:  bool
+    :param addNameKey: Whether a key ``__name`` should be in the output. Defaults to true, where
+                       a unique name key is generated from the given name key and added to the
+                       file (even when no generation pattern is given). If set to false, no
+                       name key will be in the output, whether a scheme was given or not.
     """
 
     # parse the ini file

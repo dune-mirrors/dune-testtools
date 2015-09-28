@@ -4,10 +4,10 @@
 
 import sys
 
-from dune_testtools.wrapper.argumentparser import get_args
-from dune_testtools.wrapper.call_executable import call
-from dune_testtools.wrapper.fuzzy_compare_vtk import compare_vtk
-from dune_testtools.parser import parse_ini_file
+from dune.testtools.wrapper.argumentparser import get_args
+from dune.testtools.wrapper.call_executable import call
+from dune.testtools.wrapper.fuzzy_compare_vtk import compare_vtk
+from dune.testtools.parser import parse_ini_file
 
 
 # Parse the given arguments

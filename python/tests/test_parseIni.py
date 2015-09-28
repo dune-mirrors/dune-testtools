@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from dune_testtools.parser import parse_ini_file
-from dune_testtools.escapes import count_unescaped
+from dune.testtools.parser import parse_ini_file
+from dune.testtools.escapes import count_unescaped
 
 
 def test_parse1(dir):

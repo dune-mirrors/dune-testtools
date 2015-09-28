@@ -1,19 +1,48 @@
 # Implement configure time assertions to test cmake modules.
 #
-# dune_assert(MESSAGE message
-#            [COND condition]
-#            [TEST_EXISTS name]
-#            [LIST_LENGTH list length]
-#            [WARNING]
-# )
-# 
-# Fail with a fatal error if the given condition evaluates to false.
-# (or with a warning if WARNING has been given). The condition might either
-# be given through COND, which accpets anything the if statement accepts
-# or through one of the following shortcuts:
-# * TEST_EXISTS true if a test of the given name has been added
-# * LIST_LENGTH true if the given list has the given length
+# .. cmake_function:: dune_assert
 #
+#    .. cmake_param:: MESSAGE
+#       :single:
+#       :required:
+#
+#       The message to print if the assertion fails.
+#
+#    .. cmake_param:: COND
+#       :single:
+#
+#       A condition that may be evaluated by the cmake command :code:`if`.
+#
+#    .. cmake_param:: TEST_EXISTS
+#       :single:
+#       :argname: name
+#
+#       A special condition, that tests whether a test of the
+#       given name has been added to cmake. Note that such check
+#       does not exist in CMake. To work around this, the existence
+#       of a test label is checked. This works fine for us, because
+#       the functions in :ref:`DuneSystemtests` apply at least one
+#       label to all generated tests. It might fail for arbitrary tests
+#       though.
+#
+#    .. cmake_param:: LIST_LENGTH
+#       :single:
+#       :argname: list length
+#
+#       A special condition to check whether the length of a given list
+#       equals the expected length.
+#
+#    .. cmake_param:: WARNING
+#       :option:
+#
+#       If given, a failed assertion only throws a warning instead of an error.
+#
+#    Implement configure time assertions in cmake. This may be used to write
+#    unit tests for cmake functions. Any condition that can be evaluated by
+#    cmakes command :code:`if` may be used. Some additional conditions are
+#    implemented, check below documentation for details. Only one conditions
+#    should be given. Giving more than one, will result in all but one being
+#    ignored.
 #
 
 macro(fail_assert message warning)
@@ -47,7 +76,7 @@ function(dune_assert)
     endif()
     return()
   endif()
-  # If we got so far, we should just evaluate the givne if statement.
+  # If we got so far, we should just evaluate the given if statement.
   if(NOT ${ASSERT_COND})
     fail_assert(${ASSERT_MESSAGE} ${ASSERT_WARNING})
     return()

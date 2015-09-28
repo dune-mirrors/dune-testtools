@@ -1,6 +1,6 @@
 """ A test for the vtu fuzzy compare"""
 from __future__ import absolute_import
-from dune_testtools.wrapper.fuzzy_compare_vtk import compare_vtk
+from dune.testtools.wrapper.fuzzy_compare_vtk import compare_vtk
 
 
 def test_0(dir):

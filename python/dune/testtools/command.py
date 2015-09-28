@@ -5,15 +5,15 @@ This is necessary to have a reliably full command registry.
 """
 from __future__ import absolute_import
 
-from dune_testtools.command_infrastructure import meta_ini_command, command_registry, CommandType, apply_commands, command_count
+from dune.testtools.command_infrastructure import meta_ini_command, command_registry, CommandType, apply_commands, command_count
 
 # import all those modules that do define commands.
 # Only this way we can ensure that the registry is completely
 # build up.
-from dune_testtools.uniquenames import *
-from dune_testtools.metaini import *
-from dune_testtools.conditionals import *
-from dune_testtools.wrapper.convergencetest import *
+from dune.testtools.uniquenames import *
+from dune.testtools.metaini import *
+from dune.testtools.conditionals import *
+from dune.testtools.wrapper.convergencetest import *
 
 
 @meta_ini_command(name="tolower")

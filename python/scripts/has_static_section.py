@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from dune_testtools.metaini import expand_meta_ini
+from dune.testtools.metaini import expand_meta_ini
 import argparse
 import sys
 

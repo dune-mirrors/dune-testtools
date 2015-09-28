@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from dune_testtools.metaini import expand_meta_ini
+from dune.testtools.metaini import expand_meta_ini
 
 
 def test_metaini(dir):

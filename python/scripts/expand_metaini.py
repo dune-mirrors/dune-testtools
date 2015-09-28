@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from dune_testtools.metaini import expand_meta_ini, write_configuration_to_ini
-from dune_testtools.static_metaini import extract_static_info
+from dune.testtools.metaini import expand_meta_ini, write_configuration_to_ini
+from dune.testtools.static_metaini import extract_static_info
 import argparse
 
 
@@ -36,5 +36,5 @@ for c in configurations:
     write_configuration_to_ini(c, metaini, static_info, args)
 
 if args["cmake"]:
-    from dune_testtools.cmakeoutput import printForCMake
+    from dune.testtools.cmakeoutput import printForCMake
     printForCMake(metaini)

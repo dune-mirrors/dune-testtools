@@ -5,8 +5,8 @@
 
 import sys
 
-from dune_testtools.wrapper.argumentparser import get_args
-from dune_testtools.wrapper.call_executable import call
+from dune.testtools.wrapper.argumentparser import get_args
+from dune.testtools.wrapper.call_executable import call
 
 # Parse the given arguments
 args = get_args()

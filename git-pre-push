@@ -23,6 +23,6 @@ then
     exit $?
   fi
   echo "Checking for PEP8 compliance"
-  py.test --pep8
+  python -m pytest --pep8
   exit $?
 fi
