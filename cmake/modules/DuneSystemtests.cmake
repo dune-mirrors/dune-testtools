@@ -1,8 +1,4 @@
-# Define the API to add system tests in dune. The most
-# important function is :ref:`add_dune_system_test`, which
-# aims at doing all the work in one line. If you want
-# to split dynamic and static variations manually, use
-# both :ref:`add_static_variants` and :ref:`add_system_test_per_target`.
+# Define the API to add system tests in dune.
 #
 # .. cmake_function:: add_static_variants
 #
@@ -79,7 +75,7 @@
 #
 #       This parameter is only for internal usage.
 #
-#    Given a set of executables (givne as cmake targets), a number of tests is
+#    Given a set of executables (given as cmake targets), a number of tests is
 #    added. The given meta ini file is expanded and each dynamic variant is
 #    connected with each given executable.
 #

@@ -1,8 +1,5 @@
 # A CMake module defining the interface to read data from python
 #
-# .. note::
-#    This is intended for internal use only.
-#
 # .. cmake_function:: parse_python_data
 #
 #    .. cmake_param:: PREFIX

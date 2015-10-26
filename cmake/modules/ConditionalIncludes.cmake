@@ -1,49 +1,11 @@
 # A module managing conditional includes for the cmake build system
 #
-# .. note::
-#
-#    This currently not used productively. The alternative is to use
-#    the ninja generator, which does dependency extraction different.
-#
-# CMake does not rely on the compiler to determine the dependencies of a
-# target. Unfortunately, it does not provide a full c preprocessor standard
-# implementation either. The issue is documented here:
-#
-# http://public.kitware.com/Bug/print_bug_page.php?bug_id=11985
-#
-# Preprocessor-macro-dependant include directives are pretty common in dune.
-# Those are not picked up correctly.
-#
-# In the context of system testing, this is not acceptable. Using static
-# switches to define the grid to be used will be a common pattern. A change to
-# one grid should only trigger rebuilds on those tests, that are actually using
-# that grid.
-#
-# This module introduces a work-around based on the target property
-# :code:`IMPLICIT_DEPENDS_INCLUDE_TRANSFORM`, which allows giving preprocessor macros
-# to the cmake dependency parser. Those macros are applied to include lines only.
-#
-# Usage:
-#
-# The following code snippet, one would usually use
-#
-# ::
-#
-#    #ifdef SOME_VAR
-#    #include <some/header.hh>
-#    #endif
-#
-# translate to the following statement:
-#
-# ::
-#
-#    #include SOME_VAR_CONDITIONAL_INCLUDE(some/header.hh)
-#
-# The new syntax is only valid, if the macro :code:`resolve_conditional_includes` has been
-# called with the target (AFTER all compile definitions are added) and the list of
-# compile definitions, that should be resolved.
-#
 # .. cmake_function:: resolve_conditional_includes
+#
+#    .. cmake_brief::
+#
+#        Implement a special mechanism for the resolution of conditional
+#        includes.
 #
 #    .. cmake_param:: target
 #       :required:
@@ -59,9 +21,48 @@
 #
 #       The list of preprocessor defines that includes depend on.
 #
-#    Implement a special mechanism for the resolution of conditional
-#    includes. For a description of the problem and the proposed solution
-#    see :ref:`ConditionalIncludes`
+# .. note::
+#
+#    This currently not used productively. The alternative is to use
+#    the ninja generator, which does dependency extraction differently.
+#
+#    CMake does not rely on the compiler to determine the dependencies of a
+#    target. Unfortunately, it does not provide a full c preprocessor standard
+#    implementation either. The issue is documented here:
+#
+#    http://public.kitware.com/Bug/print_bug_page.php?bug_id=11985
+#
+#    Preprocessor-macro-dependant include directives are pretty common in dune.
+#    Those are not picked up correctly.
+#
+#    In the context of system testing, this is not acceptable. Using static
+#    switches to define the grid to be used will be a common pattern. A change to
+#    one grid should only trigger rebuilds on those tests, that are actually using
+#    that grid.
+#
+#    This module introduces a work-around based on the target property
+#    :code:`IMPLICIT_DEPENDS_INCLUDE_TRANSFORM`, which allows giving preprocessor macros
+#    to the cmake dependency parser. Those macros are applied to include lines only.
+#
+#    Usage:
+#
+#    The following code snippet, one would usually use
+#
+#    ::
+#
+#       #ifdef SOME_VAR
+#       #include <some/header.hh>
+#       #endif
+#
+#    translate to the following statement:
+#
+#    ::
+#
+#       #include SOME_VAR_CONDITIONAL_INCLUDE(some/header.hh)
+#
+#    The new syntax is only valid, if the macro :code:`resolve_conditional_includes` has been
+#    called with the target (AFTER all compile definitions are added) and the list of
+#    compile definitions, that should be resolved.
 #
 
 macro(resolve_conditional_includes target definitions)

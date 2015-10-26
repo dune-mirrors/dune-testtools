@@ -1,9 +1,11 @@
-# The cmake code to execute whenever a module requires or suggests dune-testtools.
+# .. cmake_module::
 #
-# A summary of what is done:
+#    The cmake code to execute whenever a module requires or suggests dune-testtools.
 #
-# * Requirements on the python interpreter are formulated
-# * The API for dune-style system tests is included.
+#    A summary of what is done:
+#
+#    * Requirements on the python interpreter are formulated
+#    * The API for dune-style system tests is included.
 #
 # .. cmake_variable:: DEBUG_MACRO_TESTS
 #
