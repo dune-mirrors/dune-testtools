@@ -10,6 +10,6 @@ add_subdirectory(convergencetest)
 dune_add_test(SOURCES outputtreetest.cc)
 
 include(ConditionalIncludes)
-dune_add_test(SOURCE triggertest.cc
+dune_add_test(SOURCES triggertest.cc
               COMPILE_DEFINITIONS SWITCH1)
 resolve_conditional_includes(triggertest "SWITCH1;SWITCH2")
