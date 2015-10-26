@@ -1,7 +1,8 @@
 add_subdirectory(test)
 
-#install headers
-install(FILES outputtree.hh DESTINATION include/dune/testtools)
+install(FILES gridconstruction.hh
+              outputtree.hh
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/testtools)
 
 
 
