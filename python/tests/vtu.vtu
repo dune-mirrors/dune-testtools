@@ -3,22 +3,26 @@
   <UnstructuredGrid>
     <Piece NumberOfCells="2" NumberOfPoints="6">
       <PointData Scalars="p">
-        <DataArray type="Float32" Name="T" NumberOfComponents="1" format="ascii">
-          350 320 320 320 320 320 320 320
-        </DataArray>
         <DataArray type="Float32" Name="p" NumberOfComponents="1" format="ascii">
           100000 100000 90000 100000 100000 100000 100000 100000
+        </DataArray>
+        <DataArray type="Float32" Name="T" NumberOfComponents="1" format="ascii">
+          350 320 320 320 320 320 320 320
         </DataArray>
       </PointData>
       <CellData Scalars="small">
         <DataArray type="Float32" Name="small" NumberOfComponents="1" format="ascii">
-          1e-16 1e-14
+          1e-9 1e-15
         </DataArray>
       </CellData>
       <Points>
         <DataArray type="Float32" Name="Coordinates" NumberOfComponents="3" format="ascii">
-          0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 1.0 1.0 0.0
-          2.0 0.0 0.0 2.0 1.0 0.0
+          0.0 0.0 0.0
+          1.0 0.0 0.0
+          0.0 1.0 0.0
+          1.0 1.0 0.0
+          2.0 0.0 0.0
+          2.0 1.0 0.0
         </DataArray>
       </Points>
       <Cells>
