@@ -1,5 +1,3 @@
-set(TESTPROGS outputtreetest triggertest)
-
 add_subdirectory(constructiontest)
 add_subdirectory(cmakepython)
 add_subdirectory(staticvariants)
@@ -9,14 +7,9 @@ add_subdirectory(allvariants)
 add_subdirectory(parallel)
 add_subdirectory(convergencetest)
 
-add_executable("outputtreetest" outputtreetest.cc)
+dune_add_test(SOURCES outputtreetest.cc)
 
 include(ConditionalIncludes)
-add_executable("triggertest" triggertest.cc)
-set_property(TARGET triggertest APPEND PROPERTY COMPILE_DEFINITIONS SWITCH1)
+dune_add_test(SOURCE triggertest.cc
+              COMPILE_DEFINITIONS SWITCH1)
 resolve_conditional_includes(triggertest "SWITCH1;SWITCH2")
-
-foreach(_exe ${TESTPROGS})
-  target_link_libraries(${_exe} ${DUNE_LIBS})
-  add_test(${_exe} ${_exe})
-endforeach()

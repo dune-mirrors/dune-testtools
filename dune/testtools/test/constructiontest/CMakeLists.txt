@@ -1,14 +1,5 @@
 if(dune-grid_FOUND)
-  add_executable(constructiontest constructiontest.cc)
+  dune_add_test(SOURCES constructiontest.cc
+                MPI_RANKS 2)
   dune_symlink_to_source_files(FILES ini test.msh)
-  add_dune_ug_flags(constructiontest)
-  if (dune-alugrid_FOUND)
-    add_dune_dune_alugrid_flags(constructiontest)
-  endif(dune-alugrid_FOUND)
-  target_link_libraries(constructiontest ${DUNE_LIBS})
-  add_test(constructiontest constructiontest)
-
-  if(MPI_FOUND)
-    add_test(NAME constructiontest-parallel COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} "2" constructiontest)
-  endif(MPI_FOUND)
 endif()
