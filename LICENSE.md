@@ -1,8 +1,14 @@
 Copyright holders:
+------------------
 
-2014 -- 2015    Dominic Kempf
-2014 -- 2015    Timo Koch
-2015            Linus Seelinger
+2014 -- 2015
+   Dominic Kempf
+
+2014 -- 2015
+   Timo Koch
+
+2015
+   Linus Seelinger
 
 The module dune-testtools is free software and documentation.
 
