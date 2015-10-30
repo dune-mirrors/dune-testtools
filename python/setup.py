@@ -36,7 +36,7 @@ class PyTest(TestCommand):
 
 
 setup(name='dune.testtools',
-      version='0.1',
+      version='2.4',
       namespace_packages=['dune'],
       description='Python testtools for systemtesting in DUNE',
       author='Dominic Kempf <dominic.kempf@iwr.uni-heidelberg.de>, Timo Koch <timo.koch@iws.uni-stuttgart.de>',
