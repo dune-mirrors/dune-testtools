@@ -43,7 +43,7 @@ setup(name='dune.testtools',
       author_email='no_mailinglist_yet@dune-testtools.de',
       url='http://conan2.iwr.uni-heidelberg.de/git/quality/dune-testtools',
       packages=['dune.testtools', 'dune.testtools.wrapper'],
-      install_requires=['pyparsing', 'six'],
+      install_requires=['pyparsing', 'six>=1.4.1'],
       tests_require=['pytest'],
       cmdclass={'test': PyTest},
       scripts=dune_testtools_scripts())
