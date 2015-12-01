@@ -18,7 +18,7 @@ def call(executable, inifile=None):
     return subprocess.call(command)
 
 
-def call_parallel(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postflags, inifile=None):
+def call_parallel(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postflags, max_processors, inifile=None):
     # If we have an inifile, parse it and look for special keys that modify the execution
     num_processes = "2"  # a default
     command = [mpi_exec, mpi_numprocflag, num_processes]
@@ -36,4 +36,7 @@ def call_parallel(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postf
         if "__num_processes" in iniinfo:
             command[2] = iniinfo["__num_processes"]
 
-    return subprocess.call(command)
+    if int(command[2]) <= int(max_processors):
+        return subprocess.call(command)
+    else:
+        return 77

@@ -261,14 +261,14 @@ function(add_system_test_per_target)
       if(${DOSOMETHING})
         if(NOT ${MPI_CXX_FOUND})
           add_test(NAME ${target}_${ininame}
-                   COMMAND ${CMAKE_BINARY_DIR}/dune-env ${TARGVAR_SCRIPT}
+                    COMMAND ${CMAKE_BINARY_DIR}/dune-env ${TARGVAR_SCRIPT}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
-                  )
+                   )
         else()
           add_test(NAME ${target}_${ininame}
-                   COMMAND ${CMAKE_BINARY_DIR}/dune-env ${TARGVAR_SCRIPT}
+                    COMMAND ${CMAKE_BINARY_DIR}/dune-env ${TARGVAR_SCRIPT}
                     --exec ${target}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
@@ -276,7 +276,8 @@ function(add_system_test_per_target)
                     --mpi-numprocflag=${MPIEXEC_NUMPROC_FLAG}
                     --mpi-preflags "${MPIEXEC_PREFLAGS}"
                     --mpi-postflags "${MPIEXEC_POSTFLAGS}"
-                  )
+                    --max-processors=${DUNE_MAX_TEST_CORES}
+                   )
         endif()
         set_property(TEST ${target}_${ininame} PROPERTY LABELS ${iniinfo_labels_${ininame}} DUNE_SYSTEMTEST)
         set_tests_properties(${target}_${ininame} PROPERTIES SKIP_RETURN_CODE "77")
@@ -353,8 +354,3 @@ function(dune_add_system_test)
                                ${DEBUG})
   endif()
 endfunction()
-
-macro(add_dune_system_test)
-    message(WARNING "add_dune_system_test is deprecated. Please use dune_add_system_test!")
-    dune_add_system_test(${ARGN})
-endmacro()
