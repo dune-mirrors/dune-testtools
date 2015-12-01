@@ -6,14 +6,14 @@ from setuptools.command.test import test as TestCommand
 
 
 def dune_testtools_scripts():
-    return ['./scripts/analysis.py',
-            './scripts/expand_metaini.py',
-            './scripts/extract_static.py',
-            './scripts/has_static_section.py',
-            './wrapper/convergencetest.py',
-            './wrapper/execute.py',
-            './wrapper/execute_parallel.py',
-            './wrapper/vtkcompare.py']
+    return ['./scripts/dune_metaini_analysis.py',
+            './scripts/dune_expand_metaini.py',
+            './scripts/dune_extract_static.py',
+            './scripts/dune_has_static_section.py',
+            './wrapper/dune_convergencetest.py',
+            './wrapper/dune_execute.py',
+            './wrapper/dune_execute_parallel.py',
+            './wrapper/dune_vtkcompare.py']
 
 
 class PyTest(TestCommand):
