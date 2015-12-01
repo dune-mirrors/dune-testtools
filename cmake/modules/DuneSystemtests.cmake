@@ -186,12 +186,14 @@ function(add_static_variants)
           get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
           message("  with COMPILE_DEFINITIONS: ${cd}")
         endif()
+
+        # And append the target to the list of created targets
+        list(APPEND targetlist "${tname}")
       endif()
     endif()
     if(${STATVAR_DEBUG})
       message("Generating target ${tname} skipped because it already existed!")
     endif()
-    list(APPEND targetlist "${tname}")
   endforeach()
 
   # export the list of created targets
