@@ -36,6 +36,7 @@ if ret is 0:
 
         # check for specific options for this comparison
         checktype = float(ini.get("wrapper.outputtreecompare." + prefix + "type", "exact"))
+        exclude = ini.get("wrapper.outputtreecompare." + prefix + "exclude", [])
 
         # fuzzy comparisons
         if checktype == "fuzzy":
@@ -48,6 +49,7 @@ if ret is 0:
                                     absolute=absolute,
                                     relative=relative,
                                     zeroValueThreshold=zeroThreshold,
+                                    exclude=exclude,
                                     verbose=True)
 
             # early exit if one vtk comparison fails
@@ -57,6 +59,8 @@ if ret is 0:
         # exact comparison
         else:
             ret = compare_ini(ini1=n + "." + e,
-                              ini2=args["source"] + "/" + r + "." + e)
+                              ini2=args["source"] + "/" + r + "." + e,
+                              exclude=exclude,
+                              verbose=True)
 
 sys.exit(0)
