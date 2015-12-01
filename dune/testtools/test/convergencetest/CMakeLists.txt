@@ -1,4 +1,4 @@
-add_dune_system_test(SOURCE test_convergencetest.cc
+dune_add_system_test(SOURCE test_convergencetest.cc
 	                 INIFILE test_convergencetest.ini
 	                 BASENAME convergence_test
 	                 CREATED_TARGETS targetlist
