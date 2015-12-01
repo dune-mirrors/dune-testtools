@@ -83,7 +83,7 @@
 #    added. The given meta ini file is expanded and each dynamic variant is
 #    connected with each given executable.
 #
-# .. cmake_function:: add_dune_system_test
+# .. cmake_function:: dune_add_system_test
 #
 #    .. cmake_param:: SOURCE
 #       :multi:
@@ -273,7 +273,7 @@ function(add_system_test_per_target)
   endforeach()
 endfunction()
 
-function(add_dune_system_test)
+function(dune_add_system_test)
   # parse arguments
   set(OPTION DEBUG)
   set(SINGLE INIFILE BASENAME SCRIPT)
@@ -281,7 +281,7 @@ function(add_dune_system_test)
   cmake_parse_arguments(SYSTEMTEST "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
 
   if(SYSTEMTEST_UNPARSED_ARGUMENTS)
-    message(WARNING "add_dune_system_test: Encountered unparsed arguments: This often indicates typos in named arguments")
+    message(WARNING "dune_add_system_test: Encountered unparsed arguments: This often indicates typos in named arguments")
   endif()
 
   # construct a string containg DEBUG to pass the debug flag to the other macros
@@ -341,3 +341,8 @@ function(add_dune_system_test)
                                ${DEBUG})
   endif()
 endfunction()
+
+macro(add_dune_system_test)
+    message(WARNING "add_dune_system_test is deprecated. Please use dune_add_system_test!")
+    dune_add_system_test(${ARGN})
+endmacro()
