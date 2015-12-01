@@ -1,0 +1,9 @@
+[wrapper.vtkcompare]
+name = test test2
+reference = testref testref2
+extension = vtk vtk
+
+[wrapper.vtkcompare.test]
+absolute = 1.0e-7
+relative = 1.0e-2
+zeroThreshold.small = 1e-19
