@@ -331,20 +331,3 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
                 dataArray.text = dataArrays[dataArray.attrib["Name"]]
 
     return (root1, root2)
-
-
-# main program if called as script return appropriate error codes
-if __name__ == "__main__":
-    # handle arguments and print help message
-    parser = argparse.ArgumentParser(description='Fuzzy compare of two VTK\
-        (Visualization Toolkit) files. The files are accepted if for every\
-        value the difference is below the absolute error or below the\
-        relative error or below both.')
-    parser.add_argument('vtk_file_1', type=str, help='first file to compare')
-    parser.add_argument('vtk_file_2', type=str, help='second file to compare')
-    parser.add_argument('-r', '--relative', type=float, default=1e-2, help='maximum relative error (default=1e-2)')
-    parser.add_argument('-a', '--absolute', type=float, default=1.5e-7, help='maximum absolute error (default=1.5e-7)')
-    parser.add_argument('-v', '--verbose', type=bool, default=True, help='verbosity of the script')
-    args = vars(parser.parse_args())
-
-    sys.exit(compare_vtk(args["vtk_file_1"], args["vtk_file_2"], args["absolute"], args["relative"], args["verbose"]))
