@@ -14,6 +14,7 @@ from dune.testtools.uniquenames import *
 from dune.testtools.metaini import *
 from dune.testtools.conditionals import *
 from dune.testtools.wrapper.convergencetest import *
+from dune.testtools.testdiscarding import *
 
 
 @meta_ini_command(name="tolower")

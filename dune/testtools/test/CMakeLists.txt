@@ -1,6 +1,7 @@
 set(TESTPROGS outputtreetest triggertest)
 
 add_subdirectory(constructiontest)
+add_subdirectory(cmakediscard)
 add_subdirectory(cmakepython)
 add_subdirectory(staticvariants)
 add_subdirectory(dynamicvariants)
