@@ -1,0 +1,1 @@
+add_dune_system_test(SOURCE test.cc INIFILE discard.mini BASENAME discardtest)

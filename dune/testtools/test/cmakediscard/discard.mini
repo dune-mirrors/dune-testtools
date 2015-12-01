@@ -1,0 +1,4 @@
+[__static]
+GRID = Dune::YaspGrid<2>, Dune::UGGrid<2> | expand grid
+
+1, HAVE_UG | expand grid | cmake_guard
