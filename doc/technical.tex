@@ -194,8 +194,8 @@ The subsequent sections present how to use the CMake interface in combination wi
 
 \subsection{A simple test}
 A simple \emph{ctest} using an ordinaty DUNE-style ini file can be added using the CMake interface as follows
-\begin{lstlisting}[caption={A CMakeLists.txt adding a simple test with the dune-testtools CMake interface function \lstinline!add_dune_system_test!}]
-add_dune_system_test(SOURCE mytest.cc
+\begin{lstlisting}[caption={A CMakeLists.txt adding a simple test with the dune-testtools CMake interface function \lstinline!dune_add_system_test!}]
+dune_add_system_test(SOURCE mytest.cc
                      BASENAME mytest
                      INIFILE mytest.ini)
 \end{lstlisting}
@@ -212,7 +212,7 @@ We will see more sensible usage of the macro subsequently.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Dynamic variations}
-For creating tests covering different runtime parameters the CMake macro \lstinline!add_dune_system_test! can be used exactly
+For creating tests covering different runtime parameters the CMake macro \lstinline!dune_add_system_test! can be used exactly
 as in the simple test example above. The ordinary ini file gets replaced with a meta ini file as in Listing~\ref{lst:dyn}.
 \begin{lstlisting}[caption={[dynamic.mini] An example of dynamic variations},label=lst:dyn]
  [TimeManager]
@@ -222,7 +222,7 @@ as in the simple test example above. The ordinary ini file gets replaced with a 
 As explained above the meta ini file expands to four ini files with the respective combinations of the parameters \lstinline!timestep! and
 \lstinline!endtime!. Using that meta ini file in combination with the CMake macro call
 \begin{lstlisting}[caption={A CMakeLists.txt generating dynamic variations}]
-add_dune_system_test(SOURCE mytest.cc
+dune_add_system_test(SOURCE mytest.cc
                      BASENAME mytest
                      INIFILE dynamic.mini)
 \end{lstlisting}
@@ -240,7 +240,7 @@ variables. A meta ini file creating static variations is shown in Listing~\ref{l
 \end{lstlisting}
 This meta ini is parsed for CMake and will generate two different executables for each precompiler variable using the same call as above
 \begin{lstlisting}[caption={A CMakeLists.txt generating static variations with compile definitions}]
-add_dune_system_test(SOURCE mytest.cc
+dune_add_system_test(SOURCE mytest.cc
                      BASENAME mytest
                      INIFILE static.mini)
 \end{lstlisting}
@@ -267,7 +267,7 @@ if not unique a numbered scheme will be added automatically to the suffix. The k
 ini files. The default is \lstinline!*.ini!. The \lstinline!__ini_option_key! can be used to tell CMake that the ini file is attached to an
 executable using an option key. In this example the programme will be called with \lstinline!./mytest_solver1 --input smalltimestep.input!.
 
-\subsection{Understanding the CMake macro \lstinline!add_dune_system_test!}
+\subsection{Understanding the CMake macro \lstinline!dune_add_system_test!}
 
 \subsection{Creating tests from existing executables}
 \subsection{Creating executables with static variations without tests}

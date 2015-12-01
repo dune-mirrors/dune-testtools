@@ -1,4 +1,4 @@
-add_dune_system_test(SOURCE source.cc
+dune_add_system_test(SOURCE source.cc
 	                 BASENAME parallel
 	                 INIFILE test.mini
 	                 CREATED_TARGETS output
