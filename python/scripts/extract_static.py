@@ -15,7 +15,7 @@ def get_args():
 args = get_args()
 
 # call the macro
-static = extract_static_info(args["ini"])
+static = extract_static_info(args["ini"], add_guards=True)
 
 # print to CMake
 printForCMake(static)
