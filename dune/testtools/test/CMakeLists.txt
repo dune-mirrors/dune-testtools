@@ -6,6 +6,7 @@ add_subdirectory(onemacrodynamicvariants)
 add_subdirectory(allvariants)
 add_subdirectory(parallel)
 add_subdirectory(convergencetest)
+add_subdirectory(vtkcompare)
 
 dune_add_test(SOURCES outputtreetest.cc)
 
