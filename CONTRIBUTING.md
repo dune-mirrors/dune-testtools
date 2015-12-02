@@ -48,5 +48,5 @@ Ini-files
   as compile definitions or labels in the static section)
 * use groups to make things readable
 * space separate key, "=", and value
-* you can test meta ini files with the analysis.py script
+* you can test meta ini files with the `dune_analysis.py` script
   provided with testtools
