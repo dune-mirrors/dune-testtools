@@ -28,7 +28,7 @@ Known issues:
 - the code could use a lot more error checking
 """
 from __future__ import absolute_import
-from dune.common.ini.dotdict import DotDict
+from dune.common.parametertree.dotdict import DotDict
 from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
 from dune.testtools.parser import parse_ini_file, CommandToApply
 from dune.testtools.writeini import write_dict_to_ini
