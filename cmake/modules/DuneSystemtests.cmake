@@ -272,10 +272,11 @@ function(add_system_test_per_target)
                     --mpi-numprocflag=${MPIEXEC_NUMPROC_FLAG}
                     --mpi-preflags "${MPIEXEC_PREFLAGS}"
                     --mpi-postflags "${MPIEXEC_POSTFLAGS}"
+                    --max-processors=${DUNE_MAX_TEST_CORES}
                    )
         endif()
         set_property(TEST ${target}_${ininame} PROPERTY LABELS ${iniinfo_labels_${ininame}} DUNE_SYSTEMTEST)
-        set_tests_properties(${target}_${ininame} PROPERTIES SKIP_RETURN_CODE "77")
+        set_tests_properties(${target}_${ininame} PROPERTIES SKIP_RETURN_CODE 77)
       endif()
     endforeach()
   endforeach()

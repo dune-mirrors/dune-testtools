@@ -17,4 +17,5 @@ def get_args():
     parser.add_argument('--mpi-numprocflag', help='The flag for setting the number of processes')
     parser.add_argument('--mpi-preflags', nargs='*', help='The mpi preflags')
     parser.add_argument('--mpi-postflags', nargs='*', help='The mpi preflags')
+    parser.add_argument('--max-processors', nargs=1, help='The maximum number of processors this test may used (from DUNE_MAX_TEST_CORES)')
     return vars(parser.parse_args())
