@@ -9,6 +9,7 @@ add_subdirectory(onemacrodynamicvariants)
 add_subdirectory(allvariants)
 add_subdirectory(parallel)
 add_subdirectory(convergencetest)
+add_subdirectory(outputcompare)
 add_subdirectory(vtkcompare)
 
 add_executable("outputtreetest" outputtreetest.cc)
