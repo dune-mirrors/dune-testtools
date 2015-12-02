@@ -1,0 +1,5 @@
+[__static]
+BLA = 1,2 | expand stat
+
+1, MYPARAM | expand stat | cmake_guard
+MYOTHERPARAM, 1 | expand stat | cmake_guard

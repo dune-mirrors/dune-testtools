@@ -7,8 +7,8 @@ import sys
 import argparse
 
 
-def extract_static_info(metaini):
-    static_section = expand_meta_ini(metaini, whiteFilter=("__static", "__exec_suffix"), addNameKey=False)
+def extract_static_info(metaini, add_guards=False):
+    static_section = expand_meta_ini(metaini, whiteFilter=("__static", "__exec_suffix", "__cmake_guards"), addNameKey=False)
 
     # make the found exec suffixes unique
     if "__exec_suffix" not in static_section[0]:
@@ -34,5 +34,10 @@ def extract_static_info(metaini):
                     static["__COMPILE_DEFINITIONS"].append(key)
 
             static[conf["__exec_suffix"]] = conf["__static"]
+
+        # Now update the list of cmake guards
+        if add_guards:
+            if "__cmake_guards" in conf:
+                static[conf["__exec_suffix"]]['__GUARDS'] = conf["__cmake_guards"].values()
 
     return static

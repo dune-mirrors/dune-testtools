@@ -160,24 +160,36 @@ function(add_static_variants)
     endif()
     # add the executable with that configurations
     if(NOT TARGET ${tname})
-      add_executable(${tname} "${STATVAR_SOURCE}")
-
-      # treat compile definitions
-      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-        target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
+      # evaluate all the discarding conditions that have been provided!
+      set(PROCEED TRUE)
+      foreach(condition ${STATINFO_${conf}___GUARDS})
+        if(NOT ${condition})
+          set(PROCEED FALSE)
+        endif()
       endforeach()
 
-      # maybe output debug information
-      if(${STATVAR_DEBUG})
-        message("Generated target ${tname}")
-        get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
-        message("  with COMPILE_DEFINITIONS: ${cd}")
+      if(PROCEED)
+        add_executable(${tname} "${STATVAR_SOURCE}")
+
+        # treat compile definitions
+        foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+          target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
+        endforeach()
+
+        # maybe output debug information
+        if(${STATVAR_DEBUG})
+          message("Generated target ${tname}")
+          get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
+          message("  with COMPILE_DEFINITIONS: ${cd}")
+        endif()
+
+        # And append the target to the list of created targets
+        list(APPEND targetlist "${tname}")
       endif()
     endif()
     if(${STATVAR_DEBUG})
       message("Generating target ${tname} skipped because it already existed!")
     endif()
-    list(APPEND targetlist "${tname}")
   endforeach()
 
   # export the list of created targets
