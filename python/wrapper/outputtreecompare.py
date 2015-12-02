@@ -44,8 +44,8 @@ if ret is 0:
             absolute = float(ini.get("wrapper.outputtreecompare." + prefix + "absolute", 1.5e-7))
             zeroThreshold = ini.get("wrapper.outputtreecompare." + prefix + "zeroThreshold", {})
 
-            ret = fuzzy_compare_ini(ini1=n + "." + e,
-                                    ini2=args["source"] + "/" + r + "." + e,
+            ret = fuzzy_compare_ini(inifile1=n + "." + e,
+                                    inifile2=args["source"] + "/" + r + "." + e,
                                     absolute=absolute,
                                     relative=relative,
                                     zeroValueThreshold=zeroThreshold,
@@ -58,8 +58,8 @@ if ret is 0:
 
         # exact comparison
         else:
-            ret = compare_ini(ini1=n + "." + e,
-                              ini2=args["source"] + "/" + r + "." + e,
+            ret = compare_ini(inifile1=n + "." + e,
+                              inifile2=args["source"] + "/" + r + "." + e,
                               exclude=exclude,
                               verbose=True)
 
