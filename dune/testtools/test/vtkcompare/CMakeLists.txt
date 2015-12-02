@@ -4,7 +4,7 @@ dune_add_system_test(SOURCE source.cc
                      BASENAME vtkcompare_single
                      INIFILE test_single.mini
                      CREATED_TARGETS output
-                     SCRIPT vtkcompare.py
+                     SCRIPT dune_vtkcompare.py
                      ${DEBUG_MACRO_TESTS})
 
 dune_assert(COND TARGET vtkcompare_single MESSAGE "vtkcompare_single: A target named vtkcompare_single should have been generated")
@@ -15,7 +15,7 @@ dune_add_system_test(SOURCE source.cc
                      BASENAME vtkcompare_multiple
                      INIFILE test_multiple.mini
                      CREATED_TARGETS output
-                     SCRIPT vtkcompare.py
+                     SCRIPT dune_vtkcompare.py
                      ${DEBUG_MACRO_TESTS})
 
 dune_assert(COND TARGET vtkcompare_multiple MESSAGE "vtkcompare_multiple: A target named vtkcompare_multiple should have been generated")
