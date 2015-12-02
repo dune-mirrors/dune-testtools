@@ -255,6 +255,18 @@ function(add_system_test_per_target)
       get_filename_component(iniext ${inifile} EXT)
 
       if(${DOSOMETHING})
+        # Make sure to exclude the target from all, even when it is user-provided
+        # This is exactly what dune_add_test does in dune-common
+        if(DUNE_BUILD_TESTS_ON_MAKE_ALL)
+          set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL 0)
+        else()
+          set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL 1)
+        endif()
+
+        # and have it depend on the metatarget build_tests, mimicking dune-common again
+        add_dependencies(build_tests ${target})
+
+        # Now add the actual test!
         if(NOT ${MPI_CXX_FOUND})
           _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/dune-env ${TARGVAR_SCRIPT}
