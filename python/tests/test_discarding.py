@@ -7,7 +7,7 @@ def test_has_correct_static_info(dir):
     for c in configs:
         assert len(c['__cmake_guards']) == 1
 
-    static = extract_static_info(dir + "discard.mini")
-    assert static is None
+    static = extract_static_info(dir + "discard.mini", add_guards=True)
+
     for conf in static['__CONFIGS']:
         assert len(static[conf]['__GUARDS']) == 1
