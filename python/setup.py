@@ -13,7 +13,8 @@ def dune_testtools_scripts():
             './wrapper/dune_convergencetest.py',
             './wrapper/dune_execute.py',
             './wrapper/dune_execute_parallel.py',
-            './wrapper/dune_vtkcompare.py']
+            './wrapper/dune_vtkcompare.py',
+            './wrapper/outputtreecompare.py']
 
 
 class PyTest(TestCommand):
