@@ -6,7 +6,7 @@ import sys
 
 from dune.testtools.wrapper.argumentparser import get_args
 from dune.testtools.wrapper.call_executable import call
-from dune.testtools.wrapper.compare_ini import compare_ini, fuzzy_compare_ini
+from dune.testtools.wrapper.compareini import compare_ini, fuzzy_compare_ini
 from dune.testtools.parser import parse_ini_file
 
 
@@ -35,7 +35,7 @@ if ret is 0:
         prefix = "" if len(names) == 1 else n + "."
 
         # check for specific options for this comparison
-        checktype = float(ini.get("wrapper.outputtreecompare." + prefix + "type", "exact"))
+        checktype = ini.get("wrapper.outputtreecompare." + prefix + "type", "exact")
         exclude = ini.get("wrapper.outputtreecompare." + prefix + "exclude", [])
 
         # fuzzy comparisons
