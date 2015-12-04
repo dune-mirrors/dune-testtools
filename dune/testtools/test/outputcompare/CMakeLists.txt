@@ -4,7 +4,7 @@ dune_add_system_test(SOURCE source.cc
 	                 BASENAME outputcompare
 	                 INIFILE test.mini
 	                 CREATED_TARGETS output
-	                 SCRIPT outputtreecompare.py
+	                 SCRIPT dune_outputtreecompare.py
 	                 ${DEBUG_MACRO_TESTS})
 
 dune_assert(COND TARGET outputcompare MESSAGE "outputcompare: A target named outputcompare should have been generated")
