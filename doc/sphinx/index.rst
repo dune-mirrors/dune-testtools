@@ -9,6 +9,7 @@ Content
    metaini
    dune-testtools
    cmake
+   python
 
 Indices and tables
 ==================

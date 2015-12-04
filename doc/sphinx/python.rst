@@ -1,6 +1,6 @@
 Full documentation of dune-testtools
 ************************************
-.. automodule:: dune_testtools
+.. automodule:: dune.testtools
 
 The dune-testtools core modules
 ===============================
@@ -8,78 +8,78 @@ The dune-testtools core modules
 The metaini module
 ++++++++++++++++++
 
-.. automodule:: dune_testtools.metaini
+.. automodule:: dune.testtools.metaini
     :members: expand_meta_ini
 
 Other modules
 +++++++++++++
 
-.. automodule:: dune_testtools.cmakeoutput
+.. automodule:: dune.testtools.cmakeoutput
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.command_infrastructure
+.. automodule:: dune.testtools.command_infrastructure
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.command
+.. automodule:: dune.testtools.command
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.conditionals
+.. automodule:: dune.testtools.conditionals
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.dotdict
+.. automodule:: dune.testtools.dotdict
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.escapes
+.. automodule:: dune.testtools.escapes
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.parser
+.. automodule:: dune.testtools.parser
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.fuzzy_compare_vtk
+.. automodule:: dune.testtools.fuzzy_compare_vtk
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.static_metaini
+.. automodule:: dune.testtools.static_metaini
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.uniquenames
+.. automodule:: dune.testtools.uniquenames
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.writeini
+.. automodule:: dune.testtools.writeini
     :members:
     :undoc-members:
 
 The dune-testtools wrapper modules
 ==================================
 
-.. automodule:: dune_testtools.wrapper
+.. automodule:: dune.testtools.wrapper
 
-.. automodule:: dune_testtools.wrapper.call_executable
+.. automodule:: dune.testtools.wrapper.call_executable
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.wrapper.call_parallel
+.. automodule:: dune.testtools.wrapper.call_parallel
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.wrapper.vtkcompare
+.. automodule:: dune.testtools.wrapper.vtkcompare
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.wrapper.argumentparser
+.. automodule:: dune.testtools.wrapper.argumentparser
     :members:
     :undoc-members:
 
-.. automodule:: dune_testtools.wrapper.convergencetest
+.. automodule:: dune.testtools.wrapper.convergencetest
     :members:
     :undoc-members:
 
