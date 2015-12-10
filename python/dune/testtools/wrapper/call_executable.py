@@ -33,8 +33,8 @@ def call_parallel(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postf
         if "__inifile_optionkey" in iniinfo:
             command.append(iniinfo["__inifile_optionkey"])
         command.append(iniargument)
-        if "__num_processes" in iniinfo:
-            command[2] = iniinfo["__num_processes"]
+        if "wrapper.execute_parallel.numprocesses" in iniinfo:
+            command[2] = iniinfo["wrapper.execute_parallel.numprocesses"]
 
     if int(command[2]) <= int(max_processors):
         return subprocess.call(command)
