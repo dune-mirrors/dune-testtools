@@ -12,8 +12,8 @@ Keys can be excluded from comparison by specifying the key-list `exclude`.
 """
 
 from __future__ import absolute_import
-from dune.common.ini.dotdict import DotDict
-from dune.common.ini.parser import parse_ini_file
+from dune.common.parametertree.dotdict import DotDict
+from dune.common.parametertree.parser import parse_ini_file
 
 
 def compare_ini(inifile1, inifile2,
