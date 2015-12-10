@@ -22,6 +22,7 @@ def _get_convergence_test(key=None, value=None, config=None, args=None, commands
     # escape the resolution brackets as we don't want them to be resolved now
     return "\\{" + key + "\\}"
 
+
 @meta_ini_command(name="convergencetest_retrieve", ctype=CommandType.POST_RESOLUTION)
 def _get_convergence_test(key=None, value=None, config=None):
     """This command replaces the convergence test key by the original unexpanded value
