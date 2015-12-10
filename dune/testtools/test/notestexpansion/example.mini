@@ -1,0 +1,13 @@
+# an ini file example producing
+# 6 (dynamic) * 2 (static) = 12 variations
+# it produces two executables on expansion
+
+__exec_suffix = {__static.GRID}
+
+[params]
+a = 3, 4 | expand together
+b = 2, 5 | expand together
+c = foo, bar, bla | expand
+
+[__static]
+GRID = yasp, ug | expand
