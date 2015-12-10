@@ -11,6 +11,7 @@ add_subdirectory(parallel)
 add_subdirectory(convergencetest)
 add_subdirectory(outputcompare)
 add_subdirectory(vtkcompare)
+add_subdirectory(notestexpansion)
 
 add_executable("outputtreetest" outputtreetest.cc)
 
