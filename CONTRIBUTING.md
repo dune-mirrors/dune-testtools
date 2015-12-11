@@ -3,6 +3,14 @@ that are generated with:
 
 `git format-patch -k`
 
+Before submitting a patch we kindly ask you to run and check
+our testing suite:
+
+`make build_tests`
+`ctest -j2`
+`make pytest`
+
+
 Please note the following:
 
 STYLE GUIDE
