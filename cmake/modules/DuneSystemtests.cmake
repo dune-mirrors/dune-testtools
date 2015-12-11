@@ -156,6 +156,12 @@ function(add_static_variants)
                   OUTPUT_VARIABLE output)
   parse_python_data(PREFIX STATINFO INPUT "${output}")
 
+  # If there is more than one configuration, introduce a meta target
+  # that collects all these static variants
+  if(NOT "${STATINFO___CONFIGS}" STREQUAL "__empty")
+    add_custom_target(${STATVAR_BASENAME})
+  endif()
+
   # iterate over the static configurations
   foreach(conf ${STATINFO___CONFIGS})
     # determine the target name: in case of only one config, omit the underscore.
@@ -175,6 +181,11 @@ function(add_static_variants)
 
       if(PROCEED)
         add_executable(${tname} "${STATVAR_SOURCE}")
+
+        # Add dependency on the metatarget for this systemtest
+        if(NOT "${STATINFO___CONFIGS}" STREQUAL "__empty")
+          add_dependencies(${STATVAR_BASENAME} ${tname})
+        endif()
 
         # treat compile definitions
         foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
