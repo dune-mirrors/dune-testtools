@@ -73,10 +73,10 @@ def test_quoting_magic(dir):
 
 def test_double_command(dir):
     f = open(dir + "tmp.mini", 'w')
-    f.write("2, 3 | convergencetest rate | expand deg \n\
+    f.write("bla = bla, blubb | toupper | expand deg \n\
              degree = 1, 2 | expand deg")
     f.close()
     result = expand_meta_ini(dir + "tmp.mini")
     assert(len(result) == 2)
-    assert(result[0]["__convergencetest.expectedrate"] == '2')
-    assert(result[1]["__convergencetest.expectedrate"] == '3')
+    assert(result[0]["bla"] == 'BLA')
+    assert(result[1]["bla"] == 'BLUBB')

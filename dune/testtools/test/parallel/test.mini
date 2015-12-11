@@ -1,9 +1,11 @@
 __exec_suffix = 1, 2 | expand 1
-__num_processes = 8
 
 something = 1, 2 | expand
 
 someother = bla, bli | expand 1
+
+[wrapper.execute_parallel]
+numprocesses = 8
 
 [__static]
 SOMEVAR = 1, 2 | expand 1
