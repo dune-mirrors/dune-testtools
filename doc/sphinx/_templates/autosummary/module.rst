@@ -32,5 +32,17 @@
    {% for item in classes %}
       {{ item }}
    {%- endfor %}
+
+   {% for item in classes %}
+   {{ item }}
+   {{ '*' * (fullname | length) }}
+
+   .. currentmodule:: {{ fullname }}
+
+   .. autoclass:: {{ item }}
+      :members:
+
+   {%- endfor %}
+
    {% endif %}
    {% endblock %}
