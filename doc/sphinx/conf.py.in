@@ -304,3 +304,5 @@ texinfo_documents = [
 
 # generate stub rst files for each auto summary
 autosummary_generate = True
+# sort members by source
+autodoc_member_order = "bysource"

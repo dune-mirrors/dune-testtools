@@ -1,87 +1,24 @@
 Full documentation of dune-testtools
 ************************************
-.. automodule:: dune.testtools
 
-The dune-testtools core modules
-===============================
+Modules of dune-testtools:
+==========================
 
-The metaini module
-++++++++++++++++++
+.. currentmodule:: dune.testtools
+.. autosummary::
+   :toctree:
 
-.. automodule:: dune.testtools.metaini
-    :members: expand_meta_ini
-
-Other modules
-+++++++++++++
-
-.. automodule:: dune.testtools.cmakeoutput
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.command_infrastructure
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.command
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.conditionals
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.dotdict
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.escapes
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.parser
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.fuzzy_compare_vtk
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.static_metaini
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.uniquenames
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.writeini
-    :members:
-    :undoc-members:
-
-The dune-testtools wrapper modules
-==================================
-
-.. automodule:: dune.testtools.wrapper
-
-.. automodule:: dune.testtools.wrapper.call_executable
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.wrapper.call_parallel
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.wrapper.vtkcompare
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.wrapper.argumentparser
-    :members:
-    :undoc-members:
-
-.. automodule:: dune.testtools.wrapper.convergencetest
-    :members:
-    :undoc-members:
+   metaini
+   cmakeoutput
+   command_infrastructure
+   command
+   conditionals
+   escapes
+   parser
+   fuzzy_compare_vtk
+   static_metaini
+   uniquenames
+   writeini
 
 The dune-testtools scripts
 ==========================
@@ -108,7 +45,7 @@ How to use dune-testtools
 +++++++++++++++++++++++++
 
 dune-testtools is a python module that is included in a
-dune-module. See the `dune-testtools <http://conan2.iwr.uni-heidelberg.de/git/quality/dune-testtools>`_ dune module for more.
+dune module. See the `dune-testtools <http://conan2.iwr.uni-heidelberg.de/git/quality/dune-testtools>`_ dune module for more.
 
 Where to get help?
 ++++++++++++++++++
