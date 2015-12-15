@@ -7,7 +7,6 @@ Content
    :maxdepth: 2
 
    metaini
-   dune-testtools
    cmake
    python
 
