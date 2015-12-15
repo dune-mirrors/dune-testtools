@@ -5,7 +5,8 @@
 
    {% block functions %}
    {% if functions %}
-   .. rubric:: Functions
+   Functions
+   {{ '*' * (fullname | length) }}
 
    .. autosummary::
    {% for item in functions %}
@@ -14,7 +15,7 @@
 
    {% for item in functions %}
    {{ item }}
-   {{ '*' * (fullname | length) }}
+   {{ '+' * (fullname | length) }}
 
    .. currentmodule:: {{ fullname }}
 
@@ -26,7 +27,8 @@
 
    {% block classes %}
    {% if classes %}
-   .. rubric:: Classes
+   Classes
+   {{ '*' * (fullname | length) }}
 
    .. autosummary::
    {% for item in classes %}
@@ -35,7 +37,7 @@
 
    {% for item in classes %}
    {{ item }}
-   {{ '*' * (fullname | length) }}
+   {{ '+' * (fullname | length) }}
 
    .. currentmodule:: {{ fullname }}
 
