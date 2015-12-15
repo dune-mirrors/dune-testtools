@@ -1,5 +1,10 @@
 The documentation of dune-testtools
 ***********************************
+
+The documentation of the dune module dune-testtools. Dune-testtools
+provides tools for system testing in numerical software frameworks
+like Dune.
+
 Content
 ==================
 
@@ -7,6 +12,7 @@ Content
    :maxdepth: 2
 
    metaini
+   what
    cmake
    python
 
