@@ -1,3 +1,4 @@
+.. _introductionmetaini:
 Introduction to Meta Ini Files
 ******************************
 
