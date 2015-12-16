@@ -33,6 +33,9 @@ for path in pythonsourcepaths:
         continue
     sys.path.append(path)
 
+# include local path for command extension
+sys.path.append(os.path.abspath('.'))
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
@@ -48,7 +51,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinx_cmake_dune'
+    'sphinx_cmake_dune',
+    'sphinx_metainicommand'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

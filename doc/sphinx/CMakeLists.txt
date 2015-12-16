@@ -6,4 +6,4 @@ dune_cmake_sphinx_doc(SPHINX_CONF ${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in
                                   what.rst
                       MODULE_ONLY)
 
-dune_symlink_to_source_files(FILES "_templates")
+dune_symlink_to_source_files(FILES "_templates" "sphinx_metainicommand.py")
