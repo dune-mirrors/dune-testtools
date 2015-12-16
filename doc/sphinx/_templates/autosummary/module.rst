@@ -6,7 +6,7 @@
    {% block functions %}
    {% if functions %}
    Functions
-   {{ '*' * (fullname | length) }}
+   {{ '*' * 9 }}
 
    .. autosummary::
    {% for item in functions %}
@@ -14,13 +14,13 @@
    {%- endfor %}
 
    {% for item in functions %}
+
    {{ item }}
-   {{ '+' * (fullname | length) }}
+   {{ '+' * (item | length) }}
 
    .. currentmodule:: {{ fullname }}
 
    .. autofunction:: {{ item }}
-
    {%- endfor %}
    {% endif %}
    {% endblock %}
@@ -28,7 +28,7 @@
    {% block classes %}
    {% if classes %}
    Classes
-   {{ '*' * (fullname | length) }}
+   {{ '*' * 7 }}
 
    .. autosummary::
    {% for item in classes %}
@@ -36,15 +36,14 @@
    {%- endfor %}
 
    {% for item in classes %}
+
    {{ item }}
-   {{ '+' * (fullname | length) }}
+   {{ '+' * (item | length) }}
 
    .. currentmodule:: {{ fullname }}
 
    .. autoclass:: {{ item }}
       :members:
-
    {%- endfor %}
-
    {% endif %}
    {% endblock %}
