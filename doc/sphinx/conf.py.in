@@ -25,8 +25,13 @@ import shlex
 # -- General configuration ------------------------------------------------
 
 sys.path.append('@DUNE_SPHINX_EXT_PATH@')
-@DUNE_PYTHON_SOURCE_PATHS@
 
+# put all dune python module dependencies in the path
+pythonsourcepaths = '@DUNE_PYTHON_SOURCE_PATHS@'.split(':')
+for path in pythonsourcepaths:
+    if path == '':
+        continue
+    sys.path.append(path)
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
