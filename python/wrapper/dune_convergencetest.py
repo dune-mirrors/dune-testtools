@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
-# A wrapper script that controls the execution of a convergence test
+"""
+A wrapper script that controls the execution of a convergence test
+"""
+if __name__ == "__main__":
 
-import sys
+    import sys
 
-from dune.testtools.wrapper.argumentparser import get_args
-from dune.testtools.wrapper.convergencetest import call
+    from dune.testtools.wrapper.argumentparser import get_args
+    from dune.testtools.wrapper.convergencetest import call
 
-args = get_args()
-sys.exit(call(args["exec"], args["ini"]))
+    args = get_args()
+    sys.exit(call(args["exec"], args["ini"]))

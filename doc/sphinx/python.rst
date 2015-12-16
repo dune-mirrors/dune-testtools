@@ -19,11 +19,39 @@ Modules of dune-testtools
    uniquenames
    writeini
    testdiscarding
-   wrapper.argumentparser
-   wrapper.call_executable
-   wrapper.compareini
-   wrapper.convergencetest
-   wrapper.fuzzy_compare_vtk
+
+Wrapper scripts of dune-testtools
+=================================
+
+dune-testtools provides test wrappers for checking specific quality aspects
+of numerical software. Wrapper scripts are meant to be implemented by users
+wishing to check a certain aspect of their test. However, the most common
+test wrappers are already provided with dune-testools.
+
+.. currentmodule:: wrapper
+.. autosummary::
+   :toctree: dune.testtools
+
+   dune_execute
+   dune_execute_parallel
+   dune_outputtreecompare
+   dune_vtkcompare
+   dune_convergencetest
+
+
+Helper modules for wrapper scripts
+++++++++++++++++++++++++++++++++++
+
+.. currentmodule:: dune.testtools.wrapper
+.. autosummary::
+   :toctree: dune.testtools
+
+   argumentparser
+   call_executable
+   compareini
+   convergencetest
+   fuzzy_compare_vtk
+
 
 Scripts of dune-testtools
 =========================
