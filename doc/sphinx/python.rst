@@ -23,4 +23,11 @@ Modules of dune-testtools
 Scripts of dune-testtools
 =========================
 
-Write something about the scripts and what they do. Scripts can't be autodocumented because they are not importable.
+.. currentmodule:: scripts
+.. autosummary::
+   :toctree: dune.testtools
+
+   dune_expand_metaini
+   dune_extract_static
+   dune_has_static_section
+   dune_metaini_analysis
