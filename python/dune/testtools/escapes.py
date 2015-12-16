@@ -1,6 +1,6 @@
-"""
+"""A module for handling escaped characters in in ini files
+
 .. currentmodule:: dune.testtools.escapes
-    :synopsis: A module for handling escaped characters in in ini files
 
 We have a lot of special characters in our project: assignment,
 comment, key-dependent value syntax, list separators, etc.
@@ -8,6 +8,7 @@ This file provides some methods to escape these characters.
 
 .. note::
     Backslashes cannot be escaped at the moment.
+
 """
 from __future__ import absolute_import
 import re

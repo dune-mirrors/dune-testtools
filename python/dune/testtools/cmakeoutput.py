@@ -1,9 +1,11 @@
 """ A module formatting data in a way that can be picked up by CMake
 
-The CMakeParseArguments module is a VERY helpful in processing
+.. currentmodule:: dune.testtools.cmakeoutput
+
+The CMakeParseArguments module is a very helpful in processing
 data in CMake. This module formats python data in a way to have it
-recognized by CMakeParseArguments through the macro parse_python_data
-from dune-testtools/cmake/modules/ParsePythonData.cmake .
+recognized by CMakeParseArguments through the macro `parse_python_data`
+from `dune-testtools/cmake/modules/ParsePythonData.cmake`.
 
 Currently the following assumptions on the data are made:
 
@@ -14,7 +16,7 @@ Currently the following assumptions on the data are made:
 - All keys and values must be convertible to strings.
 
 Semicolons in the data need to be replaced by a different character, because
-CMake does use semicolons as list separators. The replacement is passed to CMake
+CMake uses semicolons as list separators. The replacement character is passed to CMake
 to undo the replacement.
 """
 from __future__ import absolute_import
@@ -22,6 +24,16 @@ from __future__ import print_function
 
 
 def printForCMake(d):
+    """A function to communicate meta ini information with CMake
+
+        :param d: A dictionary with information to be passed to CMake
+        :type d: dict
+
+        .. note::
+            You can pass any dictionary to CMake given that the elements
+            can be converted to strings. There is no limit on the depth.
+
+    """
     # Do all the error checking in the beginning and forget about it later
     if not isinstance(d, dict):
         raise ValueError("Expected a dictionary for the Python-CMake interface")

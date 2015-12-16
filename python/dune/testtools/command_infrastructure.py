@@ -8,19 +8,21 @@ will be parsed and executed by the meta ini parser.
 To implement a custom command you have to do the following:
 
 1. provide a function, that does what you want to do using only named arguments from the following list:
-  * key : the key in the current line
-  * value : the value string in the current line
-  * config : The configuration dictionary
-  * configs : The list of all configurations
-  * args : The list of arguments givne to the command
-  * argdefaults : A list of default arguments to apply, if the arguments are missing in the meta ini file.
+
+    * key : the key in the current line
+    * value : the value string in the current line
+    * config : The configuration dictionary
+    * configs : The list of all configurations
+    * args : The list of arguments givne to the command
+    * argdefaults : A list of default arguments to apply, if the arguments are missing in the meta ini file.
 
 2. decorate it with @ :func:`meta_ini_command`. :func:`meta_ini_command` itself takes some arguments:
-  * name : How to use this command from a meta ini file (mandatory)
-  * ctype : the command type, a.k.a. when to execute the command. defaults to CommandType.POST_RESOLUTION, which is after all curly brackets in the file have been resolved.
-  * argc : the number of arguments that can be specified within the meta ini file.
-  * returnValue : Whether a value is returned, which should be written into the given key.
-  * returnConfigurations : Whether a list of configurations is returned, which should be replace the current list of configurations
+
+    * name : How to use this command from a meta ini file (mandatory)
+    * ctype : the command type, a.k.a. when to execute the command. defaults to CommandType.POST_RESOLUTION, which is after all curly brackets in the file have been resolved.
+    * argc : the number of arguments that can be specified within the meta ini file.
+    * returnValue : Whether a value is returned, which should be written into the given key.
+    * returnConfigurations : Whether a list of configurations is returned, which should be replace the current list of configurations
 
 Example:
 
@@ -41,6 +43,7 @@ in your meta inifile and have it resolved to:
 .. code-block:: ini
 
     x = caps
+
 """
 
 from __future__ import absolute_import
