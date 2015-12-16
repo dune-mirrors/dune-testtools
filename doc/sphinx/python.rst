@@ -15,10 +15,15 @@ Modules of dune-testtools
    conditionals
    escapes
    parser
-   fuzzy_compare_vtk
    static_metaini
    uniquenames
    writeini
+   testdiscarding
+   wrapper.argumentparser
+   wrapper.call_executable
+   wrapper.compareini
+   wrapper.convergencetest
+   wrapper.fuzzy_compare_vtk
 
 Scripts of dune-testtools
 =========================
