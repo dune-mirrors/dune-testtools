@@ -135,7 +135,7 @@ todo_include_todos = True
 try:
     from sphinx import version_info
     if version_info[0:2] > (1,2):
-        html_theme = 'classic'
+        html_theme = 'sphinx_rtd_theme'
 except Exception as _: pass
 
 # Theme options are theme-specific and customize the look and feel of a theme
