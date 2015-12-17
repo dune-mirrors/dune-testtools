@@ -29,6 +29,7 @@ Also have a look at the :ref:`introduction to metaini files <introductionmetaini
    writeini
    testdiscarding
 
+.. _thewrappers:
 Wrapper scripts of dune-testtools
 =================================
 
