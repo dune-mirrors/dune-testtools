@@ -3,6 +3,14 @@
 """
 This wrapper script does simply call the executable and forwards the return code.
 This is used as the default wrapper script in the dune-testtools project.
+
+If you want to explitly specify the wrapper for clarity use
+
+.. code-block:: cmake
+
+    dune_add_system_test(...
+                         SCRIPT dune_execute.py
+                         ...)
 """
 if __name__ == "__main__":
 
