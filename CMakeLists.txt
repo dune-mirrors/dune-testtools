@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 2.8.12)
 project(dune-testtools CXX)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
@@ -17,9 +17,7 @@ include(DuneMacros)
 
 # start a dune project with information from dune.module
 dune_project()
-
-# disable the upstream testing magic
-set(DUNE_TEST_MAGIC OFF)
+dune_enable_all_packages()
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
