@@ -2,6 +2,12 @@
 
 """
 A script to check if there are static variations in a metaini file
+
+To be called by CMake. Provides CMake with information on if a
+``[__static]`` section is present in the meta ini file. If no
+such section is present, the system test does not contain static
+variations and at most one executable has to be generated.
+
 """
 if __name__ == "__main__":
 

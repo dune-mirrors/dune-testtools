@@ -2,6 +2,12 @@
 
 """
 A script that expands a given metaini file into its configurations (ini files).
+
+Main interface from python to CMake. To be called from CMake to obtain all
+build system specific information in meta ini files, e.g. information for a
+given test which executable to use with which ini file. This script also
+controles the expansion process of a single meta ini file into a set of ini files.
+
 """
 if __name__ == "__main__":
 

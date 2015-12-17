@@ -3,6 +3,20 @@
 """
 An analysis script for checking validity of meta ini files
 and inspecting the resulting configuration upon expansion.
+
+Because all python code in ``dune-testtools`` runs in a virutalenv
+by default running the analysis script is not straight forward. Luckily,
+it's not too hard either. Analyse your favorite meta ini file with
+
+.. code-block:: shell
+
+    ./<build directory>/dune-env dune_metaini_analysis.py <path to ini file>
+
+from the top level project directory. The analysis script will inform you on
+any detected irregularities in your meta ini files. Given that the expansion
+process was successful, you can interactively step through the resulting
+ini files.
+
 """
 if __name__ == "__main__":
 

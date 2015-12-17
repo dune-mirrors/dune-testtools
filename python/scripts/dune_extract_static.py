@@ -2,6 +2,10 @@
 
 """
 A script that extract static variations of a meta ini file to CMake
+
+Communicate the ``[__static]`` section of the meta ini file with
+CMake. The ``[__static]`` section contains information about compile
+definitions, test labels, and preprocessor guards.
 """
 if __name__ == "__main__":
 
