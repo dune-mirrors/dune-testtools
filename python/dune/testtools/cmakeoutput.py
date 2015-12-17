@@ -4,8 +4,8 @@
 
 The CMakeParseArguments module is a very helpful in processing
 data in CMake. This module formats python data in a way to have it
-recognized by CMakeParseArguments through the macro `parse_python_data`
-from `dune-testtools/cmake/modules/ParsePythonData.cmake`.
+recognized by CMakeParseArguments through the macro ``parse_python_data``
+from ``dune-testtools/cmake/modules/ParsePythonData.cmake``.
 
 Currently the following assumptions on the data are made:
 
