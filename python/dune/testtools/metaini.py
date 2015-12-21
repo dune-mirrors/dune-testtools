@@ -1,14 +1,14 @@
-"""
-.. module:: metaini
-    :synopsis: A module for expanding meta ini files into sets of ini files.
+"""A module for expanding meta ini files into sets of ini files.
 
-This module provides methods to expand a meta ini files into a set
-of corresponding ini files.
+.. currentmodule:: dune.testtools.metaini
 
-This is an example aiming at showing the full power of the meta ini syntax:
+This piece of documentation deals with the meta ini module. For
+an better overview what meta ini files are and how they can be useful
+we refer to the :ref:`introduction to metaini files <introductionmetaini>`.
+This is an example showing the power of the meta ini syntax:
 
 .. code-block:: ini
-   :caption: An example ini file
+   :caption: An example meta ini ini file
 
     __name = {model.parameters}_gridlevel{grid.level}
 
@@ -23,9 +23,58 @@ This is an example aiming at showing the full power of the meta ini syntax:
 
    The example produces a total of 6 ini files.
 
-Known issues:
+Commands
+++++++++
 
-- the code could use a lot more error checking
+.. metaini_command:: expand
+
+    .. metaini_command_arg:: IDENTIFIER
+        :single:
+
+        An arbitrary identifier connecting expansion processes of all keys
+        that have the same identifier assigned to the `expand` command.
+
+    The command `expand` is the most important command in the meta ini context.
+    It expands a given key-value pair of a (parsed) meta ini file into multiple
+    ini files where the value of the keys each take one of the comma separated
+    values residing in `value`.
+
+    Example:
+
+    In the following code example shows a simple meta ini file using the `expand`
+    command.
+
+    .. code-block:: ini
+
+        a = 2, 3, 4 | expand
+
+    .. note::
+
+        The meta ini file will be expanded into 3 ini files
+
+    Assigning multiple keys the `expand` command will result in the combinatoric product.
+
+    .. code-block:: ini
+
+        a = 2, 3, 4 | expand
+        b = 1, 2, 3 | expand
+
+    .. note::
+
+        The example produces a total of 9 ini files.
+
+    If an identifier is present behind two or more `expand` commands, those keys will be
+    expanded together.
+
+    .. code-block:: ini
+
+        a = 2, 3, 4 | expand bla
+        b = 1, 2, 3 | expand bla
+
+    .. note::
+
+        The example produces a total of 3 ini files.
+
 """
 from __future__ import absolute_import
 from dune.common.parametertree.dotdict import DotDict
@@ -39,11 +88,22 @@ from six.moves import range
 
 
 def uniquekeys():
-    """ define those keys which are special and should always be made unique """
+    """ Define those keys which are special and should always be made unique """
     return ["__name", "__exec_suffix"]
 
 
 def expand_key(c, keys):
+    """ Expand a group of keys together
+
+        :param c: A meta ini dictionary
+        :type c: DotDict
+        :param keys: The keys to be expanded together
+        :type keys: string
+
+        :returns: A generator for the resulting configurations
+        :rtype: generator expression
+
+    """
     # first split all given value lists:
     splitted = []
     for k in keys:
@@ -60,6 +120,7 @@ def expand_key(c, keys):
 
 @meta_ini_command(name="expand", argc=1, ctype=CommandType.AT_EXPANSION, returnConfigs=True)
 def _expand_command(key=None, configs=None):
+    """Defines the meta ini command expand"""
     retconfigs = []
     for conf in configs:
         retconfigs = retconfigs + list(expand_key(conf, key))
@@ -215,6 +276,11 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
 
 
 def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
+    """Write a configuration to a file
+
+        Configurations are ini files or meta ini files represented as a dictionary.
+        This functions writes such a configuration to an ini file.
+    """
     # get the unique ini name
     fn = c["__name"]
 
