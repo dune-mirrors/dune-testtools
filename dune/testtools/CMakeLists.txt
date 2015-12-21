@@ -1,4 +1,5 @@
 add_subdirectory(test)
+add_subdirectory(tutorial)
 
 install(FILES gridconstruction.hh
               outputtree.hh

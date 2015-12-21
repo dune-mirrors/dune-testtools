@@ -1,4 +1,5 @@
-.. title:: dune-testtools CMake reference
+CMake documentation of dune-testools
+************************************
 
 CMake Command reference
 =======================
