@@ -75,7 +75,6 @@ if __name__ == "__main__":
     from dune.testtools.wrapper.fuzzy_compare_vtk import compare_vtk
     from dune.testtools.parser import parse_ini_file
 
-
     # Parse the given arguments
     args = get_args()
 

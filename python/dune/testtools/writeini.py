@@ -6,6 +6,8 @@ This module provides functions to write a dictionary representing
 an ini file to a stream or to file (ini file).
 
 """
+
+
 def write_to_stream(d, stream, assignment="="):
     """Write a dictionary to stream in ini file syntax
 

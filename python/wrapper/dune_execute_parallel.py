@@ -27,7 +27,6 @@ if __name__ == "__main__":
     from dune.testtools.wrapper.argumentparser import get_args
     from dune.testtools.wrapper.call_executable import call_parallel
 
-
     # Parse the given arguments
     args = get_args()
     if not args["mpi_exec"]:
