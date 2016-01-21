@@ -74,7 +74,6 @@ if __name__ == "__main__":
     from dune.testtools.wrapper.compareini import compare_ini, fuzzy_compare_ini
     from dune.testtools.parser import parse_ini_file
 
-
     # Parse the given arguments
     args = get_args()
 
