@@ -26,7 +26,7 @@
 #       :required:
 #
 #       The meta ini file, whose `__static` section is used to
-#       define the executables to add. See :ref:`metaini`
+#       define the executables to add. See :ref:`introductionmetaini`
 #       for details on how to write such meta ini files.
 #
 #    .. cmake_param:: CREATED_TARGETS
@@ -61,7 +61,7 @@
 #       :required:
 #
 #       The meta ini file, that describes the dynamic
-#       variations of the systemtest. See :ref:`metaini`
+#       variations of the systemtest. See :ref:`introductionmetaini`
 #       for details on how to write such meta ini files.
 #
 #    .. cmake_param:: SCRIPT
@@ -70,7 +70,7 @@
 #       The python wrapper script around the test. Defaults to :code:`call_executable.py`,
 #       which essentially forwards the return code of the program run.
 #       Changing this parameter to a different python wrapper enables more
-#       involved, numerics-aware testing methods. Check :ref:`tools`
+#       involved, numerics-aware testing methods. Check :ref:`thewrappers`
 #       for details on pre-implemented tools and on how to
 #       write your own ones.
 #
@@ -105,7 +105,7 @@
 #       :required:
 #
 #       The meta ini file, that describes the dynamic and static
-#       variations of the systemtest. See :ref:`metaini`
+#       variations of the systemtest. See :ref:`introductionmetaini`
 #       for details on how to write such meta ini files.
 #
 #    .. cmake_param:: CREATED_TARGETS
@@ -121,7 +121,7 @@
 #       The python wrapper script around the test. Defaults to :code:`call_executable.py`,
 #       which essentially forwards the return code of the program run.
 #       Changing this parameter to a different python wrapper enables more
-#       involved, numerics-aware testing methods. Check :ref:`tools` for details
+#       involved, numerics-aware testing methods. Check :ref:`thewrappers` for details
 #       on pre-implemented tools and on how to write your own ones.
 #
 #    .. cmake_param:: DEBUG

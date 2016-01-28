@@ -16,26 +16,27 @@ from six.moves import zip
 
 # fuzzy compare VTK tree from VTK strings
 def compare_vtk(vtk1, vtk2, absolute=1.5e-7, relative=1e-2, zeroValueThreshold={}, verbose=True):
-    """ take two vtk files and compare them. Returns an exit key as returnvalue.
+    """ Take two vtk files and fuzzy compare them. Returns an exit key as return value.
 
-    Arguments:
-    ----------
-    vtk1, vtk2 : string
-        The filenames of the vtk files to compare
+    :param vtk1: The filename of the vtk files to compare
+    :type vtk1: string
+    :param vtk2: The filename of the vtk files to compare
+    :type vtk2: string
 
-    Keyword Arguments:
-    ------------------
-    absolute : float
-        The epsilon used for comparing numbers with an absolute criterion
-    relative: float
-        The epsilon used for comparing numbers with an relative criterion
-    zeroValueThreshold: dict
-        A dictionary of parameter value pairs that set the threshold under
-        which a number is treated as zero for a certain parameter. Use this parameter if
-        you have to avoid comparisons of very small numbers for a certain parameter.
-    verbose : bool
-        If the script should produce informative output. Enabled by default as the details
-        give the tester a lot more information on why tests fail.
+    :param absolute: The epsilon used for comparing numbers with an absolute criterion
+    :type absolute: float
+
+    :param relative: The epsilon used for comparing numbers with an relative criterion
+    :type relative: float
+
+    :param zeroValueThreshold: A dictionary of parameter value pairs that set the threshold under
+                               which a number is treated as zero for a certain parameter. Use this parameter if
+                               you have to avoid comparisons of very small numbers for a certain parameter.
+    :type zeroValueThreshold: dict
+
+    :param verbose: If the script should produce informative output. Enabled by default as the details
+                    give the tester a lot more information on why tests fail.
+    :type verbose: bool
     """
 
     # construct element tree from vtk file

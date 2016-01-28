@@ -1,7 +1,4 @@
 """
-.. module:: compareini
-    :synopsis: A module for comparing two ini files.
-
 This module provides methods compare two ini files. They can be compared
 exact, i.e. key-value-pair by key-value-pair. They can be fuzzy compared, i.e.
 numbers are converted to floating point numbers and compared using absolute

@@ -59,7 +59,7 @@ First, let's have a look at ``CMakeLists.txt``. To add system tests ``dune-testt
 provides a simple CMake macro. In the above setting, ``CMakeLists.txt`` could look like this
 
 .. code-block:: cmake
-    :caption: ``CMakeLists.txt``
+    :caption: The ``CMakeLists.txt``
 
     dune_add_system_test(SOURCE source.cc
                          INIFILE config.mini
@@ -95,7 +95,7 @@ two grid managers and for three different refinement levels. Then, your
 meta ini file could look like this
 
 .. code-block:: ini
-    :caption: ``config.mini``
+    :caption: The ``config.mini``
 
     level = 1, 2, 3 | expand
 
@@ -225,7 +225,7 @@ Many times we don't only want to check exit codes of our tests to decide whether
 passed or failed. That's why with ``dune-testtools`` you can easily wrap your executable
 and perform more elaborate result checking or execution. ``dune-testtools`` already provides
 a number of useful :ref:`wrappers <thewrappers>`. With a little knowledge of python it is also
-easy to :ref:`write your own wrapper <writingwrapperscripts>`. We want to demonstrate the
+easy to write your own wrapper. We want to demonstrate the
 use of wrappers here briefly.
 
 Suppose you want to run the tests we just wrote in parallel using ``8`` cores. The CMake macro
@@ -233,7 +233,7 @@ provides an optional argument for specifying a wrapper script. The modified ``CM
 would look like this
 
 .. code-block:: cmake
-    :caption: ``CMakeLists.txt``
+    :caption: The modified ``CMakeLists.txt``
 
     dune_add_system_test(SOURCE source.cc
                          INIFILE config.mini
@@ -244,7 +244,7 @@ Conveniently, you can configure the wrapper script with your meta ini file.
 To specifiy the number of processors we would modify ``config.mini`` like this
 
 .. code-block:: ini
-    :caption: ``config.mini``
+    :caption: The modified ``config.mini``
 
     level = 1, 2, 3 | expand
 

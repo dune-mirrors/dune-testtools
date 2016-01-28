@@ -1,3 +1,7 @@
+"""
+This module provides methods for defining convergence tests.
+"""
+
 from __future__ import absolute_import
 from dune.testtools.parser import *
 from dune.testtools.metaini import *
