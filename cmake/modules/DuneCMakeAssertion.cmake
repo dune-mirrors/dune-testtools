@@ -21,7 +21,7 @@
 #       given name has been added to cmake. Note that such check
 #       does not exist in CMake. To work around this, the existence
 #       of a test label is checked. This works fine for us, because
-#       the functions in :ref:`DuneSystemtests` apply at least one
+#       the functions in DuneSystemtests apply at least one
 #       label to all generated tests. It might fail for arbitrary tests
 #       though.
 #

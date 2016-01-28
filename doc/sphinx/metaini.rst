@@ -1,4 +1,5 @@
 .. _introductionmetaini:
+
 Introduction to Meta Ini Files
 ******************************
 
@@ -94,12 +95,12 @@ Whenever values that contain unescaped curly brackets, the string within those c
 Other commands
 ==============
 
-The following subsections describes all other general purpose commands, that exist in dune-testtools. This does not cover commands that are specific to certain testtools. Those are described in the section `testtools`_.
+The following subsections describes all other general purpose commands, that exist in dune-testtools. This does not cover commands that are specific to certain testtools. Those are described in the section :ref:`thewrappers`.
 
 The unique command
 ++++++++++++++++++
 
-A key marked with the command ``unique`` will be made unique throughout the set of generated ini files. This is done by appending a consecutive numbering scheme to those (and only those) values, that appear multiple times in the set. Some special keys like ``__name`` (see section `systemtest`_) have the unique command applied automatically.
+A key marked with the command ``unique`` will be made unique throughout the set of generated ini files. This is done by appending a consecutive numbering scheme to those (and only those) values, that appear multiple times in the set. Some special keys like ``__name`` have the unique command applied automatically.
 
 Using the curly bracket syntax to depend on keys which have the ``unique`` command applied is not well-defined.
 
@@ -130,7 +131,7 @@ Operands may be any literals, ``pi`` is expanded to its value.
 The include statement
 +++++++++++++++++++++
 
-The ``include`` statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name. See figure `bla`_ for a minimal example.
+The ``include`` statement can be used to paste the contents of another inifile into the current ini file. The positioning of the statement within the ini file defines the priority order of keys that appear on both files. All keys prior to the include statements are potentially overriden if they appear in the include. Likewise, all keys after the include will override those from the include file with the same name.
 
 This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, ``include`` and ``import`` are synonymous w.r.t. to this feature.
 

@@ -96,7 +96,7 @@ def expand_key(c, keys):
     """ Expand a group of keys together
 
         :param c: A meta ini dictionary
-        :type c: DotDict
+        :type c: dune.common.parametertree.dotdict.DotDict
         :param keys: The keys to be expanded together
         :type keys: string
 
