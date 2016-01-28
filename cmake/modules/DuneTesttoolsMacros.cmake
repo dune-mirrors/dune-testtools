@@ -22,6 +22,17 @@ else()
   set(DEBUG_MACRO_TESTS)
 endif()
 
+# Set the default on the variable DUNE_MAX_TEST_CORES
+# Starting with Dune 3.0 this is done in dune-common
+if(NOT DUNE_MAX_TEST_CORES)
+  set(DUNE_MAX_TEST_CORES 1000000000)
+endif()
+
+# Discard all parallel tests if MPI was not found
+if(NOT MPI_FOUND)
+  set(DUNE_MAX_TEST_CORES 1)
+endif()
+
 include(DuneCMakeAssertion)
 include(ParsePythonData)
 include(DuneSystemtests)
