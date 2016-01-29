@@ -23,11 +23,14 @@ set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
 dune_install_python_package(PATH python)
 add_python_test_command(COMMAND python -m pytest
-                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python)
+                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
+                        REQUIRED_PACKAGES pytest)
 add_python_test_command(COMMAND python -m pytest VIRTUALENV dune-env-2
-                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python)
+                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
+                        REQUIRED_PACKAGES pytest)
 add_python_test_command(COMMAND python -m pytest --pep8 VIRTUALENV dune-env-2
-                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python)
+                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
+                        REQUIRED_PACKAGES pytest pytest-pep8)
 
 add_subdirectory("dune")
 add_subdirectory("doc")
