@@ -217,7 +217,7 @@ def sort_elements(items, newroot):
         # Create a new item to represent the sorted version
         # of the next item, and copy the tag name and contents
         newitem = ET.Element(item.tag)
-        if item.text and item.text.isspace() == False:
+        if item.text and item.text.isspace() is False:
             newitem.text = item.text
 
         # Copy the attributes (sorted by key) to the new item
