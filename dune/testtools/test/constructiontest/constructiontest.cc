@@ -31,6 +31,13 @@ void test_ini(std::string filename) {
     std::cout << "Created YaspGrid with " << factory3.getGrid()->size(0) << " cells." << std::endl;
   }
 
+  if (tree.hasSub("onedgrid")) {
+    typedef Dune::OneDGrid G;
+    typedef IniGridFactory<G> F;
+    F factory(tree, "onedgrid");
+    std::cout << "Created OneDGrid with " << factory.getGrid()->size(0) << " cells." << std::endl;
+  }
+
 #if HAVE_UG
   if (tree.hasSub("ug")) {
     typedef Dune::UGGrid<2> G4;
@@ -73,6 +80,7 @@ int main(int argc, char** argv)
     test_ini("ini/ug_structured_simplical.ini");
 
     test_ini("ini/yasp.ini");
+    test_ini("ini/oned.ini");
   } catch (Dune::Exception& e) {
     std::cerr << e << std::endl;
     return 1;

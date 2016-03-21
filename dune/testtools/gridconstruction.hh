@@ -19,6 +19,10 @@
 #include<dune/grid/yaspgrid/backuprestore.hh>
 #include<dune/grid/io/file/dgfparser/dgfyasp.hh>
 
+// OneDGrid specific includes
+#include<dune/grid/onedgrid.hh>
+#include<dune/grid/io/file/dgfparser/dgfoned.hh>
+
 // UGGrid specific includes
 #if HAVE_UG
 #include<dune/grid/uggrid.hh>
@@ -344,6 +348,67 @@ public:
 private:
   std::shared_ptr<Grid> grid;
 };
+
+
+/** An IniGridFactory for a OneDGrid
+ *
+ * The following keys are recognized:
+ * - dgfFile : a dgf file to load the coarse grid from
+ * - coords : A coordinate list (of course forming a monotonous sequence)
+ * - left : coordinate of the left interval boundary
+ * - right : coordinate of the right interval boundary
+ * - cells : the number of cells in each direction
+ * - refinement : the number of global refines to apply initially.
+ */
+template<>
+class IniGridFactory<Dune::OneDGrid>
+{
+public:
+  typedef typename Dune::OneDGrid Grid;
+  typedef typename Grid::ctype ct;
+
+  IniGridFactory(const Dune::ParameterTree& params)
+  {
+    if (params.hasKey("dgfFile"))
+    {
+      std::string dgffile = params.get<std::string>("dgfFile");
+      Dune::GridPtr<Grid> gridptr(dgffile);
+      grid = std::shared_ptr<Grid>(gridptr.release());
+    }
+    else if (params.hasKey("coords"))
+    {
+      auto coords = params.get<std::vector<ct>>("coords");
+      grid = std::make_shared<Grid>(coords);
+    }
+    else
+    {
+      // extract the interval extensions from the ini file
+      ct left = params.get<ct>("left");
+      ct right = params.get<ct>("right");
+
+      // number of cells per direction
+      int cells = params.get<int>("cells");
+
+      grid = std::make_shared<Grid>(cells, left, right);
+    }
+
+    int refinement = params.get<int>("refinement", 0);
+    grid->globalRefine(refinement);
+  }
+
+  IniGridFactory(const Dune::ParameterTree& params, std::string section)
+    : IniGridFactory(params.sub(section))
+  {}
+
+  std::shared_ptr<Grid> getGrid()
+  {
+    return grid;
+  }
+
+private:
+  std::shared_ptr<Grid> grid;
+};
+
 
 #if HAVE_UG
 /** An IniGridFactory for an UGGrid
