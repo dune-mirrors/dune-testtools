@@ -17,8 +17,11 @@ from dune.testtools.escapes import extract_delimited
 def floatify(x):
     try:
         return float(x)
-    except ValueError as e:
-        return float(extract_delimited(x, '"', '"'))
+    except ValueError:
+        try:
+            return float(extract_delimited(x, '"', '"'))
+        except Exception:
+            raise ValueError
 
 
 def compare_ini(inifile1, inifile2,
