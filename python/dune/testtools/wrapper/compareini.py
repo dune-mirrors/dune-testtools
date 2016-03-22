@@ -11,6 +11,17 @@ Keys can be excluded from comparison by specifying the key-list `exclude`.
 from __future__ import absolute_import
 from dune.common.parametertree.dotdict import DotDict
 from dune.common.parametertree.parser import parse_ini_file
+from dune.testtools.escapes import extract_delimited
+
+
+def floatify(x):
+    try:
+        return float(x)
+    except ValueError:
+        try:
+            return float(extract_delimited(x, '"', '"'))
+        except Exception:
+            raise ValueError
 
 
 def compare_ini(inifile1, inifile2,
@@ -130,8 +141,8 @@ def fuzzy_compare_ini(inifile1, inifile2,
 
         # check if the values can be converted to float
         try:
-            value = float(value)
-            ini2[key] = float(ini2[key])
+            value = floatify(value)
+            ini2[key] = floatify(ini2[key])
         except ValueError:
             # do exact comparison, we can only do fuzzy float comparison
             if value != ini2[key]:
