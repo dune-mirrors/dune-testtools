@@ -23,12 +23,19 @@ void test_ini(std::string filename) {
     typedef IniGridFactory<G2> F2;
     typedef IniGridFactory<G3> F3;
 
-    F1 factory1(tree);
+    F1 factory1(tree, "yaspgrid");
     std::cout << "Created YaspGrid with " << factory1.getGrid()->size(0) << " cells." << std::endl;
-    F2 factory2(tree);
+    F2 factory2(tree, "yaspgrid");
     std::cout << "Created YaspGrid with " << factory2.getGrid()->size(0) << " cells." << std::endl;
-    F3 factory3(tree);
+    F3 factory3(tree, "yaspgrid");
     std::cout << "Created YaspGrid with " << factory3.getGrid()->size(0) << " cells." << std::endl;
+  }
+
+  if (tree.hasSub("onedgrid")) {
+    typedef Dune::OneDGrid G;
+    typedef IniGridFactory<G> F;
+    F factory(tree, "onedgrid");
+    std::cout << "Created OneDGrid with " << factory.getGrid()->size(0) << " cells." << std::endl;
   }
 
 #if HAVE_UG
@@ -36,7 +43,7 @@ void test_ini(std::string filename) {
     typedef Dune::UGGrid<2> G4;
     typedef IniGridFactory<G4> F4;
 
-    F4 factory4(tree);
+    F4 factory4(tree, "ug");
     std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
   }
 #endif
@@ -45,14 +52,14 @@ void test_ini(std::string filename) {
   if (tree.hasSub("alu")) {
     typedef Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming> G5;
     typedef IniGridFactory<G5> F5;
-    F5 factory5(tree);
+    F5 factory5(tree, "alu");
     std::cout << "Created ALUGrid with " << factory5.getGrid()->size(0) << " cells." << std::endl;
 
     // We test a simplical gmsh file, so no cuboid grid in that case
     if (!tree.hasKey("alu.gmshFile")) {
       typedef Dune::ALUGrid<2, 2, Dune::cube, Dune::nonconforming> G6;
       typedef IniGridFactory<G6> F6;
-      F6 factory6(tree);
+      F6 factory6(tree, "alu");
       std::cout << "Created ALUGrid with " << factory6.getGrid()->size(0) << " cells." << std::endl;
     }
   }
@@ -73,6 +80,7 @@ int main(int argc, char** argv)
     test_ini("ini/ug_structured_simplical.ini");
 
     test_ini("ini/yasp.ini");
+    test_ini("ini/oned.ini");
   } catch (Dune::Exception& e) {
     std::cerr << e << std::endl;
     return 1;
