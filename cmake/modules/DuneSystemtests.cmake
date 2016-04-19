@@ -222,6 +222,9 @@ function(add_system_test_per_target)
     set(TARGVAR_SCRIPT dune_execute.py)
   endif()
 
+  # Configure a bogus file from the meta ini file. This is a trick to retrigger configuration on meta ini changes.
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/tmp_${TARGVAR_INIFILE})
+
   # expand the given meta ini file into the build tree
   execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_expand_metaini.py --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
                   OUTPUT_VARIABLE output)
