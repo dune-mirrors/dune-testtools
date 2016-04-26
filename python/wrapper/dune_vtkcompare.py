@@ -115,4 +115,4 @@ if __name__ == "__main__":
             if ret is not 0:
                 sys.exit(ret)
 
-    sys.exit(0)
+    sys.exit(ret)
