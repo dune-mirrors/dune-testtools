@@ -7,7 +7,7 @@
 
 #include<dune/testtools/gridconstruction.hh>
 
-void test_ini(std::string filename) {
+void test_ini(std::string filename, const Dune::MPIHelper& mpiHelper) {
 
   std::cout << std::endl << "******** starting ini file: " << filename << std::endl;
 
@@ -38,13 +38,24 @@ void test_ini(std::string filename) {
     std::cout << "Created OneDGrid with " << factory.getGrid()->size(0) << " cells." << std::endl;
   }
 
-#if HAVE_UG
+#if HAVE_UG && UG_PARALLEL
   if (tree.hasSub("ug")) {
     typedef Dune::UGGrid<2> G4;
     typedef IniGridFactory<G4> F4;
 
     F4 factory4(tree, "ug");
     std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
+  }
+#else
+#warning "UG construction is sequential. UGGrid needs to be configured with --enable-parallel to run this test in parallel."
+  if (tree.hasSub("ug")) {
+    typedef Dune::UGGrid<2> G4;
+    typedef IniGridFactory<G4> F4;
+    if (mpiHelper.rank() == 0)
+    {
+        F4 factory4(tree, "ug");
+        std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
+    }
   }
 #endif
 
@@ -70,17 +81,17 @@ void test_ini(std::string filename) {
 int main(int argc, char** argv)
 {
   try {
-    Dune::MPIHelper::instance(argc, argv);
+    const auto& mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
-    test_ini("ini/alu_gmsh.ini");
-    test_ini("ini/alu_structured.ini");
+    test_ini("ini/alu_gmsh.ini", mpiHelper);
+    test_ini("ini/alu_structured.ini", mpiHelper);
 
-    test_ini("ini/ug_gmsh.ini");
-    test_ini("ini/ug_structured_quadrilateral.ini");
-    test_ini("ini/ug_structured_simplical.ini");
+    test_ini("ini/ug_gmsh.ini", mpiHelper);
+    test_ini("ini/ug_structured_quadrilateral.ini", mpiHelper);
+    test_ini("ini/ug_structured_simplical.ini", mpiHelper);
 
-    test_ini("ini/yasp.ini");
-    test_ini("ini/oned.ini");
+    test_ini("ini/yasp.ini", mpiHelper);
+    test_ini("ini/oned.ini", mpiHelper);
   } catch (Dune::Exception& e) {
     std::cerr << e << std::endl;
     return 1;
