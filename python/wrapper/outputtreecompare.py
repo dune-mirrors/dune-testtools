@@ -127,4 +127,4 @@ if __name__ == "__main__":
                                   exclude=exclude,
                                   verbose=True)
 
-    sys.exit(0)
+    sys.exit(ret)
