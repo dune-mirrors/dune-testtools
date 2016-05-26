@@ -99,7 +99,7 @@ meta ini file could look like this
 
     level = 1, 2, 3 | expand
 
-    [_static]
+    [__static]
     GRID = Dune::YaspGrid<2>, Dune::UGGrid<2> | expand
 
 This example will create two exectuables and in total 6 tests. As you can see
@@ -117,13 +117,13 @@ lead to the combination of the parameter variations.
 
 Static parameters like the grid type need to be communicated to the build system
 to generate different executables. To tell ``dune-testtools`` that a parameter
-is static we list it under the ``[_static]`` group.
+is static we list it under the ``[__static]`` group.
 
 .. note::
     If your template type contains commas, they need to be escaped. Alternatively,
     you can put the whole type in quotation marks (``"Dune::FieldVector<2, 3>"``).
 
-The static variable ``GRID`` that you defined under the ``[_static]`` section, will
+The static variable ``GRID`` that you defined under the ``[__static]`` section, will
 be available as preprocessor variable in your source code. So the source code could
 look like this
 
@@ -264,7 +264,7 @@ To specifiy the number of processors we would modify ``config.mini`` like this
     [wrapper.execute_parallel]
     numprocessors = 8
 
-    [_static]
+    [__static]
     GRID = Dune::YaspGrid<2>, Dune::UGGrid<2> | expand
 
 Finally, you can build and run your tests in parallel!

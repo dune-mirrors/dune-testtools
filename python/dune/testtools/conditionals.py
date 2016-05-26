@@ -25,7 +25,7 @@ Commands
 
         if {GRID} == ug and {DIM} == 1 | exclude
 
-        [_static]
+        [__static]
         DIM = 1, 2 | expand
         GRID = ug, yasp | expand
 
