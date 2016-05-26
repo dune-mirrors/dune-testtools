@@ -5,7 +5,7 @@
 #    A summary of what is done:
 #
 #    * Requirements on the python interpreter are formulated
-#    * The API for dune-style system tests is included.
+#    * The API for Dune-style system tests is included.
 #
 # .. cmake_variable:: DEBUG_MACRO_TESTS
 #

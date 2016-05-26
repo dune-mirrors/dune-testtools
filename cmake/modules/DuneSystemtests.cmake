@@ -1,4 +1,4 @@
-# Define the API to add system tests in dune.
+# Define the API to add system tests in Dune.
 #
 # .. cmake_function:: add_static_variants
 #
