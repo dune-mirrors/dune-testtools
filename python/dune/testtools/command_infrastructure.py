@@ -13,7 +13,7 @@ To implement a custom command you have to do the following:
     * value : the value string in the current line
     * config : The configuration dictionary
     * configs : The list of all configurations
-    * args : The list of arguments givne to the command
+    * args : The list of arguments given to the command
     * argdefaults : A list of default arguments to apply, if the arguments are missing in the meta ini file.
 
 2. decorate it with @ :func:`meta_ini_command`. :func:`meta_ini_command` itself takes some arguments:
