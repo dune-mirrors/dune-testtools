@@ -1,4 +1,4 @@
-# A module managing conditional includes for the cmake build system
+# A module managing conditional includes for the CMake build system
 #
 # .. cmake_function:: resolve_conditional_includes
 #
@@ -42,7 +42,7 @@
 #
 #    This module introduces a work-around based on the target property
 #    :code:`IMPLICIT_DEPENDS_INCLUDE_TRANSFORM`, which allows giving preprocessor macros
-#    to the cmake dependency parser. Those macros are applied to include lines only.
+#    to the CMake dependency parser. Those macros are applied to include lines only.
 #
 #    Usage:
 #

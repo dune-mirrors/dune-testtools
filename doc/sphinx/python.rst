@@ -1,7 +1,7 @@
 Python documentation of dune-testools
 *************************************
 
-The dune-testools python module provides the infrstructure for parsing
+The dune-testools Python module provides the infrstructure for parsing
 and expanding meta ini files. Script for communicating information to
 a CMake-based buildsystem are provided. It further provides test wrapper scripts
 aiming at testing for specific quality measures.
@@ -11,7 +11,7 @@ Modules of dune-testtools
 
 The dune-testtools core modules provide all functionality related
 to meta ini files and their expansion mechanism.
-Also have a look at the :ref:`introduction to metaini files <introductionmetaini>`.
+Also have a look at the :ref:`introduction to meta ini files <introductionmetaini>`.
 
 .. currentmodule:: dune.testtools
 .. autosummary::

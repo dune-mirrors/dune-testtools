@@ -30,7 +30,7 @@ def _get_convergence_test(key=None, value=None, config=None, args=None, commands
 @meta_ini_command(name="convergencetest_retrieve", ctype=CommandType.POST_RESOLUTION)
 def _get_convergence_test(key=None, value=None, config=None):
     """This command replaces the convergence test key by the original unexpanded value
-       leaving a metaini file configuring a convergence test"""
+       leaving a meta ini file configuring a convergence test"""
     return config["__local.wrapper.convergencetest.value"] + " | expand"
 
 

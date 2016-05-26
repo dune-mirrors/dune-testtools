@@ -38,7 +38,7 @@ Python
 
 * follow PEP8 (see https://www.python.org/dev/peps/pep-0008/)
 * you can test your files for PEP8 compliance with e.g. pytest --pep8
-* make your code work with python2 and python3
+* make your code work with Python 2 and Python 3
 * separate scripts and modules, scripts belong in the scripts folder
 * provide unit tests for new features
 * prefer named arguments

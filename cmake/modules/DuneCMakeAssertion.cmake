@@ -1,4 +1,4 @@
-# Implement configure time assertions to test cmake modules.
+# Implement configure time assertions to test CMake modules.
 #
 # .. cmake_function:: dune_assert
 #
@@ -11,14 +11,14 @@
 #    .. cmake_param:: COND
 #       :single:
 #
-#       A condition that may be evaluated by the cmake command :code:`if`.
+#       A condition that may be evaluated by the CMake command :code:`if`.
 #
 #    .. cmake_param:: TEST_EXISTS
 #       :single:
 #       :argname: name
 #
 #       A special condition, that tests whether a test of the
-#       given name has been added to cmake. Note that such check
+#       given name has been added to CMake. Note that such check
 #       does not exist in CMake. To work around this, the existence
 #       of a test label is checked. This works fine for us, because
 #       the functions in DuneSystemtests apply at least one
@@ -37,9 +37,9 @@
 #
 #       If given, a failed assertion only throws a warning instead of an error.
 #
-#    Implement configure time assertions in cmake. This may be used to write
-#    unit tests for cmake functions. Any condition that can be evaluated by
-#    cmakes command :code:`if` may be used. Some additional conditions are
+#    Implement configure time assertions in CMake. This may be used to write
+#    unit tests for CMake functions. Any condition that can be evaluated by
+#    CMake's command :code:`if` may be used. Some additional conditions are
 #    implemented, check below documentation for details. Only one conditions
 #    should be given. Giving more than one, will result in all but one being
 #    ignored.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-A script to check if there are static variations in a metaini file
+A script to check if there are static variations in a meta ini file
 
 To be called by CMake. Provides CMake with information on if a
 ``[__static]`` section is present in the meta ini file. If no

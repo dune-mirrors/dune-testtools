@@ -39,7 +39,7 @@ class PyTest(TestCommand):
 setup(name='dune.testtools',
       version='2.4',
       namespace_packages=['dune'],
-      description='Python testtools for systemtesting in DUNE',
+      description='Python testtools for systemtesting in Dune',
       author='Dominic Kempf <dominic.kempf@iwr.uni-heidelberg.de>, Timo Koch <timo.koch@iws.uni-stuttgart.de>',
       author_email='no_mailinglist_yet@dune-testtools.de',
       url='http://conan2.iwr.uni-heidelberg.de/git/quality/dune-testtools',

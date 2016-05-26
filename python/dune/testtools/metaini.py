@@ -4,7 +4,7 @@
 
 This piece of documentation deals with the meta ini module. For
 an better overview what meta ini files are and how they can be useful
-we refer to the :ref:`introduction to metaini files <introductionmetaini>`.
+we refer to the :ref:`introduction to meta ini files <introductionmetaini>`.
 This is an example showing the power of the meta ini syntax:
 
 .. code-block:: ini
@@ -317,7 +317,7 @@ def write_configuration_to_ini(c, metaini, static_info, args, prefix=""):
         c["__name"] = fn
 
     # before writing the expanded ini file delete the special keywords to make it look like an ordinary ini file
-    # Don't do it, if this is called from cmake to give the user the possibility to understand as much as possible
+    # Don't do it, if this is called from CMake to give the user the possibility to understand as much as possible
     # from the expansion process.
     if ("__name" in c) and (not args["cmake"]):
         del c["__name"]

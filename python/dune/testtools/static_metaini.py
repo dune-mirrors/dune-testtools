@@ -35,7 +35,7 @@ def extract_static_info(metaini, add_guards=False):
 
             static[conf["__exec_suffix"]] = conf["__static"]
 
-        # Now update the list of cmake guards
+        # Now update the list of CMake guards
         if add_guards:
             if "__cmake_guards" in conf:
                 static[conf["__exec_suffix"]]['__GUARDS'] = conf["__cmake_guards"].values()

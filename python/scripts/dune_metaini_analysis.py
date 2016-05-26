@@ -4,7 +4,7 @@
 An analysis script for checking validity of meta ini files
 and inspecting the resulting configuration upon expansion.
 
-Because all python code in ``dune-testtools`` runs in a virutalenv
+Because all Python code in ``dune-testtools`` runs in a virutalenv
 by default running the analysis script is not straight forward. Luckily,
 it's not too hard either. Analyse your favorite meta ini file with
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     import sys
     import os
 
-    # python 2/3 compatibility
+    # Python 2/3 compatibility
     try:
         input = raw_input
     except NameError:
