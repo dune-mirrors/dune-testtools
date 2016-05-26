@@ -15,7 +15,7 @@ from six.moves import zip
 
 
 # fuzzy compare VTK tree from VTK strings
-def compare_vtk(vtk1, vtk2, absolute=1.5e-7, relative=1e-2, zeroValueThreshold={}, verbose=True):
+def compare_vtk(vtk1, vtk2, absolute=1.2e-7, relative=1e-2, zeroValueThreshold={}, verbose=True):
     """ Take two vtk files and fuzzy compare them. Returns an exit key as return value.
 
     :param vtk1: The filename of the vtk files to compare

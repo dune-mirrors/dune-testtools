@@ -24,7 +24,7 @@ The wrapper can be configured through the meta ini file under the section
     reference = path_to_reference_file
     extension = vtu
     relative = 1e-2
-    absolute = 1.5e-7
+    absolute = 1.2e-7
     zeroThreshold.velocity = 1e-18
 
 The mandatory parameters are ``name`` and ``reference``. ``name`` specifies
@@ -55,12 +55,12 @@ vtu file is written for each domain. The vtu files are to be given as space sepa
 
     [wrapper.vtkcompare.myvtkfile1]
     relative = 1e-2
-    absolute = 1.5e-7
+    absolute = 1.2e-7
     zeroThreshold.velocity = 1e-18
 
     [wrapper.vtkcompare.myvtkfile2]
     relative = 1e-2
-    absolute = 1.5e-7
+    absolute = 1.2e-7
     zeroThreshold.velocity = 1e-18
 
 In this case the parameters ``relative``, ``absolute``, and ``zeroThreshold`` can be
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
             # check for specific options for this comparison
             relative = float(ini.get("wrapper.vtkcompare." + prefix + "relative", 1e-2))
-            absolute = float(ini.get("wrapper.vtkcompare." + prefix + "absolute", 1.5e-7))
+            absolute = float(ini.get("wrapper.vtkcompare." + prefix + "absolute", 1.2e-7))
             zeroThreshold = ini.get("wrapper.vtkcompare." + prefix + "zeroThreshold", {})
 
             ret = compare_vtk(vtk1=n + "." + e,
