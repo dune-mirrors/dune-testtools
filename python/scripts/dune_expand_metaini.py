@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-A script that expands a given metaini file into its configurations (ini files).
+A script that expands a given meta ini file into its configurations (ini files).
 
-Main interface from python to CMake. To be called from CMake to obtain all
+Main interface from Python to CMake. To be called from CMake to obtain all
 build system specific information in meta ini files, e.g. information for a
 given test which executable to use with which ini file. This script also
 controles the expansion process of a single meta ini file into a set of ini files.
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser()
         parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
         parser.add_argument('-d', '--dir', help='The directory to put the output in')
-        parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from cmake and should return data to it')
+        parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from CMake and should return data to it')
         return vars(parser.parse_args())
 
     # analyse the given arguments
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # expand the meta ini files into a list of configurations
     configurations = expand_meta_ini(args["ini"])
 
-    # initialize a data structure to pass the list of generated ini files to cmake
+    # initialize a data structure to pass the list of generated ini files to CMake
     metaini = {}
     metaini["names"] = []  # TODO this should  have underscores!
     metaini["labels"] = {}

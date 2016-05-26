@@ -4,7 +4,7 @@
 
 It is possible in meta ini syntax to state values without keys
 if they have a command applied that support conditionals. The value
-is then evaluated as a python boolean expression (after resolution).
+is then evaluated as a Python Boolean expression (after resolution).
 
 Commands
 ++++++++

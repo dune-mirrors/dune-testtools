@@ -3,13 +3,13 @@
 .. currentmodule:: dune.testtools.cmakeoutput
 
 The CMakeParseArguments module is a very helpful in processing
-data in CMake. This module formats python data in a way to have it
+data in CMake. This module formats Python data in a way to have it
 recognized by CMakeParseArguments through the macro ``parse_python_data``
 from ``dune-testtools/cmake/modules/ParsePythonData.cmake``.
 
 Currently the following assumptions on the data are made:
 
-- The data is considered to be a dict. Otherwise naming of the cmake variables
+- The data is considered to be a dict. Otherwise naming of the CMake variables
   would be a pain.
 - The dictionary can contain dictionaries itself (arbitrarily nested). The keys
   in CMake are appended with an underscore inbetween
@@ -114,6 +114,6 @@ def printForCMake(d):
     output = singlekeys + multikeys + data
     output = output + "__SEMICOLON" + delimiter + replacement + delimiter
 
-    # this is necessary because python will always add a newline character on program exit
+    # this is necessary because Python will always add a newline character on program exit
     import sys
     sys.stdout.write(output[:-1])

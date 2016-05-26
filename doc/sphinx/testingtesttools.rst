@@ -30,8 +30,8 @@ e.g. if you don't have MPI.
     all tests that belong to a system test by calling ``make BASENAME``,
     where ``BASENAME`` is the name given in the system test macro.
 
-The machinery behind meta ini files is written in python. Our python
-modules provide unit tests, too. You can run the python test suite with
+The machinery behind meta ini files is written in Python. Our Python
+modules provide unit tests, too. You can run the Python test suite with
 
 .. code-block:: shell
 

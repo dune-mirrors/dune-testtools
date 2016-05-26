@@ -1,4 +1,4 @@
-# A CMake module defining the interface to read data from python
+# A CMake module defining the interface to read data from Python
 #
 # .. note::
 #    This is intended for internal use only.
@@ -15,11 +15,11 @@
 #       :single:
 #       :required:
 #
-#       The input string, which is the stdout of a python script
+#       The input string, which is the stdout of a Python script
 #       that used the :code:`printForCMake` function from :code:`dune.testtools`
 #
-#    The function that implements the data interface between python and
-#    cmake from the cmake side.
+#    The function that implements the data interface between Python and
+#    CMake from the CMake side.
 #
 #    .. note::
 #       This is intended for internal use only.
@@ -29,7 +29,7 @@ function(parse_python_data)
   set(SINGLE PREFIX)
   set(MULTI INPUT)
   cmake_parse_arguments(PYPARSE "" "${SINGLE}" "${MULTI}" ${ARGN})
-  # these keys are an agreement between the python and the cmake module
+  # these keys are an agreement between the Python and the CMake module
   # they can be changed to whatever keys, as long as they are updated on
   # both ends.
   set(SINGLEKEY __SEMICOLON)

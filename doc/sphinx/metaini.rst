@@ -6,7 +6,7 @@ Introduction to Meta Ini Files
 The Meta Ini Format
 ===================
 
-The *meta ini* format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in DUNE. To reiterate the syntax of such ini file, see the :ref:`normal_ebnf` and :ref:`normalini`. Note that, you can define groups of keys either by using the ``[..]`` syntax, by putting dots into keys, or by using a combination of both
+The *meta ini* format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in DUNE. To reiterate the syntax of such ini file, see the :ref:`normal_ebnf` and :ref:`normalini`. Note that, you can define groups of keys either by using the ``[..]`` syntax, by putting dots into keys, or by using a combination of both.
 
 .. _normal_ebnf:
 .. code-block:: ebnf
@@ -45,7 +45,7 @@ The following sections are about describing the semantics of the extensions.
 The command syntax
 ==================
 
-Commands can be applied to key/value pairs by using a pipe and then stating the command name and potential arguments. As you'd expect from a pipe, you can use multiple commands on single key/value pair. If so, the order of resolution is the following
+Commands can be applied to key/value pairs by using a pipe and then stating the command name and potential arguments. As you'd expect from a pipe, you can use multiple commands on single key/value pair. If so, the order of resolution is the following:
 
  - Commands with a command type of higher priority are executed first. The available command types in order of priority are: ``POST_PARSE``, ``PRE_EXPANSION``, ``POST_EXPANSION``, ``PRE_RESOLUTION``, ``POST_RESOLUTION``, ``PRE_FILTERING``, ``POST_FILTERING``, ``AT_EXPANSION``.
  - Given multiple commands with the same type, commands are executed from left to right.
@@ -62,7 +62,7 @@ The ``expand`` command is the most important command, as it defines the mechanis
     key = foo, bar | expand
     someother = 1, 2, 3 | expand
 
-Sometimes, you may not want to generate the product of possible values, but instead couple multiple key expansions. You can do that by providing an argument to the expand command. All expand commands with the same argument, will be expanded together. Having expand commands with the same argument but a differing number of camma separated values is not well-defined. This example shows again a minimal example, which yields 2 configurations.
+Sometimes, you may not want to generate the product of possible values, but instead couple multiple key expansions. You can do that by providing an argument to the expand command. All expand commands with the same argument will be expanded together. Having expand commands with the same argument but a differing number of camma separated values is not well-defined. This example shows again a minimal example, which yields 2 configurations.
 
 .. code-block:: ini
    :caption: A simple example of expanded keys with argument
@@ -70,7 +70,7 @@ Sometimes, you may not want to generate the product of possible values, but inst
     key = 1, 2 | expand foo
     someother = 4, 5 | expand foo
 
-The above mechanism can be combined at will. Listing~\ref{lst:exp3} shows an example, which yields 6 ini files.
+The above mechanism can be combined at will. The following example yields 6 ini files.
 
 .. code-block:: ini
    :caption: A simple combining multiple expansions

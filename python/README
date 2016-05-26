@@ -1,5 +1,5 @@
 ***************************************************************
-*                       DUNE-TESTTOOLS (python module)        *
+*                       DUNE-TESTTOOLS (Python module)        *
 *  developed by:                                              *
 *   Timo Koch (timo.koch@iws.uni-stuttgart.de)                *
 *   Dominic Kempf (dominic.kempf@iwr.uni-heidelberg.de)       *
@@ -21,7 +21,7 @@ dune-testtools provides the following components:
 *                   How to use dune-testtools                 *
 ***************************************************************
 
-dune-testtools is a python module that is included in a
+dune-testtools is a Python module that is included in a
 dune-module. See the dune module for more.
 
 ***************************************************************

@@ -26,7 +26,8 @@ and its dependency ``dune-python`` from the Dune GitLab server.
 
 ``dune-foo`` needs to know about ``dune-testtools`` in order to use its
 functionality, so we have to add it to the dependencies in the ``dune.module``
-file of the project.
+file of the project. Having it in the ``Depends:`` list is necessary to
+emable the functions of the ``dune-testtools`` CMake modules.
 
 .. code-block:: ini
     :caption: ``dune.module`` file of project ``dune-foo``
@@ -41,8 +42,8 @@ file of the project.
     of ``dune-foo`` and rebuild using dunecontrol
     to find dune-testtools.
 
-Setting up he first system test
-===============================
+Setting up a first system test
+==============================
 
 Assuming you have a ``test`` directory in your dune module, your source directory
 for the system test should look something like this
@@ -181,15 +182,28 @@ look like this
         return 1;
     }
 
-Running the first system test
-=============================
+Building and running the first system test
+==========================================
 
-Congratulations, you already configured your first system test. In order to configure
-the system test run CMake from the top level directory
+Congratulations, you already set up your first system test.
+We assume you already know how to configure and build Dune.
+Using ``dunecontrol`` is the easiest.
 
 .. code-block:: shell
 
-    cmake <builddir>
+    ./dune-common/bin/dunecontrol all
+
+To configure the system test in case you already have a build-directory
+from a dunecontrol run or otherwise, rerun CMake
+
+.. code-block:: shell
+
+    cmake build-cmake
+
+.. note::
+    This assumes you are using ``dunecontrol``'s default
+    build directory structure with a ``build-cmake`` build
+    directory in each module.
 
 Now, like for other Dune tests you can build and run your tests with
 
@@ -237,7 +251,7 @@ Test wrappers
 Many times we don't only want to check exit codes of our tests to decide whether they
 passed or failed. That's why with ``dune-testtools`` you can easily wrap your executable
 and perform more elaborate result checking or execution. ``dune-testtools`` already provides
-a number of useful :ref:`wrappers <thewrappers>`. With a little knowledge of python it is also
+a number of useful :ref:`wrappers <thewrappers>`. With a little knowledge of Python it is also
 easy to write your own wrapper. We want to demonstrate the
 use of wrappers here briefly.
 

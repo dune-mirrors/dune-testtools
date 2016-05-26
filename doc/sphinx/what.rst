@@ -8,7 +8,7 @@ What is ``dune-testtools``?
 
 ``dune-testtools`` provides the following components:
 
-**A python module**
+**A Python module**
 
 - a domain specific language for feature modelling, which is
   naturally integrates into the workflow of numerical simulation.

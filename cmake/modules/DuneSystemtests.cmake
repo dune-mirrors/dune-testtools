@@ -67,9 +67,9 @@
 #    .. cmake_param:: SCRIPT
 #       :single:
 #
-#       The python wrapper script around the test. Defaults to :code:`call_executable.py`,
+#       The Python wrapper script around the test. Defaults to :code:`call_executable.py`,
 #       which essentially forwards the return code of the program run.
-#       Changing this parameter to a different python wrapper enables more
+#       Changing this parameter to a different Python wrapper enables more
 #       involved, numerics-aware testing methods. Check :ref:`thewrappers`
 #       for details on pre-implemented tools and on how to
 #       write your own ones.
@@ -79,7 +79,7 @@
 #
 #       This parameter is only for internal usage.
 #
-#    Given a set of executables (givne as cmake targets), a number of tests is
+#    Given a set of executables (given as CMake targets), a number of tests is
 #    added. The given meta ini file is expanded and each dynamic variant is
 #    connected with each given executable.
 #
@@ -118,9 +118,9 @@
 #    .. cmake_param:: SCRIPT
 #       :single:
 #
-#       The python wrapper script around the test. Defaults to :code:`call_executable.py`,
+#       The Python wrapper script around the test. Defaults to :code:`call_executable.py`,
 #       which essentially forwards the return code of the program run.
-#       Changing this parameter to a different python wrapper enables more
+#       Changing this parameter to a different Python wrapper enables more
 #       involved, numerics-aware testing methods. Check :ref:`thewrappers` for details
 #       on pre-implemented tools and on how to write your own ones.
 #
