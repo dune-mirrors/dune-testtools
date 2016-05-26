@@ -1,4 +1,4 @@
-# Define the API to add system tests in dune. The most
+# Define the API to add system tests in Dune. The most
 # important function is :ref:`add_dune_system_test`, which
 # aims at doing all the work in one line. If you want
 # to split dynamic and static variations manually, use

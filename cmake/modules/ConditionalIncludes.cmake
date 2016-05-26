@@ -11,7 +11,7 @@
 #
 # http://public.kitware.com/Bug/print_bug_page.php?bug_id=11985
 #
-# Preprocessor-macro-dependant include directives are pretty common in dune.
+# Preprocessor-macro-dependant include directives are pretty common in Dune.
 # Those are not picked up correctly.
 #
 # In the context of system testing, this is not acceptable. Using static
