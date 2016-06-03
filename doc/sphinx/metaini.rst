@@ -27,19 +27,7 @@ The *meta ini* format is used in dune-testtools as a domain specific language fo
     [somegroup.subgroup]
     z = 3
 
-The meta ini format is an extension to the normal ini file, which describes a set of ini files within one file. This is the EBNF of the extended syntax:
-
-.. _metaini_ebnf:
-.. code-block:: ebnf
-   :caption: EBNF describing normal meta ini files
-
-    <ini> & ::= {<pair> | <group> | <include> }*
-    <group> & ::= [ <str> ]
-    <pair> & ::= <str> = <value>{ | <command>}*
-    <value> & ::= <str>{ { <value> } }*<str>
-    <command> & ::= <cmdname> {<cmdargs>}*
-    <include> & ::= include <str> | import <str>
-
+The meta ini format is an extension to the normal ini file, which describes a set of ini files within one file.
 The following sections are about describing the semantics of the extensions.
 
 The command syntax
