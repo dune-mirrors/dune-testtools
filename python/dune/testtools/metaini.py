@@ -26,6 +26,7 @@ This is an example showing the power of the meta ini syntax:
 Commands
 ++++++++
 
+.. _expand:
 .. metaini_command:: expand
 
     .. metaini_command_arg:: IDENTIFIER

@@ -9,6 +9,7 @@ a naming scheme might be given, but it may not be unique.
 Commands
 ++++++++
 
+.. _unique:
 .. metaini_command:: unique
 
     The ``unique`` command can be applied to any value that has to

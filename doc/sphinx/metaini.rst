@@ -6,15 +6,8 @@ Introduction to Meta Ini Files
 The Meta Ini Format
 ===================
 
-The *meta ini* format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in DUNE. To reiterate the syntax of such ini file, see the :ref:`normal_ebnf` and :ref:`normalini`. Note that, you can define groups of keys either by using the ``[..]`` syntax, by putting dots into keys, or by using a combination of both.
-
-.. _normal_ebnf:
-.. code-block:: ebnf
-   :caption: EBNF describing normal DUNE-style ini files
-
-    <ini>    ::= {<pair> | <group>}*
-    <group>  ::= [ <str> ]
-    <pair>   ::= <str> = <str>
+The *meta ini* format is used in dune-testtools as a domain specific language for feature modelling. It is an extension to the ini format as used in DUNE. To reiterate the syntax of such ini file, see the example :ref:`normalini`.
+Note that, you can define groups of keys either by using the ``[..]`` syntax, by putting dots into keys, or by using a combination of both.
 
 .. _normalini:
 .. code-block:: ini
@@ -28,15 +21,13 @@ The *meta ini* format is used in dune-testtools as a domain specific language fo
     z = 3
 
 The meta ini format is an extension to the normal ini file, which describes a set of ini files within one file.
-The following sections are about describing the semantics of the extensions.
+The following sections are about describing the semantics of these extensions.
 
 The command syntax
 ==================
 
-Commands can be applied to key/value pairs by using a pipe and then stating the command name and potential arguments. As you'd expect from a pipe, you can use multiple commands on single key/value pair. If so, the order of resolution is the following:
-
- - Commands with a command type of higher priority are executed first. The available command types in order of priority are: ``POST_PARSE``, ``PRE_EXPANSION``, ``POST_EXPANSION``, ``PRE_RESOLUTION``, ``POST_RESOLUTION``, ``PRE_FILTERING``, ``POST_FILTERING``, ``AT_EXPANSION``.
- - Given multiple commands with the same type, commands are executed from left to right.
+dune-testoools defines a set of commands, which may be applied to key/value pairs by using a Unix-style pipe. A command may also take several arguments. As you'd expect from a pipe, you can use multiple commands on single key/value pair.
+The most import command is ``expand`` and will be explained in much detail below.
 
 
 The expand command
@@ -83,38 +74,14 @@ Whenever values that contain unescaped curly brackets, the string within those c
 Other commands
 ==============
 
-The following subsections describes all other general purpose commands, that exist in dune-testtools. This does not cover commands that are specific to certain testtools. Those are described in the section :ref:`thewrappers`.
+For the documentation of all other available commands, we refer to the documentation of the python package:
 
-The unique command
-++++++++++++++++++
-
-A key marked with the command ``unique`` will be made unique throughout the set of generated ini files. This is done by appending a consecutive numbering scheme to those (and only those) values, that appear multiple times in the set. Some special keys like ``__name`` have the unique command applied automatically.
-
-Using the curly bracket syntax to depend on keys which have the ``unique`` command applied is not well-defined.
-
-Simple value-altering commands: tolower, toupper, eval
-++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-``tolower`` is a command turning the given value to lowercase. ``toupper`` converts to uppercase respectively.
-
-The ``eval`` command applies a simple expression parsing to the given value. The following operators are recognized
-- addition (``+``)
-- subtraction (``-``)
-- multiplication (``*``)
-- floating point division (``/``)
-- a power function(``^``)
-- unary minus (``-``).
-
-Operands may be any literals, ``pi`` is expanded to its value.
-
-.. code-block:: ini
-   :caption: An example of the eval command
-
-    radius = 1, 2, 3 | expand
-    circumference = 2 * {r} * pi | eval
-
-.. note::
-    The ``eval`` command is currently within the ``POST_FILTERING`` priority group. That means you cannot have other values depend on the result with the curly bracket syntax.
+- :ref:`cmake_discard`
+- :ref:`exclude`
+- :ref:`eval`
+- :ref:`label`
+- :ref:`tolower`
+- :ref:`toupper`
 
 The include statement
 +++++++++++++++++++++
@@ -124,7 +91,7 @@ The ``include`` statement can be used to paste the contents of another inifile i
 This command is not formulated as a command, because it does, by definition not operate on a key/value pair. For convenience, ``include`` and ``import`` are synonymous w.r.t. to this feature.
 
 Escaping in meta ini files
-++++++++++++++++++++++++++
+==========================
 
 Meta ini files contain some special characters. Those are:
 
@@ -134,4 +101,22 @@ Meta ini files contain some special characters. Those are:
 - ``|``		        in values for piping commands
 - ``,``		        in comma separated value lists when using the ``expand`` command
 
-All those character can be escaped with a preceding backslash. It is currently not possible to escape a backslash itself. It is neither possible to use quotes as a mean of escaping instead. Escaping is only necessary when the character would have special meaning (You could in theory have for example commata in keys). Escaping a dot in a groupname is currently not supported, but it would be bad style anyway.
+You have two possibilities of escaping these:
+- through a preceding backslash
+- using double quotes
+
+Priority of command application
+===============================
+When several commands are applied to the same key value pair, the order depends on the commands *execution point*.
+The currently implemented execution points are:
+- ``POST_PARSE``
+- ``PRE_EXPANSION``
+- ``AT_EXPANSION``
+- ``POST_EXPANSION``
+- ``PRE_RESOLUTION``
+- ``POST_RESOLUTION``
+- ``PRE_FILTERING``
+- ``POST_FILTERING``
+Typically, a command's execution point is the latest point, where its application is still semantically well-defined.
+
+Given multiple commands with the same execution point, commands are executed from left to right.
