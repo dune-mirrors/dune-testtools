@@ -8,6 +8,7 @@ This is necessary to have a reliably full command registry.
 Commands
 ++++++++
 
+.. _eval:
 .. metaini_command:: eval
 
     The command `eval` evaluates basic math operations.
@@ -33,6 +34,7 @@ Commands
     - a power function(`^`)
     - unary minus (`-`).
 
+.. _tolower:
 .. metaini_command:: tolower
 
     The command `tolower` converts the value to lower case.
@@ -47,6 +49,7 @@ Commands
         a = VARIABLE | to_lower
 
 
+.. _toupper:
 .. metaini_command:: toupper
 
     The command `toupper` converts the value to upper case.

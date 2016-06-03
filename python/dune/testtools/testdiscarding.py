@@ -19,6 +19,7 @@ command for constraints. The corresponding command is called ``cmake_guard``.
 Commands
 ++++++++
 
+.. _cmake_discard:
 .. metaini_command:: cmake_guard
     :operates_on_value:
 

@@ -9,6 +9,7 @@ is then evaluated as a Python Boolean expression (after resolution).
 Commands
 ++++++++
 
+.. _exclude:
 .. metaini_command:: exclude
     :operates_on_value:
 
@@ -30,6 +31,7 @@ Commands
         GRID = ug, yasp | expand
 
 
+.. _label:
 .. metaini_command:: label
     :operates_on_value:
 

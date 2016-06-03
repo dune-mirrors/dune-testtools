@@ -85,7 +85,11 @@ class MetaIniCommand(Directive):
         # add the parameter list to the output
         arg_nodes.append(dl)
 
-        return [nodes.subtitle(text="The " + node['name'] + " command")] + arg_nodes + other_nodes
+        # Add a target for referencing!
+        section = nodes.section(names=[node['name']])
+        section += nodes.subtitle(text="The " + node['name'] + " command")
+
+        return [section] + arg_nodes + other_nodes
 
 
 class MetaIniCommandArg(Directive):
