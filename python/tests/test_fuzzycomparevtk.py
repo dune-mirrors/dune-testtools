@@ -15,6 +15,10 @@ def test_different_grid_order(dir):
     assert(compare_vtk(dir + "vtu.vtu", dir + "vtu3.vtu") == 0)
 
 
+def test_different_grid_order_ug_alu(dir):
+    assert(compare_vtk(dir + "vtuug.vtu", dir + "vtualu.vtu") == 0)
+
+
 def test_neglegible_difference(dir):
     assert(compare_vtk(dir + "vtu.vtu", dir + "vtu4.vtu") == 0)
 
