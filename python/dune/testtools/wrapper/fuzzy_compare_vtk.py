@@ -283,17 +283,23 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
             cellArray = []
             offsets = dataArrays["offsets"].split()
             connectivity = dataArrays["connectivity"].split()
-            vertex = 0
+            vertexCounter = 0
             for cellIdx, offset in enumerate(offsets):
                 cellArray.append([])
-                for v in range(vertex, int(offset)):
+                for v in range(vertexCounter, int(offset)):
                     cellArray[cellIdx].append(int(connectivity[v]))
-                    vertex += 1
+                vertexCounter += int(offset)
 
             # replace all vertex indices in the cellArray by the new indices
-            for cell in cellArray:
-                for idx, vertexIndex in enumerate(cell):
-                    cell[idx] = vertexIndexMap[vertexIndex]
+            for cellIdx, cell in enumerate(cellArray):
+                for i, vertexIndex in enumerate(cell):
+                    cell[i] = vertexIndexMap[vertexIndex]
+                # sort the connectivity array
+                # for the comparison we don't care about the local order of the vertices
+                # in the connectivity array. As different grid manager might produce different
+                # local orderings, i.e. flipped or permuted versions of the same element, we
+                # just sort them in ascending order here to make them easy to compare
+                cellArray[cellIdx] = sorted(cell)
 
             # sort all data arrays
             for name, text in list(dataArrays.items()):
