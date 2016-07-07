@@ -24,7 +24,7 @@ Commands
 
     .. code-block:: ini
 
-        if {GRID} == ug and {DIM} == 1 | exclude
+        {__static.GRID} == ug and {__static.DIM} == 1 | exclude
 
         [__static]
         DIM = 1, 2 | expand
