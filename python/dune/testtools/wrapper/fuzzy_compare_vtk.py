@@ -283,12 +283,12 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
             cellArray = []
             offsets = dataArrays["offsets"].split()
             connectivity = dataArrays["connectivity"].split()
-            vertex = 0
+            vertexCounter = 0
             for cellIdx, offset in enumerate(offsets):
                 cellArray.append([])
-                for v in range(vertex, int(offset)):
+                for v in range(vertexCounter, int(offset)):
                     cellArray[cellIdx].append(int(connectivity[v]))
-                    vertex += 1
+                vertexCounter += int(offset)
 
             # replace all vertex indices in the cellArray by the new indices
             for cell in cellArray:
