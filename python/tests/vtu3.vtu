@@ -27,7 +27,7 @@
       </Points>
       <Cells>
         <DataArray type="Int32" Name="connectivity" NumberOfComponents="1" format="ascii">
-          0 2 3 1 2 4 5 3
+          1 0 2 3 2 4 5 3
         </DataArray>
         <DataArray type="Int32" Name="offsets" NumberOfComponents="1" format="ascii">
           4 8
