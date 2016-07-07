@@ -23,7 +23,7 @@ To get help concerning dune-testtools, first check the technical
 documentation in the doc subfolder. If your problem persists,
 check the bugtracker at
 
-http://conan2.iwr.uni-heidelberg.de/git/quality/dune-testtools/issues
+https://gitlab.dune-project.org/quality/dune-testtools/issues
 
 or contact the authors directly:
 *   Timo Koch (timo.koch@iws.uni-stuttgart.de)
