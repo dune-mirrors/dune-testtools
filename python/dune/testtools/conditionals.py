@@ -61,30 +61,17 @@ Commands
 """
 
 from __future__ import absolute_import
-from pyparsing import alphanums, printables, Word, Literal, restOfLine, SkipTo
 from dune.testtools.command import meta_ini_command, CommandType
 
 
-def _grammar(key):
-    quoted = Literal("'") + Literal(key) + Literal("'")
-    inother = Word(alphanums, exact=1) + Literal(key)
-    ignorePattern = inother | quoted
-    return SkipTo(key, ignore=ignorePattern) + Literal(key) + restOfLine
-
-_findkey = Word(printables).suppress() + Literal("'").suppress() + Word(alphanums) + Literal("'").suppress() + Word(printables).suppress()
+class _DummyEnvironment(dict):
+    def __getitem__(self, key):
+        return key
 
 
 def eval_boolean(s):
     """ evaluate the given string `s` as a boolean expression """
-    def comp(s):
-        try:
-            return eval(s)
-        except NameError as e:
-            key = _findkey.parseString(e.args[0])[0]
-            parts = _grammar(key).parseString(s)
-            return comp(parts[0] + "'" + parts[1] + "'" + parts[2])
-
-    return comp(s)
+    return eval(s, _DummyEnvironment())
 
 
 @meta_ini_command(name="exclude", returnConfigs=True)
