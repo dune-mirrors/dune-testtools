@@ -34,7 +34,7 @@ add_python_test_command(COMMAND python -m pytest --pep8 VIRTUALENV dune-env-2
 
 add_subdirectory("dune")
 add_subdirectory("doc")
-add_subdirectory("cmake/modules")
+add_subdirectory(cmake)
 
 # Use a custom section to export testtool module path for downstream modules.
 set(DUNE_CUSTOM_PKG_CONFIG_SECTION "

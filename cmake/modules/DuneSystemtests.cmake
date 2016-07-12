@@ -172,36 +172,39 @@ function(add_static_variants)
     # add the executable with that configurations
     if(NOT TARGET ${tname})
       # evaluate all the discarding conditions that have been provided!
-      set(PROCEED TRUE)
+      set(SOURCE_FILES ${STATVAR_SOURCE})
       foreach(condition ${STATINFO_${conf}___GUARDS})
         if(NOT ${condition})
-          set(PROCEED FALSE)
+          # This test is to be skipped, we switch the source for a dummy that always return 77.
+          if(CMAKE_PROJECT_NAME STREQUAL dune-testtools)
+            set(SOURCE_FILES ${CMAKE_SOURCE_DIR}/cmake/scripts/main77.cc)
+          else()
+            set(SOURCE_FILES ${dune-testtools_SCRIPTS_DIR}/main77.cc)
+          endif()
         endif()
       endforeach()
 
-      if(PROCEED)
-        add_executable(${tname} "${STATVAR_SOURCE}")
+      add_executable(${tname} "${SOURCE_FILES}")
 
-        # Add dependency on the metatarget for this systemtest
-        if(NOT "${STATINFO___CONFIGS}" STREQUAL "__empty")
-          add_dependencies(${STATVAR_BASENAME} ${tname})
-        endif()
-
-        # treat compile definitions
-        foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
-          target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
-        endforeach()
-
-        # maybe output debug information
-        if(${STATVAR_DEBUG})
-          message("Generated target ${tname}")
-          get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
-          message("  with COMPILE_DEFINITIONS: ${cd}")
-        endif()
-
-        # And append the target to the list of created targets
-        list(APPEND targetlist "${tname}")
+      # Add dependency on the metatarget for this systemtest
+      if(NOT "${STATINFO___CONFIGS}" STREQUAL "__empty")
+        add_dependencies(${STATVAR_BASENAME} ${tname})
       endif()
+
+      # treat compile definitions
+      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+        target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
+      endforeach()
+
+      # maybe output debug information
+      if(${STATVAR_DEBUG})
+        message("Generated target ${tname}")
+        get_property(cd TARGET ${tname} PROPERTY COMPILE_DEFINITIONS)
+        message("  with COMPILE_DEFINITIONS: ${cd}")
+      endif()
+
+      # And append the target to the list of created targets
+      list(APPEND targetlist "${tname}")
     endif()
     if(${STATVAR_DEBUG})
       message("Generating target ${tname} skipped because it already existed!")
