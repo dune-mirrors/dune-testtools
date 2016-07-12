@@ -23,6 +23,8 @@ def test_quoting_magic(dir):
     assert(eval_boolean("'x' == x"))
     assert(eval_boolean("x == 'x'"))
     assert(eval_boolean("'x' == 'x'"))
+    assert(eval_boolean("x == x and x==x"))
+    assert(eval_boolean("x == 'x' and 'x'==x"))
     assert(not eval_boolean("ax == x"))
 
     f = open(dir + "tmp.mini", 'w')
