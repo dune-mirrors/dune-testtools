@@ -46,9 +46,9 @@ void test_ini(std::string filename, const Dune::MPIHelper& mpiHelper) {
     F4 factory4(tree, "ug");
     std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
   }
-#else
-#warning "UG construction is sequential. UGGrid needs to be configured with --enable-parallel to run this test in parallel."
+#elif HAVE_UG && !UG_PARALLEL
   if (tree.hasSub("ug")) {
+    std::cout << "UG construction is sequential. UGGrid needs to be configured with --enable-parallel to run this test in parallel." << std::endl;
     typedef Dune::UGGrid<2> G4;
     typedef IniGridFactory<G4> F4;
     if (mpiHelper.rank() == 0)
@@ -56,6 +56,11 @@ void test_ini(std::string filename, const Dune::MPIHelper& mpiHelper) {
         F4 factory4(tree, "ug");
         std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
     }
+  }
+#else
+  if (tree.hasSub("ug"))
+  {
+    std::cout << "UGGrid construction skipped because UGGrid has not been found." << std::endl;
   }
 #endif
 
