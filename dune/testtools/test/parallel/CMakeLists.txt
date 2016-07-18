@@ -1,9 +1,9 @@
 dune_add_system_test(SOURCE source.cc
-	                 BASENAME parallel
-	                 INIFILE test.mini
-	                 CREATED_TARGETS output
-	                 SCRIPT dune_execute_parallel.py
-	                 ${DEBUG_MACRO_TESTS})
+                     BASENAME parallel
+                     INIFILE test.mini
+                     CREATED_TARGETS output
+                     SCRIPT dune_execute_parallel.py
+                     ${DEBUG_MACRO_TESTS})
 
 add_dune_mpi_flags(${output})
 
