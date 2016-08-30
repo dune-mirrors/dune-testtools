@@ -192,7 +192,7 @@ function(add_static_variants)
       endif()
 
       # treat compile definitions
-      foreach(cd ${STATINFO___COMPILE_DEFINITIONS})
+      foreach(cd ${STATINFO___STATIC_DATA})
         target_compile_definitions(${tname} PUBLIC "${cd}=${STATINFO_${conf}_${cd}}")
       endforeach()
 
