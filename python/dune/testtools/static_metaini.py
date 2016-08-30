@@ -7,8 +7,8 @@ import sys
 import argparse
 
 
-def extract_static_info(metaini, add_guards=False):
-    static_section = expand_meta_ini(metaini, whiteFilter=("__static", "__exec_suffix", "__cmake_guards"), addNameKey=False)
+def extract_static_info(metaini, section='__static', add_guards=False):
+    static_section = expand_meta_ini(metaini, whiteFilter=(section, "__exec_suffix", "__cmake_guards"), addNameKey=False)
 
     # make the found exec suffixes unique
     if "__exec_suffix" not in static_section[0]:
@@ -19,7 +19,7 @@ def extract_static_info(metaini, add_guards=False):
     # construct a dictionary from the static information. This can be passed to CMake
     static = {}
     # we need a list of extracted compile definitions names
-    static["__COMPILE_DEFINITIONS"] = []
+    static["__STATIC_DATA"] = []
     # The special key __CONFIGS holds a list of configuration names
     static["__CONFIGS"] = []
 
@@ -28,12 +28,12 @@ def extract_static_info(metaini, add_guards=False):
         static["__CONFIGS"].append(conf["__exec_suffix"])
 
         # copy the entire data
-        if "__static" in conf:
-            for key in conf["__static"]:
-                if key not in static["__COMPILE_DEFINITIONS"]:
-                    static["__COMPILE_DEFINITIONS"].append(key)
+        if section in conf:
+            for key in conf[section]:
+                if key not in static["__STATIC_DATA"]:
+                    static["__STATIC_DATA"].append(key)
 
-            static[conf["__exec_suffix"]] = conf["__static"]
+            static[conf["__exec_suffix"]] = conf[section]
 
         # Now update the list of CMake guards
         if add_guards:
