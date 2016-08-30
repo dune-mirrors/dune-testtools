@@ -20,6 +20,7 @@ if __name__ == "__main__":
         parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
         parser.add_argument('-d', '--dir', help='The directory to put the output in')
         parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from CMake and should return data to it')
+        parser.add_argument('-s', '--section', default="__static", help='The section to treat as the static section (defaults to __static)')
         return vars(parser.parse_args())
 
     # analyse the given arguments
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     metaini["labels"] = {}
 
     # extract the static information from the meta ini file
-    static_info = extract_static_info(args["ini"])
+    static_info = extract_static_info(args["ini"], section=args['section'])
 
     # write the configurations to the file specified in the name key.
     for c in configurations:
@@ -42,7 +43,7 @@ if __name__ == "__main__":
         if "__LABELS" in c:
             c["__LABELS"] = list(c["__LABELS"].values())
             metaini["labels"][c["__name"]] = c["__LABELS"]
-        write_configuration_to_ini(c, metaini, static_info, args)
+        write_configuration_to_ini(c, metaini, static_info, args, section=args['section'])
 
     if args["cmake"]:
         from dune.testtools.cmakeoutput import printForCMake
