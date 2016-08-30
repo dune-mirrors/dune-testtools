@@ -16,13 +16,14 @@ if __name__ == "__main__":
     def get_args():
         parser = argparse.ArgumentParser()
         parser.add_argument('-i', '--ini', help='The meta-inifile to expand', required=True)
+        parser.add_argument('-s', '--section', default="__static", help='The section to treat as the static section (defaults to __static)')
         return vars(parser.parse_args())
 
     # analyse the given arguments
     args = get_args()
 
     # call the macro
-    static = extract_static_info(args["ini"], add_guards=True)
+    static = extract_static_info(args["ini"], args['section'], add_guards=True)
 
     # print to CMake
     printForCMake(static)
