@@ -13,6 +13,70 @@ import sys
 from six.moves import range
 from six.moves import zip
 
+from xml.etree.ElementTree import XMLParser, TreeBuilder
+import struct
+import base64
+import re
+
+
+class VTKTreeBuilder(TreeBuilder):
+    """
+    Sublass of TreeBuilder that decodes ASCII or base64-encoded VTK DataArrays.
+    When the end-tag of a base64-encoded DataArray is encountered, the XML string
+    is decoded and unpacked according to its data type and the VTK specification.
+    Only strips whitespace for ASCII-encoded VTK.
+    """
+
+    # Buffer codes from https://docs.python.org/2/library/struct.html
+    buffers = {"Int8": "b", "UInt8": "B", "Int16": "h", "UInt16": "H",
+               "Int32": "i", "UInt32": "I", "Int64": "l", "UInt64": "L",
+               "Float32": "f", "Float64": "d"}
+    byteorders = {"LittleEndian": "<", "BigEndian": ">"}
+
+    def start(self, tag, attrib):
+        self.elem = super(VTKTreeBuilder, self).start(tag, attrib)
+        self.array_data = ""
+        if tag == "VTKFile":
+            try:
+                self.byteorder = self.byteorders[attrib["byte_order"]]
+            except KeyError:
+                raise ValueError("Unknown byteorder {}".format(attrib["byte_order"]))
+        elif tag == "DataArray":
+            if not attrib["format"] in ("binary", "ascii"):
+                raise ValueError("VTK data format must be ascii or binary (base64). Got: {}".format(attrib["format"]))
+        return self.elem
+
+    def data(self, data):
+        """
+        Just record the data instead of writing it immediately. All data in VTK
+        files is contained in DataArray tags, so no need to record anything if
+        we are not currently in a DataArray.
+        """
+        if self.elem.tag == "DataArray":
+            self.array_data += data
+
+    def end(self, tag):
+        """
+        Detect the end-tag of a DataArray.
+        """
+        # remove trailing whitespace
+        self.array_data = re.sub(r"\s+", " ", "".join(self.array_data).strip())
+        if tag == "DataArray":
+            if self.elem.attrib["format"] == "binary":
+                cbuf = self.buffers[self.elem.attrib["type"]]
+                data = "".join(self.array_data)
+                print(data)
+                # base64-encoded VTK files start with an integer giving the
+                # number of elements to follow (8 bytes in base64)
+                data_len = struct.unpack('I', base64.b64decode(data[:8]))[0]
+                data_content = base64.b64decode(data[8:])
+                byte_string = self.byteorder + cbuf * int(data_len / struct.calcsize(cbuf))
+                data_content_unpacked = struct.unpack(byte_string, data_content)
+                self.array_data = " ".join([str(v) for v in data_content_unpacked]).strip()
+        # write data to element
+        super(VTKTreeBuilder, self).data(self.array_data)
+        return super(VTKTreeBuilder, self).end(tag)
+
 
 # fuzzy compare VTK tree from VTK strings
 def compare_vtk(vtk1, vtk2, absolute=1.2e-7, relative=1e-2, zeroValueThreshold={}, verbose=True):
@@ -40,8 +104,8 @@ def compare_vtk(vtk1, vtk2, absolute=1.2e-7, relative=1e-2, zeroValueThreshold={
     """
 
     # construct element tree from vtk file
-    root1 = ET.fromstring(open(vtk1).read())
-    root2 = ET.fromstring(open(vtk2).read())
+    root1 = ET.parse(vtk1, parser=XMLParser(target=VTKTreeBuilder())).getroot()
+    root2 = ET.parse(vtk2, parser=XMLParser(target=VTKTreeBuilder())).getroot()
 
     # sort the vtk file in case nodes appear in different positions
     # e.g. because of minor changes in the output code

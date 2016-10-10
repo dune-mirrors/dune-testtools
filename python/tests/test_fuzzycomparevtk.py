@@ -5,10 +5,13 @@ from dune.testtools.wrapper.fuzzy_compare_vtk import compare_vtk
 
 def test_failing_comparison(dir):
     assert(compare_vtk(dir + "vtu.vtu", dir + "vtu1.vtu") == 1)
+    assert(compare_vtk(dir + "vtu_binary.vtu", dir + "vtu1_binary.vtu") == 1)
+    assert(compare_vtk(dir + "vtu_binary.vtu", dir + "vtu1.vtu") == 1)
 
 
 def test_different_parameter_order(dir):
     assert(compare_vtk(dir + "vtu.vtu", dir + "vtu2.vtu") == 0)
+    assert(compare_vtk(dir + "vtu_binary.vtu", dir + "vtu2.vtu") == 0)
 
 
 def test_different_grid_order(dir):
