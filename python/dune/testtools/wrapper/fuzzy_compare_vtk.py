@@ -25,6 +25,7 @@ class VTKTreeBuilder(TreeBuilder):
     When the end-tag of a base64-encoded DataArray is encountered, the XML string
     is decoded and unpacked according to its data type and the VTK specification.
     Only strips whitespace for ASCII-encoded VTK.
+    VTK specification found at http://www.vtk.org/Wiki/VTK_XML_Formats
     """
 
     # Buffer codes from https://docs.python.org/2/library/struct.html
@@ -38,9 +39,17 @@ class VTKTreeBuilder(TreeBuilder):
         self.array_data = ""
         if tag == "VTKFile":
             try:
+                self.split_header = attrib["version"] == "0.1"
+            except KeyError:
+                raise ValueError("Missing version attribute in VTKFile tag")
+            try:
                 self.byteorder = self.byteorders[attrib["byte_order"]]
             except KeyError:
                 raise ValueError("Unknown byteorder {}".format(attrib["byte_order"]))
+            try:
+                self.header_type = self.buffers[attrib["header_type"]]
+            except KeyError:  # default header in older VTK versions is UInt32
+                self.header_type = "I"
         elif tag == "DataArray":
             if not attrib["format"] in ("binary", "ascii"):
                 raise ValueError("VTK data format must be ascii or binary (base64). Got: {}".format(attrib["format"]))
@@ -59,20 +68,29 @@ class VTKTreeBuilder(TreeBuilder):
         """
         Detect the end-tag of a DataArray.
         """
+        if tag != "DataArray":
+            return super(VTKTreeBuilder, self).end(tag)
+
         # remove trailing whitespace
         self.array_data = re.sub(r"\s+", " ", "".join(self.array_data).strip())
-        if tag == "DataArray":
-            if self.elem.attrib["format"] == "binary":
-                cbuf = self.buffers[self.elem.attrib["type"]]
-                data = "".join(self.array_data)
-                print(data)
-                # base64-encoded VTK files start with an integer giving the
-                # number of elements to follow (8 bytes in base64)
-                data_len = struct.unpack('I', base64.b64decode(data[:8]))[0]
-                data_content = base64.b64decode(data[8:])
+
+        if self.elem.attrib["format"] == "binary":
+            cbuf = self.buffers[self.elem.attrib["type"]]
+            data = "".join(self.array_data)
+            # binary encoded VTK files start with an integer giving the number of bytes to follow
+            data_len = struct.unpack_from(self.byteorder + self.header_type, base64.b64decode(data))[0]
+            if self.split_header:  # vtk version 0.1, encoding header and content separately
+                header_size = len(base64.b64encode(struct.pack(self.byteorder + self.header_type, 0)))
+                data_content = base64.b64decode(data[header_size:])
                 byte_string = self.byteorder + cbuf * int(data_len / struct.calcsize(cbuf))
-                data_content_unpacked = struct.unpack(byte_string, data_content)
-                self.array_data = " ".join([str(v) for v in data_content_unpacked]).strip()
+                data_unpacked = struct.unpack(byte_string, data_content)
+            else:  # vtk version 1.0, encoding header and content together
+                data_content = base64.b64decode(data)
+                byte_string = self.byteorder + self.header_type + cbuf * int(data_len / struct.calcsize(cbuf))
+                data_unpacked = struct.unpack(byte_string, data_content)[1:]
+            assert data_len == len(data_unpacked) * struct.calcsize(cbuf)
+            self.array_data = " ".join([str(v) for v in data_unpacked]).strip()
+
         # write data to element
         super(VTKTreeBuilder, self).data(self.array_data)
         return super(VTKTreeBuilder, self).end(tag)
