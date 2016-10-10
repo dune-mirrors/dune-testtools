@@ -29,7 +29,7 @@ class VTKTreeBuilder(TreeBuilder):
 
     # Buffer codes from https://docs.python.org/2/library/struct.html
     buffers = {"Int8": "b", "UInt8": "B", "Int16": "h", "UInt16": "H",
-               "Int32": "i", "UInt32": "I", "Int64": "l", "UInt64": "L",
+               "Int32": "i", "UInt32": "I", "Int64": "q", "UInt64": "Q",
                "Float32": "f", "Float64": "d"}
     byteorders = {"LittleEndian": "<", "BigEndian": ">"}
 
