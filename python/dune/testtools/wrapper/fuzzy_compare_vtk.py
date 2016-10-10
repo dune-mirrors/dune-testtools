@@ -156,12 +156,7 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, zeroValueThreshold, ve
                 is_equal = False
             else:
                 return False
-        if list(node1.attrib.items()) != list(node2.attrib.items()):
-            if verbose:
-                print('Attributes differ in node: {}'.format(node1.tag))
-                is_equal = False
-            else:
-                return False
+
         if len(list(node1.iter())) != len(list(node2.iter())):
             if verbose:
                 print('Number of children differs in node: {}'.format(node1.tag))
