@@ -164,9 +164,13 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, zeroValueThreshold, ve
             else:
                 return False
         if node1child.text or node2child.text:
+            if "NumberOfComponents" in node1child.attrib:
+                    numComp = int(node1child.attrib["NumberOfComponents"])
+            else:
+                    numComp = 1
             if not is_fuzzy_equal_text(node1child.text, node2child.text,
                                        node1child.attrib["Name"],
-                                       int(node1child.attrib["NumberOfComponents"]),
+                                       numComp,
                                        absolute, relative, zeroValueThreshold, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
                     if verbose:
@@ -338,12 +342,15 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
                 cellDataArrays.append(dataArray.attrib["Name"])
             for dataArray in root.findall(".//DataArray"):
                 dataArrays[dataArray.attrib["Name"]] = dataArray.text
-                numberOfComponents[dataArray.attrib["Name"]] = dataArray.attrib["NumberOfComponents"]
+                if "NumberOfComponents" in dataArray.attrib:
+                    numberOfComponents[dataArray.attrib["Name"]] = int(dataArray.attrib["NumberOfComponents"])
+                else:
+                    numberOfComponents[dataArray.attrib["Name"]] = 1
 
             vertexArray = []
             coords = dataArrays["Coordinates"].split()
             # group the coordinates into coordinate tuples
-            dim = int(numberOfComponents["Coordinates"])
+            dim = numberOfComponents["Coordinates"]
             for i in range(len(coords) // dim):
                 vertexArray.append([float(c) for c in coords[i * dim: i * dim + dim]])
 
@@ -383,7 +390,7 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
                 # split the text
                 items = text.split()
                 # convert if vector
-                num = int(numberOfComponents[name])
+                num = numberOfComponents[name]
                 newitems = []
                 for i in range(len(items) // num):
                     newitems.append([i for i in items[i * num: i * num + num]])
