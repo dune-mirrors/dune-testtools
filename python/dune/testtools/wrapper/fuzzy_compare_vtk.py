@@ -13,6 +13,88 @@ import sys
 from six.moves import range
 from six.moves import zip
 
+from xml.etree.ElementTree import XMLParser, TreeBuilder
+import struct
+import base64
+import re
+
+
+class VTKTreeBuilder(TreeBuilder):
+    """
+    Sublass of TreeBuilder that decodes ASCII or base64-encoded VTK DataArrays.
+    When the end-tag of a base64-encoded DataArray is encountered, the XML string
+    is decoded and unpacked according to its data type and the VTK specification.
+    Only strips whitespace for ASCII-encoded VTK.
+    VTK specification found at http://www.vtk.org/Wiki/VTK_XML_Formats
+    """
+
+    # Buffer codes from https://docs.python.org/2/library/struct.html
+    buffers = {"Int8": "b", "UInt8": "B", "Int16": "h", "UInt16": "H",
+               "Int32": "i", "UInt32": "I", "Int64": "q", "UInt64": "Q",
+               "Float32": "f", "Float64": "d"}
+    byteorders = {"LittleEndian": "<", "BigEndian": ">"}
+
+    def start(self, tag, attrib):
+        self.elem = super(VTKTreeBuilder, self).start(tag, attrib)
+        self.array_data = ""
+        if tag == "VTKFile":
+            try:
+                self.split_header = attrib["version"] == "0.1"
+            except KeyError:
+                raise ValueError("Missing version attribute in VTKFile tag")
+            try:
+                self.byteorder = self.byteorders[attrib["byte_order"]]
+            except KeyError:
+                raise ValueError("Unknown byteorder {}".format(attrib["byte_order"]))
+            try:
+                self.header_type = self.buffers[attrib["header_type"]]
+            except KeyError:  # default header in older VTK versions is UInt32
+                self.header_type = "I"
+        elif tag == "DataArray":
+            if not attrib["format"] in ("binary", "ascii"):
+                raise ValueError("VTK data format must be ascii or binary (base64). Got: {}".format(attrib["format"]))
+        return self.elem
+
+    def data(self, data):
+        """
+        Just record the data instead of writing it immediately. All data in VTK
+        files is contained in DataArray tags, so no need to record anything if
+        we are not currently in a DataArray.
+        """
+        if self.elem.tag == "DataArray":
+            self.array_data += data
+
+    def end(self, tag):
+        """
+        Detect the end-tag of a DataArray.
+        """
+        if tag != "DataArray":
+            return super(VTKTreeBuilder, self).end(tag)
+
+        # remove trailing whitespace
+        self.array_data = re.sub(r"\s+", " ", "".join(self.array_data).strip())
+
+        if self.elem.attrib["format"] == "binary":
+            cbuf = self.buffers[self.elem.attrib["type"]]
+            data = "".join(self.array_data)
+            # binary encoded VTK files start with an integer giving the number of bytes to follow
+            data_len = struct.unpack_from(self.byteorder + self.header_type, base64.b64decode(data))[0]
+            if self.split_header:  # vtk version 0.1, encoding header and content separately
+                header_size = len(base64.b64encode(struct.pack(self.byteorder + self.header_type, 0)))
+                data_content = base64.b64decode(data[header_size:])
+                byte_string = self.byteorder + cbuf * int(data_len / struct.calcsize(cbuf))
+                data_unpacked = struct.unpack(byte_string, data_content)
+            else:  # vtk version 1.0, encoding header and content together
+                data_content = base64.b64decode(data)
+                byte_string = self.byteorder + self.header_type + cbuf * int(data_len / struct.calcsize(cbuf))
+                data_unpacked = struct.unpack(byte_string, data_content)[1:]
+            assert data_len == len(data_unpacked) * struct.calcsize(cbuf)
+            self.array_data = " ".join([str(v) for v in data_unpacked]).strip()
+
+        # write data to element
+        super(VTKTreeBuilder, self).data(self.array_data)
+        return super(VTKTreeBuilder, self).end(tag)
+
 
 # fuzzy compare VTK tree from VTK strings
 def compare_vtk(vtk1, vtk2, absolute=1.2e-7, relative=1e-2, zeroValueThreshold={}, verbose=True):
@@ -40,8 +122,8 @@ def compare_vtk(vtk1, vtk2, absolute=1.2e-7, relative=1e-2, zeroValueThreshold={
     """
 
     # construct element tree from vtk file
-    root1 = ET.fromstring(open(vtk1).read())
-    root2 = ET.fromstring(open(vtk2).read())
+    root1 = ET.parse(vtk1, parser=XMLParser(target=VTKTreeBuilder())).getroot()
+    root2 = ET.parse(vtk2, parser=XMLParser(target=VTKTreeBuilder())).getroot()
 
     # sort the vtk file in case nodes appear in different positions
     # e.g. because of minor changes in the output code
@@ -74,12 +156,7 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, zeroValueThreshold, ve
                 is_equal = False
             else:
                 return False
-        if list(node1.attrib.items()) != list(node2.attrib.items()):
-            if verbose:
-                print('Attributes differ in node: {}'.format(node1.tag))
-                is_equal = False
-            else:
-                return False
+
         if len(list(node1.iter())) != len(list(node2.iter())):
             if verbose:
                 print('Number of children differs in node: {}'.format(node1.tag))
@@ -87,9 +164,13 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, zeroValueThreshold, ve
             else:
                 return False
         if node1child.text or node2child.text:
+            if "NumberOfComponents" in node1child.attrib:
+                    numComp = int(node1child.attrib["NumberOfComponents"])
+            else:
+                    numComp = 1
             if not is_fuzzy_equal_text(node1child.text, node2child.text,
                                        node1child.attrib["Name"],
-                                       int(node1child.attrib["NumberOfComponents"]),
+                                       numComp,
                                        absolute, relative, zeroValueThreshold, verbose):
                 if node1child.attrib["Name"] == node2child.attrib["Name"]:
                     if verbose:
@@ -261,12 +342,15 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
                 cellDataArrays.append(dataArray.attrib["Name"])
             for dataArray in root.findall(".//DataArray"):
                 dataArrays[dataArray.attrib["Name"]] = dataArray.text
-                numberOfComponents[dataArray.attrib["Name"]] = dataArray.attrib["NumberOfComponents"]
+                if "NumberOfComponents" in dataArray.attrib:
+                    numberOfComponents[dataArray.attrib["Name"]] = int(dataArray.attrib["NumberOfComponents"])
+                else:
+                    numberOfComponents[dataArray.attrib["Name"]] = 1
 
             vertexArray = []
             coords = dataArrays["Coordinates"].split()
             # group the coordinates into coordinate tuples
-            dim = int(numberOfComponents["Coordinates"])
+            dim = numberOfComponents["Coordinates"]
             for i in range(len(coords) // dim):
                 vertexArray.append([float(c) for c in coords[i * dim: i * dim + dim]])
 
@@ -306,7 +390,7 @@ def sort_vtk_by_coordinates(root1, root2, verbose):
                 # split the text
                 items = text.split()
                 # convert if vector
-                num = int(numberOfComponents[name])
+                num = numberOfComponents[name]
                 newitems = []
                 for i in range(len(items) // num):
                     newitems.append([i for i in items[i * num: i * num + num]])
