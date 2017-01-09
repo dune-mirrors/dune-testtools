@@ -146,14 +146,22 @@ function(add_static_variants)
     message(WARNING "add_static_variants: Encountered unparsed arguments: This often indicates typos in named arguments")
   endif()
 
+  # Allow absolute paths to the ini file
+  if(NOT IS_ABSOLUTE ${STATVAR_INIFILE})
+    set(STATVAR_INIFILE ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE})
+  endif()
+
   # Configure a bogus file from the meta ini file. This is a trick to retrigger configuration on meta ini changes.
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/tmp_${STATVAR_INIFILE})
+  string(REPLACE "/" "_" BOGUSFILE "tmp_${STATVAR_INIFILE}")
+  configure_file(${STATVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/${BOGUSFILE})
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_extract_static.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                  OUTPUT_VARIABLE output)
+  dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_extract_static.py
+                               --ini ${STATVAR_INIFILE}
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                       OUTPUT_VARIABLE output
+                       ERROR_MESSAGE "Error extracting static info from ${STATVAR_INIFILE}")
   parse_python_data(PREFIX STATINFO INPUT "${output}")
 
   # If there is more than one configuration, introduce a meta target
@@ -179,7 +187,7 @@ function(add_static_variants)
           if(CMAKE_PROJECT_NAME STREQUAL dune-testtools)
             set(SOURCE_FILES ${CMAKE_SOURCE_DIR}/cmake/scripts/main77.cc)
           else()
-            set(SOURCE_FILES ${dune-testtools_SCRIPTS_DIR}/main77.cc)
+            set(SOURCE_FILES ${dune-testtools_PREFIX}/cmake/scripts/main77.cc)
           endif()
         endif()
       endforeach()
@@ -226,6 +234,11 @@ function(add_system_test_per_target)
     message(WARNING "add_system_test_per_target: Encountered unparsed arguments: This often indicates typos in named arguments")
   endif()
 
+  # Allow absolute paths to the ini file
+  if(NOT IS_ABSOLUTE ${TARGVAR_INIFILE})
+    set(TARGVAR_INIFILE ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE})
+  endif()
+
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT TARGVAR_SCRIPT)
@@ -233,11 +246,16 @@ function(add_system_test_per_target)
   endif()
 
   # Configure a bogus file from the meta ini file. This is a trick to retrigger configuration on meta ini changes.
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/tmp_${TARGVAR_INIFILE})
+  string(REPLACE "/" "_" BOGUSFILE "tmp_${TARGVAR_INIFILE}")
+  configure_file(${TARGVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/${BOGUSFILE})
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_expand_metaini.py --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
-                  OUTPUT_VARIABLE output)
+  dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_expand_metaini.py
+                               --cmake
+                               --ini ${TARGVAR_INIFILE}
+                               --dir ${CMAKE_CURRENT_BINARY_DIR}
+                       OUTPUT_VARIABLE output
+                       ERROR_MESSAGE "Error expanding ${TARGVAR_INIFILE}")
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")
 
@@ -333,6 +351,11 @@ function(dune_add_system_test)
     set(DEBUG "DEBUG")
   endif()
 
+  # Allow absolute paths to the ini file
+  if(NOT IS_ABSOLUTE ${SYSTEMTEST_INIFILE})
+    set(SYSTEMTEST_INIFILE ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE})
+  endif()
+
   # set a default for the script. call_executable.py just calls the executable.
   # There, it is also possible to hook in things depending on the inifile
   if(NOT SYSTEMTEST_SCRIPT)
@@ -372,8 +395,10 @@ function(dune_add_system_test)
                                ${DEBUG}
                                TARGETBASENAME ${SYSTEMTEST_BASENAME})
   else()
-    execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_has_static_section.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}
-                    RESULT_VARIABLE res)
+    dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_has_static_section.py
+                                 --ini ${SYSTEMTEST_INIFILE}
+                         RESULT_VARIABLE res
+                         ERROR_MESSAGE "Error checking for static info in ${SYSTEMTEST_INIFILE}")
     if(${res})
       message(STATUS "The meta ini file specifies static variations!")
       message(FATAL_ERROR "The TARGET signature can be only used for dynamic variations.")
