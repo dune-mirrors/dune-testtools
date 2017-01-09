@@ -46,7 +46,7 @@ Commands
 
     .. code-block:: ini
 
-        a = VARIABLE | to_lower
+        a = VARIABLE | tolower
 
 
 .. _toupper:
@@ -61,7 +61,19 @@ Commands
 
     .. code-block:: ini
 
-        a = variable | to_upper
+        a = variable | toupper
+
+.. _toint:
+.. metaini_command:: toint
+
+    The command `toint` casts a given floating point number
+    to an integer.
+
+    Example:
+
+    .. code-block:: ini
+
+        a = 1.234 | toint
 
 """
 from __future__ import absolute_import
@@ -88,6 +100,12 @@ def _cmd_to_lower(value=None):
 def _cmd_to_upper(value=None):
     """Defines the meta ini command toupper"""
     return value.upper()
+
+
+@meta_ini_command(name="toint", ctype=CommandType.AT_RESOLUTION)
+def _toint(value=None):
+    """Cast the given floating point number to an integer"""
+    return str(int(float(value)))
 
 
 @meta_ini_command(name="eval", ctype=CommandType.AT_RESOLUTION)
