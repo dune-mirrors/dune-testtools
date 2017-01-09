@@ -151,9 +151,11 @@ function(add_static_variants)
 
   # get the static information from the ini file
   # TODO maybe check whether an absolute path has been given for a mini file
-  execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_extract_static.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                  OUTPUT_VARIABLE output)
+  dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_extract_static.py
+                               --ini ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                       OUTPUT_VARIABLE output
+                       ERROR_MESSAGE "Error extracting static info from ${CMAKE_CURRENT_SOURCE_DIR}/${STATVAR_INIFILE}")
   parse_python_data(PREFIX STATINFO INPUT "${output}")
 
   # If there is more than one configuration, introduce a meta target
@@ -236,8 +238,12 @@ function(add_system_test_per_target)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/tmp_${TARGVAR_INIFILE})
 
   # expand the given meta ini file into the build tree
-  execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_expand_metaini.py --cmake --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE} --dir ${CMAKE_CURRENT_BINARY_DIR}
-                  OUTPUT_VARIABLE output)
+  dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_expand_metaini.py
+                               --cmake
+                               --ini ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}
+                               --dir ${CMAKE_CURRENT_BINARY_DIR}
+                       OUTPUT_VARIABLE output
+                       ERROR_MESSAGE "Error expanding ${CMAKE_CURRENT_SOURCE_DIR}/${TARGVAR_INIFILE}")
 
   parse_python_data(PREFIX iniinfo INPUT "${output}")
 
@@ -372,8 +378,10 @@ function(dune_add_system_test)
                                ${DEBUG}
                                TARGETBASENAME ${SYSTEMTEST_BASENAME})
   else()
-    execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_has_static_section.py --ini ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}
-                    RESULT_VARIABLE res)
+    dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/dune-env dune_has_static_section.py
+                                 --ini ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}
+                         RESULT_VARIABLE res
+                         ERROR_MESSAGE "Error checking for static info in ${CMAKE_CURRENT_SOURCE_DIR}/${SYSTEMTEST_INIFILE}")
     if(${res})
       message(STATUS "The meta ini file specifies static variations!")
       message(FATAL_ERROR "The TARGET signature can be only used for dynamic variations.")
