@@ -14,3 +14,10 @@ def test_complex_command_deps(dir):
     assert(len(c) == 2)
     assert("2" in [conf["b"] for conf in c])
     assert("5" in [conf["b"] for conf in c])
+
+
+def test_repeat_command(dir):
+    c = expand_meta_ini(dir + "repeat.mini")
+    assert(len(c) == 2)
+    for conf in c:
+        assert(len(conf["cells"].split()) == int(conf["dim"]))

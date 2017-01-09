@@ -47,7 +47,7 @@ in your meta inifile and have it resolved to:
 """
 
 from __future__ import absolute_import
-from dune.testtools.escapes import escaped_split
+from dune.testtools.escapes import escaped_split, replace_delimited
 
 _registry = {}
 
@@ -148,12 +148,12 @@ def apply_commands(configurations, cmds, all_cmds=[]):
         if cmd.key in configurations[0] or cmd.name == 'expand':
             if _registry[cmd.name]._returnConfigs:
                 configurations[:] = _registry[cmd.name](args=cmd.args, key=cmd.key, configs=configurations, commands=all_cmds)
-            elif _registry[cmd.name]._returnValue:
-                for c in configurations:
-                    c[cmd.key] = _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations, commands=all_cmds)
             else:
                 for c in configurations:
-                    _registry[cmd.name](args=cmd.args, key=cmd.key, config=c, value=c[cmd.key], configs=configurations, commands=all_cmds)
+                    replargs = [replace_delimited(arg, c, leftdelimiter="{", rightdelimiter="}") for arg in cmd.args]
+                    ret = _registry[cmd.name](args=replargs, key=cmd.key, config=c, value=c[cmd.key], configs=configurations, commands=all_cmds)
+                    if _registry[cmd.name]._returnValue:
+                        c[cmd.key] = ret
 
 
 def replace_command_key(commands, key, newkey):

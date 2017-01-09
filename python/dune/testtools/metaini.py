@@ -225,12 +225,27 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
     # until all of these are resolved!
     at_resolution_commands = cmds[CommandType.AT_RESOLUTION]
     while at_resolution_commands:
-        for c in configurations:
-            for cmd in cmds[CommandType.AT_RESOLUTION]:
+        for cmd in cmds[CommandType.AT_RESOLUTION]:
+            skip = False
+            for c in configurations:
                 value = c[cmd.key]
-                if not (exists_unescaped(value, "}") and exists_unescaped(value, "{")):
-                    apply_commands(configurations, [cmd], all_cmds=cmds)
-                    at_resolution_commands.remove(cmd)
+
+                # If the value still contains curly brackets, we have to skip this!
+                if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
+                    skip = True
+
+                # If the argument list still contains curly brackets we do the same
+                for arg in cmd.args:
+                    if exists_unescaped(arg, "}") and exists_unescaped(arg, "{"):
+                        argval = c[extract_delimited(arg, leftdelimiter="{", rightdelimiter="}")]
+                        if exists_unescaped(argval, "}") and exists_unescaped(argval, "{"):
+                            skip = True
+
+            if skip:
+                continue
+
+            apply_commands(configurations, [cmd], all_cmds=cmds)
+            at_resolution_commands.remove(cmd)
 
         for c in configurations:
             while resolve_key_dependencies(c):

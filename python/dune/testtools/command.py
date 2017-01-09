@@ -75,6 +75,19 @@ Commands
 
         a = 1.234 | toint
 
+.. _repeat:
+.. metaini_command:: repeat
+
+    The command `repeat` repeats the value the given number of times
+    with one whitespace as the separator. Note, that the argument to
+    this command may itself use the curly bracket syntax.
+
+    Example:
+
+    .. code-block:: ini
+
+        d = 3
+        domain = 1.0 | repeat {dim}
 """
 from __future__ import absolute_import
 
@@ -106,6 +119,11 @@ def _cmd_to_upper(value=None):
 def _toint(value=None):
     """Cast the given floating point number to an integer"""
     return str(int(float(value)))
+
+
+@meta_ini_command(name="repeat", ctype=CommandType.AT_RESOLUTION, argc=1)
+def _repeat(value=None, args=None):
+    return " ".join([value] * int(args[0]))
 
 
 @meta_ini_command(name="eval", ctype=CommandType.AT_RESOLUTION)
