@@ -31,7 +31,7 @@ Commands
     - subtraction (`-`)
     - multiplication (`*`)
     - floating point division (`/`)
-    - a power function(`^`)
+    - a power function(`**`)
     - unary minus (`-`).
 
 .. _tolower:
