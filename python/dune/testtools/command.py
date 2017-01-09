@@ -90,7 +90,7 @@ def _cmd_to_upper(value=None):
     return value.upper()
 
 
-@meta_ini_command(name="eval", ctype=CommandType.POST_FILTERING)
+@meta_ini_command(name="eval", ctype=CommandType.AT_RESOLUTION)
 def _eval_command(value=None):
     """Defines the meta ini command eval"""
 

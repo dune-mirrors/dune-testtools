@@ -63,6 +63,7 @@ class CommandType:
         * PRE_EXPANSION
         * POST_EXPANSION
         * PRE_RESOLUTION
+        * AT_RESOLUTION
         * POST_RESOLUTION
         * PRE_FILTERING
         * POST_FILTERING
@@ -71,10 +72,11 @@ class CommandType:
     PRE_EXPANSION = 0
     POST_EXPANSION = 1
     PRE_RESOLUTION = 2
-    POST_RESOLUTION = 3
-    PRE_FILTERING = 4
-    POST_FILTERING = 5
-    AT_EXPANSION = 6
+    AT_RESOLUTION = 3
+    POST_RESOLUTION = 4
+    PRE_FILTERING = 5
+    POST_FILTERING = 6
+    AT_EXPANSION = 7
 
 
 def command_count():

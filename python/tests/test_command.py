@@ -7,3 +7,10 @@ def test_metaini(dir):
     assert("4" in [conf["ev"] for conf in c])
     assert(6 < float(c[0]["pi"]) < 7)
     assert(len(c) == 4)
+
+
+def test_complex_command_deps(dir):
+    c = expand_meta_ini(dir + "complexcommand.mini")
+    assert(len(c) == 2)
+    assert("2" in [conf["b"] for conf in c])
+    assert("5" in [conf["b"] for conf in c])
