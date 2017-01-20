@@ -79,7 +79,7 @@ Commands
 """
 from __future__ import absolute_import
 from dune.common.parametertree.dotdict import DotDict
-from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited
+from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited, extract_delimited
 from dune.testtools.parser import parse_ini_file, CommandToApply
 from dune.testtools.writeini import write_dict_to_ini
 from copy import deepcopy
@@ -187,14 +187,6 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
     # HOOK: POST_EXPANSION
     apply_commands(configurations, cmds[CommandType.POST_EXPANSION], all_cmds=cmds)
 
-    # define functions needed for resolving key-dependent values
-    def needs_resolution(d):
-        """ whether curly brackets can be found somewhere in the dictionary d """
-        for key, value in d.items():
-            if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
-                return True
-        return False
-
     def check_for_unique(d, k):
         for cta in cmds[CommandType.POST_FILTERING]:
             if (cta.key == k and cta.name == "unique") or (k in uniquekeys()):
@@ -203,11 +195,19 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
 
     def resolve_key_dependencies(d):
         """ replace curly brackets with keys by the appropriate key from the dictionary - recursively """
+        resolved = False
         for key, value in d.items():
-            while (exists_unescaped(value, "}")) and (exists_unescaped(value, "{")):
+            if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
+                # Check whether this key has an AT_RESOLUTION command applied
+                lookup_key = extract_delimited(value, leftdelimiter="{", rightdelimiter="}")
+                if lookup_key in [c.key for c in cmds[CommandType.AT_RESOLUTION]]:
+                    continue
+
                 # split the contents form the innermost curly brackets from the rest
                 d[key] = replace_delimited(value, d, access_func=check_for_unique)
-                value = d[key]
+                resolved = True
+
+        return resolved
 
     # HOOK: PRE_RESOLUTION
     apply_commands(configurations, cmds[CommandType.PRE_RESOLUTION], all_cmds=cmds)
@@ -218,8 +218,38 @@ def expand_meta_ini(filename, assignment="=", commentChar="#", whiteFilter=None,
         # In a worst case scenario concerning the order of resolution,
         # a call to resolve_key_dependencies only resolves one such layer.
         # That is why we need to do this until all dependencies are resolved.
-        while needs_resolution(c):
-            resolve_key_dependencies(c)
+        while resolve_key_dependencies(c):
+            pass
+
+    # If we have AT_RESOLUTION commands present, we need to reiterate resolution
+    # until all of these are resolved!
+    at_resolution_commands = cmds[CommandType.AT_RESOLUTION]
+    while at_resolution_commands:
+        for cmd in cmds[CommandType.AT_RESOLUTION]:
+            skip = False
+            for c in configurations:
+                value = c[cmd.key]
+
+                # If the value still contains curly brackets, we have to skip this!
+                if exists_unescaped(value, "}") and exists_unescaped(value, "{"):
+                    skip = True
+
+                # If the argument list still contains curly brackets we do the same
+                for arg in cmd.args:
+                    if exists_unescaped(arg, "}") and exists_unescaped(arg, "{"):
+                        argval = c[extract_delimited(arg, leftdelimiter="{", rightdelimiter="}")]
+                        if exists_unescaped(argval, "}") and exists_unescaped(argval, "{"):
+                            skip = True
+
+            if skip:
+                continue
+
+            apply_commands(configurations, [cmd], all_cmds=cmds)
+            at_resolution_commands.remove(cmd)
+
+        for c in configurations:
+            while resolve_key_dependencies(c):
+                pass
 
     # HOOK: POST_RESOLUTION
     apply_commands(configurations, cmds[CommandType.POST_RESOLUTION], all_cmds=cmds)
