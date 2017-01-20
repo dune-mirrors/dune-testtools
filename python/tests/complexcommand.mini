@@ -1,0 +1,5 @@
+x = 1, 2 | expand
+y = {x}*{x} | eval
+z = {y}
+a = {z} + 1 | eval
+b = {a}

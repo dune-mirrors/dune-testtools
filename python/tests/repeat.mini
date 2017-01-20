@@ -1,0 +1,2 @@
+dim = 2, 3 | expand
+cells = 16 | repeat {dim}
