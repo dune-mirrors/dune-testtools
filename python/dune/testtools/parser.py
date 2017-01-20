@@ -39,7 +39,7 @@ class MetaIniParser(object):
         # A key can consist of anything that is not an equal sign
         key = Word(alphanums + "_.")
         # define a command
-        command = Group(Literal("|").suppress() + oneOf(self._commands) + ZeroOrMore(Word(alphanums + "_", excludeChars=[commentChar, "|"])))
+        command = Group(Literal("|").suppress() + oneOf(self._commands) + ZeroOrMore(Word(alphanums + "_{}", excludeChars=[commentChar, "|"])))
         # A value may contain virtually anything
         value = Combine(OneOrMore(QuotedString(quoteChar='"', escChar='\\').setParseAction(self.escapeQuoted) | Word(printables + " ", excludeChars=[commentChar, '"', "|"])))
         # A key value pair is a concatenation of those 3
