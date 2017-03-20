@@ -5,7 +5,7 @@ from __future__ import print_function
 from pyparsing import Literal, Word, alphanums, Combine, OneOrMore, ZeroOrMore, QuotedString, Optional, restOfLine, printables, oneOf, Group, LineEnd
 from collections import namedtuple
 import os.path
-from dune.common.parametertree.dotdict import DotDict
+from dune.testtools.parametertree.dotdict import DotDict
 
 CommandToApply = namedtuple('CommandToApply', ['name', 'args', 'key'])
 
