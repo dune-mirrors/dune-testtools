@@ -14,7 +14,10 @@
 #    and debugging dune-testtools.
 #
 
-dune_require_python_version(2.7)
+# Make sure that the configure time virtual env is set up
+dune_python_require_virtualenv_setup()
+
+dune_python_require_version(2.7)
 #TODO: What is our minimum Python 3.x requirement?
 
 # Generate a string containing "DEBUG" if we want to debug macros
