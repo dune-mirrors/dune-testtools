@@ -78,7 +78,7 @@ Commands
 
 """
 from __future__ import absolute_import
-from dune.common.parametertree.dotdict import DotDict
+from dune.testtools.parametertree.dotdict import DotDict
 from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited, extract_delimited
 from dune.testtools.parser import parse_ini_file, CommandToApply
 from dune.testtools.writeini import write_dict_to_ini
@@ -97,7 +97,7 @@ def expand_key(c, keys):
     """ Expand a group of keys together
 
         :param c: A meta ini dictionary
-        :type c: dune.common.parametertree.dotdict.DotDict
+        :type c: dune.testtools.parametertree.dotdict.DotDict
         :param keys: The keys to be expanded together
         :type keys: string
 
