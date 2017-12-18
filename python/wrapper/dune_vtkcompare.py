@@ -26,6 +26,7 @@ The wrapper can be configured through the meta ini file under the section
     relative = 1e-2
     absolute = 1.2e-7
     zeroThreshold.velocity = 1e-18
+    timestep = 100
 
 The mandatory parameters are ``name`` and ``reference``. ``name`` specifies
 the name of the produced file with a path relative to the executables build directory.
@@ -36,7 +37,9 @@ comparison respectively. The ``zeroThreshold`` parameter sets a value for a cert
 data array in the vtu file (here "velocity") under which the value is considered exact 0.
 Values under the threshold (given that both reference and current solution are under the
 threshold) will thus be excluded from comparison. This is useful if a parameter suffers
-from numerical noise.
+from numerical noise. The ``timestep`` parameter can be used if VTK data is written
+through a VTKSequenceWriter instance and only the results at the given time should be
+considered for the VTK comparison.
 
 .. note::
     The vtk comparison also works when the grid manager uses different indices than
@@ -88,6 +91,9 @@ if __name__ == "__main__":
         try:
             # get reference solutions
             names = ini["wrapper.vtkcompare.name"].split(' ')
+            timestep = ini.get("wrapper.vtkcompare.timestep", "")
+            if timestep:
+                timestep = "-" + str(timestep).zfill(5)
             exts = ini.get("wrapper.vtkcompare.extension", "vtu " * len(names)).split(' ')
             references = ini["wrapper.vtkcompare.reference"].split(' ')
         except KeyError:
@@ -104,7 +110,7 @@ if __name__ == "__main__":
             absolute = float(ini.get("wrapper.vtkcompare." + prefix + "absolute", 1.2e-7))
             zeroThreshold = ini.get("wrapper.vtkcompare." + prefix + "zeroThreshold", {})
 
-            ret = compare_vtk(vtk1=n + "." + e,
+            ret = compare_vtk(vtk1=n + timestep + "." + e,
                               vtk2=args["source"] + "/" + r + "." + e,
                               absolute=absolute,
                               relative=relative,
