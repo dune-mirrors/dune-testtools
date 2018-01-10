@@ -21,13 +21,16 @@ dune_enable_all_packages()
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
-dune_install_python_package(PATH python)
-add_python_test_command(COMMAND python -m pytest
-                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
-                        REQUIRED_PACKAGES pytest)
-add_python_test_command(COMMAND python -m pytest --pep8
-                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
-                        REQUIRED_PACKAGES pytest pytest-pep8)
+dune_python_install_package(PATH python)
+
+dune_python_add_test(NAME pytest
+                     COMMAND ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE} -m pytest
+                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
+                     )
+dune_python_add_test(NAME pep8
+                     COMMAND ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE} -m pytest --pep8
+                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
+                     )
 
 add_subdirectory("dune")
 add_subdirectory("doc")
