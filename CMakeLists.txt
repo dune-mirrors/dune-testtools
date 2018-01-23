@@ -12,6 +12,8 @@ find_package(dune-common REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules"
   ${dune-common_MODULE_PATH})
 
+cmake_policy(SET CMP0054 NEW)
+
 #include the dune macros
 include(DuneMacros)
 
