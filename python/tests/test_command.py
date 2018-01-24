@@ -21,3 +21,17 @@ def test_repeat_command(dir):
     assert(len(c) == 2)
     for conf in c:
         assert(len(conf["cells"].split()) == int(conf["dim"]))
+
+
+def test_range_command(dir):
+    c = expand_meta_ini(dir + "range.mini")
+    assert(len(c) == 7)
+    vals = set("i{}".format(i) for i in range(7))
+    for conf in c:
+        assert(conf["val"] in vals)
+        vals.discard(conf["val"])
+
+    vals2 = set("i{}".format(2 * i + 1) for i in range(7))
+    for conf in c:
+        assert(conf["val2"] in vals2)
+        vals.discard(conf["val2"])
