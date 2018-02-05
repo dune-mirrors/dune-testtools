@@ -15,6 +15,12 @@
 #       The input string, which is the stdout of a Python script
 #       that used the :code:`printForCMake` function from :code:`dune.testtools`
 #
+#    .. cmake_param:: DEBUG
+#       :option:
+#
+#       If set, the function will be verbose about the variables it
+#       sets in the parent scope.
+#
 #    The function that implements the data interface between Python and
 #    CMake from the CMake side.
 #
@@ -23,9 +29,10 @@
 #
 
 function(parse_python_data)
+  set(OPTION DEBUG)
   set(SINGLE PREFIX)
   set(MULTI INPUT)
-  cmake_parse_arguments(PYPARSE "" "${SINGLE}" "${MULTI}" ${ARGN})
+  cmake_parse_arguments(PYPARSE "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
   # these keys are an agreement between the Python and the CMake module
   # they can be changed to whatever keys, as long as they are updated on
   # both ends.
@@ -46,5 +53,8 @@ function(parse_python_data)
     # restore any semicolons in the data
     string(REPLACE "${KEYS___SEMICOLON}" ";" output "${DATA_${key}}")
     set(${PYPARSE_PREFIX}_${key} ${output} PARENT_SCOPE)
+    if(PYPARSE_DEBUG)
+      message("Parsing ${PYPARSE_PREFIX}_${key}=${output}")
+    endif()
   endforeach()
 endfunction()
