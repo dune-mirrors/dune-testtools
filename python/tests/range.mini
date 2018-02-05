@@ -1,0 +1,2 @@
+val = i | range 7 | expand foo
+val2 = i | range 14 1 2 | expand foo

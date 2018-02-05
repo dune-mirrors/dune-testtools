@@ -88,6 +88,25 @@ Commands
 
         d = 3
         domain = 1.0 | repeat {dim}
+
+.. _range:
+.. metaini_command:: range
+
+    Get a list of integers as provided by the python built-in command
+    range and append it to the existing value. Arguments are given in
+    order (stop, start, increment), where the latter two can be omitted
+    (defaulting to 0 and 1 resp.). Note that there is no automatic expansion
+    of the result, but the result can be expanded. However, the argument
+    cannot be taken from an expanded key as this would involve a chicken
+    egg situation (we basically had to decide between the two features).
+
+    Example:
+
+    .. code-block:: ini
+
+        val = i | range 7 | expand
+
+    The example results in 7 configuration files with val = i0, .., i6
 """
 from __future__ import absolute_import
 
@@ -153,3 +172,10 @@ def _eval_command(value=None):
             raise TypeError(node)
 
     return str(eval_(ast.parse(value, mode='eval').body))
+
+
+@meta_ini_command(name="range", ctype=CommandType.PRE_EXPANSION, argc=3, argdefaults=(None, 0, 1))
+def _range_command(value=None, args=None):
+    # We need to switch the order of arguments here as python's range has a strange way of
+    # having the only non-defaultable value as second instead of first parameter...
+    return ", ".join("{}{}".format(value, n) for n in range(int(args[1]), int(args[0]), int(args[2])))

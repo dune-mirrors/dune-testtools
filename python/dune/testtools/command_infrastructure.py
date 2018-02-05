@@ -99,7 +99,7 @@ class RegisteredCommand:
         self._ctype = ctype
         self._argc = argc
         if argdefaults:
-            self._argdefaults = argdefaults + [None for i in range(argc - len(argdefaults))]
+            self._argdefaults = list(argdefaults) + [None for i in range(argc - len(argdefaults))]
         else:
             self._argdefaults = list(None for x in range(argc))
         self._returnConfigs = returnConfigs
