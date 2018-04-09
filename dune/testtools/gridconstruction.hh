@@ -425,7 +425,7 @@ private:
  * - lowerleft : lowerleft corner of a structured grid
  * - upperright : upperright corner of a structured grid
  * - elements : number of elements in a structured grid
- * - elementType : "quadrialteral" or "simplical" to be used for structured grids
+ * - elementType : "quadrilateral" or "simplicial" to be used for structured grids
  * - refinement : the number of global refines to perform
  * - verbose : whether the grid construction should output to standard out
  * - boundarySegments : whether to insert boundary segments into the grid
@@ -477,7 +477,7 @@ public:
       // TODO maybe add some synonymous descriptions of quadrilateral grids here.
       if (elemType == "quadrilateral")
         grid = factory.createCubeGrid(lowerleft, upperright, elements);
-      else if (elemType == "simplical")
+      else if (elemType == "simplicial")
         grid = factory.createSimplexGrid(lowerleft, upperright, elements);
       else
         DUNE_THROW(Dune::GridError,
