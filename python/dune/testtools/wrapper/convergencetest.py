@@ -43,24 +43,18 @@ def call(executable, metaini=None):
     # expand the meta ini file
     configurations = expand_meta_ini(metaini)
 
+    # Find out in which sections the test data is
+    testsections = configurations[0].get("wrapper.convergencetest.testsections", "").split()
+    testsections = ["wrapper.convergencetest.{}".format(s) if s != "" else "wrapper.convergencetest" for s in testsections]
+
     # execute all runs with temporary ini files and process the temporary output
     output = []
     for c in configurations:
-        # check if all necessary keys are given
-        if "wrapper.convergencetest.expectedrate" not in c:
-            sys.stderr.write("The convergencetest wrapper excepts a key wrapper.convergencetest.expectedrate \
-                              to be present in the ini file!")
-            return 1
+        c.setdefault("__output_extension", "out")
 
-        # specify all default keys if not specified already
-        if "wrapper.convergencetest.absolutedifference" not in c:
-            c["wrapper.convergencetest.absolutedifference"] = '0.1'
-        if "wrapper.convergencetest.normkey" not in c:
-            c["wrapper.convergencetest.normkey"] = 'norm'
-        if "wrapper.convergencetest.scalekey" not in c:
-            c["wrapper.convergencetest.scalekey"] = 'hmax'
-        if "__output_extension" not in c:
-            c["__output_extension"] = 'out'
+        for section in testsections:
+            c[section].setdefault("normkey", "norm")
+            c[section].setdefault("scalekey", "hmax")
 
         # write a temporary ini file. Prefix them with the name key to be unique
         tmp_file = c["__name"] + "_tmp.ini"
@@ -84,18 +78,29 @@ def call(executable, metaini=None):
         os.remove(tmp_file)
 
     # calculate the rate according to the outputted data
-    for idx, c in list(enumerate(configurations))[:-1]:
-        norm1 = float(output[idx][c["wrapper.convergencetest.normkey"]])
-        norm2 = float(output[idx + 1][c["wrapper.convergencetest.normkey"]])
-        hmax1 = float(output[idx][c["wrapper.convergencetest.scalekey"]])
-        hmax2 = float(output[idx + 1][c["wrapper.convergencetest.scalekey"]])
-        rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
-        # compare the rate to the expected rate
-        if math.fabs(rate - float(c["wrapper.convergencetest.expectedrate"])) > float(c["wrapper.convergencetest.absolutedifference"]):
-            sys.stderr.write("Test failed because the absolute difference between the \
-                             calculated convergence rate ({}) and the expected convergence rate ({}) was too \
-                             large.\n".format(rate, c["wrapper.convergencetest.expectedrate"]))
-            return 1
+    for section in testsections:
+        for idx, c in list(enumerate(configurations))[:-1]:
+            # check if all necessary keys are given
+            if "expectedrate" not in c[section]:
+                sys.stderr.write("The convergencetest wrapper excepts a key expectedrate \
+                                  in section {} of the ini file!".format(section))
+                return 1
+
+            # specify all default keys if not specified already
+            c[section].setdefault("absolutedifference", "0.1")
+            c.setdefault("__output_extension", "out")
+
+            norm1 = float(output[idx][c[section]["normkey"]])
+            norm2 = float(output[idx + 1][c[section]["normkey"]])
+            hmax1 = float(output[idx][c[section]["scalekey"]])
+            hmax2 = float(output[idx + 1][c[section]["scalekey"]])
+            rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
+            # compare the rate to the expected rate
+            if math.fabs(rate - float(c[section]["expectedrate"])) > float(c[section]["absolutedifference"]):
+                sys.stderr.write("Test failed because the absolute difference between the \
+                                 calculated convergence rate ({}) and the expected convergence rate ({}) was too \
+                                 large for convergence test defined in section {}\n".format(rate, c[section]["expectedrate"], section))
+                return 1
 
     # if we got here everything passed
     return 0
