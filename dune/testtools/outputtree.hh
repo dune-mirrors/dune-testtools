@@ -66,18 +66,12 @@ namespace Dune
     void setConvergenceData(const T1& norm, const T2& quantity, std::string section="")
     {
       if (section == "")
-        section = "wrapper.convergencetest";
+        section = "wrapper.convergencetest.";
       else
-        section = "wrapper.convergencetest." + section;
+        section = "wrapper.convergencetest." + section + ".";
 
-      // some error handling
-      if(!_params.hasKey(section + ".normkey"))
-        DUNE_THROW(Dune::IOError, section + ".normkey is not set!");
-      if(!_params.hasKey(section + ".scalekey"))
-        DUNE_THROW(Dune::IOError, section + ".scalekey is not set!");
-
-      set<T1>(_params[section + ".normkey"], norm);
-      set<T2>(_params[section + ".scalekey"], quantity);
+      set<T1>(section + "norm", norm);
+      set<T2>(section + "scale", quantity);
     }
 
     template<typename T>

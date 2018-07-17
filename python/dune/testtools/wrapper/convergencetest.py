@@ -55,10 +55,6 @@ def call(executable, metaini=None):
     for c in configurations:
         c.setdefault("__output_extension", "out")
 
-        for section in testsections:
-            c[section].setdefault("normkey", "norm")
-            c[section].setdefault("scalekey", "hmax")
-
         # write a temporary ini file. Prefix them with the name key to be unique
         tmp_file = c["__name"] + "_tmp.ini"
         write_dict_to_ini(c, tmp_file)
@@ -93,10 +89,10 @@ def call(executable, metaini=None):
             c[section].setdefault("absolutedifference", "0.1")
             c.setdefault("__output_extension", "out")
 
-            norm1 = float(output[idx][c[section]["normkey"]])
-            norm2 = float(output[idx + 1][c[section]["normkey"]])
-            hmax1 = float(output[idx][c[section]["scalekey"]])
-            hmax2 = float(output[idx + 1][c[section]["scalekey"]])
+            norm1 = float(output[idx][section]["norm"])
+            norm2 = float(output[idx + 1][section]["norm"])
+            hmax1 = float(output[idx][section]["scale"])
+            hmax2 = float(output[idx + 1][section]["scale"])
             rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
             # compare the rate to the expected rate
             if math.fabs(rate - float(c[section]["expectedrate"])) > float(c[section]["absolutedifference"]):
