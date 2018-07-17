@@ -1,3 +1,5 @@
+![Build Status](https://gitlab.dune-project.org/quality/dune-testtools/badges/master/build.svg)
+
 # What is dune-testtools?
 
 dune-testtools provides the following components:
