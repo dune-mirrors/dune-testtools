@@ -1,8 +1,8 @@
 Copyright holders:
 ------------------
 
-* 2014 -- 2015 Dominic Kempf
-* 2014 -- 2015 Timo Koch
+* 2014 -- 2018 Dominic Kempf
+* 2014 -- 2018 Timo Koch
 * 2015         Rene Milk
 * 2015         Linus Seelinger
 

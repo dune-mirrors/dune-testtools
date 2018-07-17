@@ -49,7 +49,7 @@ int main(int argc, char** argv) try
   return 0;
 }
 // Error handler /////////////////
-catch (Dune::Exception e) {
+catch (Dune::Exception& e) {
     std::cerr << e << std::endl;
     return 1;
 }
