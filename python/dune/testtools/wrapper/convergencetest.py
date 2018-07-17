@@ -45,7 +45,10 @@ def call(executable, metaini=None):
 
     # Find out in which sections the test data is
     testsections = configurations[0].get("wrapper.convergencetest.testsections", "").split()
-    testsections = ["wrapper.convergencetest.{}".format(s) if s != "" else "wrapper.convergencetest" for s in testsections]
+    if testsections:
+        testsections = ["wrapper.convergencetest.{}".format(s) for s in testsections]
+    else:
+        testsections = ["wrapper.convergencetest"]
 
     # execute all runs with temporary ini files and process the temporary output
     output = []
