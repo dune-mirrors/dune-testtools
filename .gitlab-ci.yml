@@ -7,12 +7,12 @@ debian:10--gcc:
   image: registry.dune-project.org/docker/ci/dune:git-debian-10-gcc-8-17
   script: duneci-standard-test
   tags:
-    - "cores:4"
-    - "mem:16G"
+    - "cores:2"
+    - "perftool"
 
 debian:10--clang:
   image: registry.dune-project.org/docker/ci/dune:git-debian-10-clang-6-libcpp-17
   script: duneci-standard-test
   tags:
-    - "cores:4"
-    - "mem:16G"
+    - "cores:2"
+    - "perftool"
