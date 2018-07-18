@@ -34,28 +34,34 @@ the meta ini file as follows
 This will calculate the convergence rate and will mark the test as
 failed if it's more than ``0.1`` different from ``2.0``.
 
-If you use the ini functionality of ``Dune::OutputTree`` class and its
+If you use the functionality of the ``Dune::OutputTree`` class and its
 method ``setConvergenceData(const T1& norm, const T2& quantity)`` the
 convergence rate is automatically calculated from the norm and the given
-scale quantity (e.g. h_max, delta_t). If you output the quantities manually
-you have to specify the keys that the wrapper has to search for when calculating
-the rate as follows
+scale quantity (e.g. h_max, delta_t). There is no further need to specify
+how and where the output data is stored.
+
+It is also possible to conduct more than one convergence test during the
+same program run. This is of particular interest if you want to
+* check convergence in more than one norm (L2, H1...)
+* check convergence for systems of PDEs (rates might differ per component).
+In order to achieve this you can substructure the configuration section
+and list all subsections in the ``testsections`` key. The following example
+treats a Q1/Q2 Taylor Hood Element.
 
 .. code-block:: ini
 
     [wrapper.convergencetest]
+    testsections = pressure velocity
+
+    [wrapper.convergencetest.pressure]
+    expectedrate = 1.0
+
+    [wrapper.convergencetest.velocity
     expectedrate = 2.0
-    normkey = l2_norm
-    scalekey = h_max
 
-You the have to make sure to output your data in ini file format like this
-for every run
 
-.. code-block:: ini
-
-    l2_norm = 1e-5
-    h_max = 1e-3
-
+Omitting the testsections key will result in the configuration values being read
+directly from the ``wrapper.convergencetest`` section.
 """
 if __name__ == "__main__":
 
