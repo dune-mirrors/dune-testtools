@@ -38,24 +38,13 @@ void test_ini(std::string filename, const Dune::MPIHelper& mpiHelper) {
     std::cout << "Created OneDGrid with " << factory.getGrid()->size(0) << " cells." << std::endl;
   }
 
-#if HAVE_UG && UG_PARALLEL
+#if HAVE_UG
   if (tree.hasSub("ug")) {
     typedef Dune::UGGrid<2> G4;
     typedef IniGridFactory<G4> F4;
 
     F4 factory4(tree, "ug");
     std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
-  }
-#elif HAVE_UG && !UG_PARALLEL
-  if (tree.hasSub("ug")) {
-    std::cout << "UG construction is sequential. UGGrid needs to be configured with --enable-parallel to run this test in parallel." << std::endl;
-    typedef Dune::UGGrid<2> G4;
-    typedef IniGridFactory<G4> F4;
-    if (mpiHelper.rank() == 0)
-    {
-        F4 factory4(tree, "ug");
-        std::cout << "Created UGGrid with " << factory4.getGrid()->size(0) << " cells." << std::endl;
-    }
   }
 #else
   if (tree.hasSub("ug"))
