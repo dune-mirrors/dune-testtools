@@ -76,6 +76,9 @@ def call(executable, metaini=None):
         os.remove(os.path.basename(c["__name"]) + "." + c["__output_extension"])
         os.remove(tmp_file)
 
+    #store return value (because we do not want to return as soon as one section fails)
+    returnvalue = 0
+
     # calculate the rate according to the outputted data
     for section in testsections:
         for idx, c in list(enumerate(configurations))[:-1]:
@@ -94,12 +97,16 @@ def call(executable, metaini=None):
             hmax1 = float(output[idx][section]["scale"])
             hmax2 = float(output[idx + 1][section]["scale"])
             rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
-            # compare the rate to the expected rate
+            # compare the rate to the expected rate. Set return value to 1 if test fails here.
             if math.fabs(rate - float(c[section]["expectedrate"])) > float(c[section]["absolutedifference"]):
-                sys.stderr.write("Test failed because the absolute difference between the \
-                                 calculated convergence rate ({}) and the expected convergence rate ({}) was too \
-                                 large for convergence test defined in section {}\n".format(rate, c[section]["expectedrate"], section))
-                return 1
+                sys.stderr.write("Test {} failed because the absolute difference between the calculated convergence rate ({}) "
+                                 "and the expected convergence rate ({}) was greater "
+                                 "than tolerance ({}). \n".format(section ,rate, c[section]["expectedrate"], c[section]["absolutedifference"]))
+                returnvalue = 1
+            # print convergence rates also if test is passed
+            else:
+                sys.stderr.write("Test {} passed because the absolute difference between the calculated convergence rate ({}) "
+                                 "and the expected convergence rate ({}) was within "
+                                 "tolerance ({}). \n".format(section, rate, c[section]["expectedrate"], c[section]["absolutedifference"]))
 
-    # if we got here everything passed
-    return 0
+    return returnvalue
