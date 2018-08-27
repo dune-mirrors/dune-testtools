@@ -108,7 +108,7 @@ def call(executable, metaini=None):
                 returnvalue = 1
             # print convergence rates also if test is passed
             else:
-                sys.stderr.write("Test {} passed because the absolute difference "
+                sys.stdout.write("Test {} passed because the absolute difference "
                                  "between the calculated convergence rate ({}) "
                                  "and the expected convergence rate ({}) was within "
                                  "tolerance ({}). \n"
