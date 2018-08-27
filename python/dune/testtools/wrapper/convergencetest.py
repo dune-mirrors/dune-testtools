@@ -99,14 +99,20 @@ def call(executable, metaini=None):
             rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
             # compare the rate to the expected rate. Set return value to 1 if test fails here.
             if math.fabs(rate - float(c[section]["expectedrate"])) > float(c[section]["absolutedifference"]):
-                sys.stderr.write("Test {} failed because the absolute difference between the calculated convergence rate ({}) "
+                sys.stderr.write("Test {} failed because the absolute difference "
+                                 "between the calculated convergence rate ({}) "
                                  "and the expected convergence rate ({}) was greater "
-                                 "than tolerance ({}). \n".format(section ,rate, c[section]["expectedrate"], c[section]["absolutedifference"]))
+                                 "than tolerance ({}). \n"
+                                 .format(section ,rate, c[section]["expectedrate"],
+                                         c[section]["absolutedifference"]))
                 returnvalue = 1
             # print convergence rates also if test is passed
             else:
-                sys.stderr.write("Test {} passed because the absolute difference between the calculated convergence rate ({}) "
+                sys.stderr.write("Test {} passed because the absolute difference "
+                                 "between the calculated convergence rate ({}) "
                                  "and the expected convergence rate ({}) was within "
-                                 "tolerance ({}). \n".format(section, rate, c[section]["expectedrate"], c[section]["absolutedifference"]))
+                                 "tolerance ({}). \n"
+                                 .format(section, rate, c[section]["expectedrate"],
+                                         c[section]["absolutedifference"]))
 
     return returnvalue
