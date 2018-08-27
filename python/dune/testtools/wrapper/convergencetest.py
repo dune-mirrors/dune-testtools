@@ -76,7 +76,7 @@ def call(executable, metaini=None):
         os.remove(os.path.basename(c["__name"]) + "." + c["__output_extension"])
         os.remove(tmp_file)
 
-    #store return value (because we do not want to return as soon as one section fails)
+    # store return value (because we do not want to return as soon as one section fails)
     returnvalue = 0
 
     # calculate the rate according to the outputted data
@@ -103,7 +103,7 @@ def call(executable, metaini=None):
                                  "between the calculated convergence rate ({}) "
                                  "and the expected convergence rate ({}) was greater "
                                  "than tolerance ({}). \n"
-                                 .format(section ,rate, c[section]["expectedrate"],
+                                 .format(section, rate, c[section]["expectedrate"],
                                          c[section]["absolutedifference"]))
                 returnvalue = 1
             # print convergence rates also if test is passed
