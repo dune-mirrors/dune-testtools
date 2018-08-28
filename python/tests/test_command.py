@@ -35,3 +35,12 @@ def test_range_command(dir):
     for conf in c:
         assert(conf["val2"] in vals2)
         vals.discard(conf["val2"])
+
+
+def test_zfill_command(dir):
+    c = expand_meta_ini(dir + "zfill.mini")
+    assert(len(c) == 10)
+    vals = set(str(i).zfill(4) for i in range(10))
+    for conf in c:
+        assert(conf["number_str"] in vals)
+        vals.discard(conf["number_str"])
