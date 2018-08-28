@@ -1,0 +1,2 @@
+number = 0 | range 10 | expand
+number_str = {number} | zfill 4
