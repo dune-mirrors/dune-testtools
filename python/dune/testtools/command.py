@@ -107,6 +107,21 @@ Commands
         val = i | range 7 | expand
 
     The example results in 7 configuration files with val = i0, .., i6
+
+.. _zfill:
+.. metaini_command:: zfill
+
+    Pad a given integer number with leading zeroes for it to be of the
+    length given by the commands argument. Inspired and implemented by
+    python str.zfill. This command is useful for numbered output filenames.
+
+    Example:
+
+    .. code-block:: ini
+
+        val = 3 | zfill 4
+
+    The example will have the val key read "0003".
 """
 from __future__ import absolute_import
 
@@ -179,3 +194,8 @@ def _range_command(value=None, args=None):
     # We need to switch the order of arguments here as python's range has a strange way of
     # having the only non-defaultable value as second instead of first parameter...
     return ", ".join("{}{}".format(value, n) for n in range(int(args[1]), int(args[0]), int(args[2])))
+
+
+@meta_ini_command(name="zfill", argc=1, ctype=CommandType.AT_RESOLUTION)
+def _zfill_command(value=None, args=None):
+    return str(value).zfill(int(args[0]))
