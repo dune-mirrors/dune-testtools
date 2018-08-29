@@ -107,12 +107,19 @@ def call(executable, metaini=None):
                                          c[section]["absolutedifference"]))
                 returnvalue = 1
             # print convergence rates also if test is passed
-            else:
+            elif math.fabs(rate - float(c[section]["expectedrate"])) <= float(c[section]["absolutedifference"]):
                 sys.stdout.write("Test {} passed because the absolute difference "
                                  "between the calculated convergence rate ({}) "
                                  "and the expected convergence rate ({}) was within "
                                  "tolerance ({}). \n"
                                  .format(section, rate, c[section]["expectedrate"],
                                          c[section]["absolutedifference"]))
+            # else we couldn't determine convergence rate, so the test should fail
+            else:
+                sys.stderr.write("Test {} failed because we could not compare "
+                                 "the calculated convergence rate ({}) "
+                                 "and the expected convergence rate ({}). \n"
+                                 .format(section, rate, c[section]["expectedrate"]))
+                returnvalue = 1
 
     return returnvalue
