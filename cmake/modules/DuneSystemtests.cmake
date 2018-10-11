@@ -182,6 +182,7 @@ function(add_static_variants)
       # evaluate all the discarding conditions that have been provided!
       set(SOURCE_FILES ${STATVAR_SOURCE})
       foreach(condition ${STATINFO_${conf}___GUARDS})
+        separate_arguments(condition)
         if(NOT ${condition})
           # This test is to be skipped, we switch the source for a dummy that always return 77.
           if(CMAKE_PROJECT_NAME STREQUAL dune-testtools)

@@ -71,7 +71,10 @@ class _DummyEnvironment(dict):
 
 def eval_boolean(s):
     """ evaluate the given string `s` as a boolean expression """
-    return eval(s, _DummyEnvironment())
+    try:
+        return eval(s, _DummyEnvironment())
+    except SyntaxError:
+        return False
 
 
 @meta_ini_command(name="exclude", returnConfigs=True)
