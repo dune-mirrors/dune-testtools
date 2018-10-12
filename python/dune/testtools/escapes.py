@@ -114,7 +114,7 @@ def replace_delimited(str, d, leftdelimiter="{", rightdelimiter="}", access_func
        This function can resolve one level of dependency for a single key-value pair using the other
        key-value pairs in the dictionary as replacement rule.
     """
-    return re.sub("{0}[^{0}{1}]+{1}".format(leftdelimiter, rightdelimiter), lookup_and_modify_key(d, access_func), str, count=1)
+    return re.sub("(?<!\\\\){0}[^{0}{1}]+(?<!\\\\){1}".format(leftdelimiter, rightdelimiter), lookup_and_modify_key(d, access_func), str, count=1)
 
 
 def extract_delimited(str, leftdelimiter="[", rightdelimiter="]"):
