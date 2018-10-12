@@ -1,0 +1,4 @@
+bla = 1, 2 | expand
+
+# This exlusion should be noop resulting in TWO configs!
+\{bla} == 1 | exclude
