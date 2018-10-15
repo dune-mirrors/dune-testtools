@@ -97,8 +97,16 @@ def call(executable, metaini=None):
             hmax1 = float(output[idx][section]["scale"])
             hmax2 = float(output[idx + 1][section]["scale"])
             rate = math.log(norm2 / norm1) / math.log(hmax2 / hmax1)
-            # compare the rate to the expected rate. Set return value to 1 if test fails here.
-            if math.fabs(rate - float(c[section]["expectedrate"])) > float(c[section]["absolutedifference"]):
+            # test passes
+            if math.fabs(rate - float(c[section]["expectedrate"])) <= float(c[section]["absolutedifference"]):
+                sys.stdout.write("Test {} passed because the absolute difference "
+                                 "between the calculated convergence rate ({}) "
+                                 "and the expected convergence rate ({}) was within "
+                                 "tolerance ({}). \n"
+                                 .format(section, rate, c[section]["expectedrate"],
+                                         c[section]["absolutedifference"]))
+            # test fails because rates are off
+            elif math.fabs(rate - float(c[section]["expectedrate"])) > float(c[section]["absolutedifference"]):
                 sys.stderr.write("Test {} failed because the absolute difference "
                                  "between the calculated convergence rate ({}) "
                                  "and the expected convergence rate ({}) was greater "
@@ -106,13 +114,17 @@ def call(executable, metaini=None):
                                  .format(section, rate, c[section]["expectedrate"],
                                          c[section]["absolutedifference"]))
                 returnvalue = 1
-            # print convergence rates also if test is passed
+            # test fails because rates are nan or inf
+            elif math.isnan(rate) or math.isinf(rate):
+                sys.stderr.write("Test {} failed because calculated rate is ({})."
+                                 "Expected was ({}) with tolerance ({}). \n"
+                                 .format(section, rate, c[section]["expectedrate"], c[section]["absolutedifference"]))
+                returnvalue = 1
+            # if we are here, something unexpcted happened
             else:
-                sys.stdout.write("Test {} passed because the absolute difference "
-                                 "between the calculated convergence rate ({}) "
-                                 "and the expected convergence rate ({}) was within "
-                                 "tolerance ({}). \n"
-                                 .format(section, rate, c[section]["expectedrate"],
-                                         c[section]["absolutedifference"]))
+                sys.stderr.write("Test {} failed for unknown reason with calculated rate ({}), "
+                                 "expected rate ({}) and tolerance ({}). \n"
+                                 .format(section, rate, c[section]["expectedrate"], c[section]["absolutedifference"]))
+                returnvalue = 1
 
     return returnvalue
