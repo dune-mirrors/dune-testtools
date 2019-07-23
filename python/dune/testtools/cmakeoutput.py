@@ -120,4 +120,4 @@ def printForCMake(d, filename):
         sys.stdout.write(output[:-1])
     else:
         with open(filename, 'w') as f:
-            f.write(output)
+            f.write(output[:-1])

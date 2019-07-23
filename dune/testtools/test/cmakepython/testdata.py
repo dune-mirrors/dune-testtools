@@ -6,7 +6,7 @@ d = {}
 # simple keys with different combinations of key and value types
 d[3] = "5"
 d[2] = 17
-d[8] = [2, 4, "something"]
+d[8] = [4, "something"]
 d["mykey"] = ["bla", "blubb"]
 d["nested"] = {}
 d["nested"]["bla"] = "val"
