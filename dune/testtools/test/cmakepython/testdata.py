@@ -1,4 +1,5 @@
-from cmakeoutput import printForCMake
+from dune.testtools.cmakeoutput import printForCMake
+import sys
 
 # define a rather complex data structure to pass to CMake
 d = {}
@@ -21,4 +22,4 @@ TESTPREFIX_nested_bla
 TESTPREFIX_nested_5_deeper
 """
 
-printForCMake(d)
+printForCMake(d, sys.argv[1])
