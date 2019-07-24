@@ -159,10 +159,10 @@ function(add_static_variants)
   # TODO maybe check whether an absolute path has been given for a mini file
   dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env dune_extract_static.py
                                --ini ${STATVAR_INIFILE}
+                               --file ${CMAKE_CURRENT_BINARY_DIR}/interface.log
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                       OUTPUT_VARIABLE output
                        ERROR_MESSAGE "Error extracting static info from ${STATVAR_INIFILE}")
-  parse_python_data(PREFIX STATINFO INPUT "${output}")
+  parse_python_data(PREFIX STATINFO FILE ${CMAKE_CURRENT_BINARY_DIR}/interface.log)
 
   # If there is more than one configuration, introduce a meta target
   # that collects all these static variants
@@ -255,10 +255,10 @@ function(add_system_test_per_target)
                                --cmake
                                --ini ${TARGVAR_INIFILE}
                                --dir ${CMAKE_CURRENT_BINARY_DIR}
-                       OUTPUT_VARIABLE output
+                               --file ${CMAKE_CURRENT_BINARY_DIR}/interface.log
                        ERROR_MESSAGE "Error expanding ${TARGVAR_INIFILE}")
 
-  parse_python_data(PREFIX iniinfo INPUT "${output}")
+  parse_python_data(PREFIX iniinfo FILE ${CMAKE_CURRENT_BINARY_DIR}/interface.log)
 
   # add the tests for all targets
   foreach(target ${TARGVAR_TARGET})

@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 
-def printForCMake(d):
+def printForCMake(d, filename):
     """A function to communicate meta ini information with CMake
 
         :param d: A dictionary with information to be passed to CMake
@@ -114,6 +114,10 @@ def printForCMake(d):
     output = singlekeys + multikeys + data
     output = output + "__SEMICOLON" + delimiter + replacement + delimiter
 
-    # this is necessary because Python will always add a newline character on program exit
-    import sys
-    sys.stdout.write(output[:-1])
+    if filename is None:
+        # this is necessary because Python will always add a newline character on program exit
+        import sys
+        sys.stdout.write(output[:-1])
+    else:
+        with open(filename, 'w') as f:
+            f.write(output[:-1])

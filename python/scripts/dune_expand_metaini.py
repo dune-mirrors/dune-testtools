@@ -21,6 +21,7 @@ if __name__ == "__main__":
         parser.add_argument('-d', '--dir', help='The directory to put the output in')
         parser.add_argument('-c', '--cmake', action="store_true", help='Set if the script is called from CMake and should return data to it')
         parser.add_argument('-s', '--section', default="__static", help='The section to treat as the static section (defaults to __static)')
+        parser.add_argument('-f', '--file', default=None, help='The filename to write the result into (stdout if omitted)')
         return vars(parser.parse_args())
 
     # analyse the given arguments
@@ -47,4 +48,4 @@ if __name__ == "__main__":
 
     if args["cmake"]:
         from dune.testtools.cmakeoutput import printForCMake
-        printForCMake(metaini)
+        printForCMake(metaini, args['file'])

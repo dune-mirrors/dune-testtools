@@ -8,12 +8,19 @@
 #
 #       The prefix to give to the CMake variables.
 #
+#    .. cmake_paramm:: FILE
+#       :single:
+#
+#       The filename to read the input from. Either this or INPUT needs to be given.
+#       The input is expected to be the output of :code:`printForCMake` function from
+#       :code:`dune.testtools`
+#
 #    .. cmake_param:: INPUT
 #       :single:
-#       :required:
 #
-#       The input string, which is the stdout of a Python script
-#       that used the :code:`printForCMake` function from :code:`dune.testtools`
+#       The input string. Either this or FILE needs to be given.
+#       The input is expected to be the output of :code:`printForCMake` function from
+#       :code:`dune.testtools`
 #
 #    .. cmake_param:: DEBUG
 #       :option:
@@ -30,9 +37,21 @@
 
 function(parse_python_data)
   set(OPTION DEBUG)
-  set(SINGLE PREFIX)
+  set(SINGLE PREFIX FILE)
   set(MULTI INPUT)
   cmake_parse_arguments(PYPARSE "${OPTION}" "${SINGLE}" "${MULTI}" ${ARGN})
+
+  # Apply defaults
+  if(PYPARSE_FILE)
+    if(PYPARSE_INPUT)
+      message(FATAL_ERROR "parse_python_data: Either FILE *or* INPUT needs to be given!")
+    endif()
+    file(READ "${PYPARSE_FILE}" PYPARSE_INPUT)
+  endif()
+  if(NOT PYPARSE_INPUT)
+    message(FATAL_ERROR "parse_python_data: Either FILE or INPUT needs to be given!")
+  endif()
+
   # these keys are an agreement between the Python and the CMake module
   # they can be changed to whatever keys, as long as they are updated on
   # both ends.
