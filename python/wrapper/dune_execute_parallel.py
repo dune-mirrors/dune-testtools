@@ -17,7 +17,7 @@ of processors in the meta ini file like this
 .. code-block:: ini
 
     [wrapper.execute_parallel]
-    numprocessors = 8
+    numprocesses = 8
 
 """
 if __name__ == "__main__":
