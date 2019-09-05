@@ -311,14 +311,14 @@ function(add_system_test_per_target)
         if(NOT ${MPI_CXX_FOUND})
           _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env ${TARGVAR_SCRIPT}
-                    --exec ${target}
+                    --exec "$<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${target}>"
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                    )
         else()
           _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env ${TARGVAR_SCRIPT}
-                    --exec ${target}
+                    --exec "$<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${target}>"
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                     --mpi-exec "${MPIEXEC}"
