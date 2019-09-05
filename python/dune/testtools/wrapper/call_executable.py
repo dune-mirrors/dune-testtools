@@ -7,7 +7,7 @@ import subprocess
 
 def call(executable, inifile=None):
     # If we have an inifile, parse it and look for special keys that modify the execution
-    command = ["./" + executable]
+    command = [executable]
     if inifile:
         iniargument = inifile
         iniinfo = parse_ini_file(inifile)
