@@ -60,7 +60,7 @@ def call(executable, metaini=None):
         write_dict_to_ini(c, tmp_file)
 
         # execute the run
-        command = ['./' + executable]
+        command = [executable]
         iniinfo = parse_ini_file(metaini)
         if "__inifile_optionkey" in iniinfo:
             command.append(iniinfo["__inifile_optionkey"])
