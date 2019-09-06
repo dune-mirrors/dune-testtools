@@ -103,7 +103,9 @@ if __name__ == "__main__":
         # loop over all vtk comparisons
         for n, e, r in zip(names, exts, references):
             # if we have multiple vtks search in the subgroup prefixed with the vtk-name for options
-            prefix = "" if len(names) == 1 else n + "."
+            prefix = ""
+            if len(names) > 1 and "wrapper.vtkcompare." + n in ini:
+                prefix = n + "."
 
             # check for specific options for this comparison
             relative = float(ini.get("wrapper.vtkcompare." + prefix + "relative", 1e-2))
