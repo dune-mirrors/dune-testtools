@@ -307,18 +307,23 @@ function(add_system_test_per_target)
         # and have it depend on the metatarget build_tests, mimicking dune-common again
         add_dependencies(build_tests ${target})
 
+        get_target_property(target_type ${target} TYPE)
+        if (target_type STREQUAL "EXECUTABLE")
+          set(EXEC_ARG --exec "$<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${target}>")
+        endif ()
+        
         # Now add the actual test!
         if(NOT ${MPI_CXX_FOUND})
           _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env ${TARGVAR_SCRIPT}
-                    --exec "$<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${target}>"
+                    ${EXEC_ARG}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                    )
         else()
           _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env ${TARGVAR_SCRIPT}
-                    --exec "$<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${target}>"
+                    ${EXEC_ARG}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                     --mpi-exec "${MPIEXEC}"
