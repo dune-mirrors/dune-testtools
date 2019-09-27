@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
         # loop over all vtk comparisons
         for n, e, r in zip(names, exts, references):
-            # keys may be set for each vtk (in a subsection with its name) or for all of them 
+            # keys may be set for each vtk (in a subsection with its name) or for all of them
             def get_key(key):
                 if "wrapper.vtkcompare." + n + "." + key in ini:
                     return "wrapper.vtkcompare." + n + "." + key
