@@ -55,18 +55,15 @@ vtu file is written for each domain. The vtu files are to be given as space sepa
     name = myvtkfile1 myvtkfile2
     reference = path_to_reference_file1 path_to_reference_file2
     extension = vtu vtu
+    relative = 1e-3
+    absolute = 1.5e-7
+    zeroThreshold.velocity = 1e-18
 
     [wrapper.vtkcompare.myvtkfile1]
     relative = 1e-2
-    absolute = 1.2e-7
     zeroThreshold.velocity = 1e-18
 
-    [wrapper.vtkcompare.myvtkfile2]
-    relative = 1e-2
-    absolute = 1.2e-7
-    zeroThreshold.velocity = 1e-18
-
-In this case the parameters ``relative``, ``absolute``, and ``zeroThreshold`` can be
+In this case the parameters ``relative``, ``absolute``, and ``zeroThreshold`` may be
 set for each test separately under the sections ``[wrapper.vtkcompare.<name>]``.
 """
 if __name__ == "__main__":
