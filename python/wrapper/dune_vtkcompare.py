@@ -102,15 +102,17 @@ if __name__ == "__main__":
 
         # loop over all vtk comparisons
         for n, e, r in zip(names, exts, references):
-            # if we have multiple vtks search in the subgroup prefixed with the vtk-name for options
-            prefix = ""
-            if len(names) > 1 and "wrapper.vtkcompare." + n in ini:
-                prefix = n + "."
+            # keys may be set for each vtk (in a subsection with its name) or for all of them 
+            def get_key(key):
+                if "wrapper.vtkcompare." + n + "." + key in ini:
+                    return "wrapper.vtkcompare." + n + "." + key
+                else:
+                    return "wrapper.vtkcompare." + key
 
             # check for specific options for this comparison
-            relative = float(ini.get("wrapper.vtkcompare." + prefix + "relative", 1e-2))
-            absolute = float(ini.get("wrapper.vtkcompare." + prefix + "absolute", 1.2e-7))
-            zeroThreshold = ini.get("wrapper.vtkcompare." + prefix + "zeroThreshold", {})
+            relative = float(ini.get(get_key("relative"), 1e-2))
+            absolute = float(ini.get(get_key("absolute"), 1.2e-7))
+            zeroThreshold = ini.get(get_key("zeroThreshold"), {})
 
             ret = compare_vtk(vtk1=n + timestep + "." + e,
                               vtk2=args["source"] + "/" + r + "." + e,
