@@ -2,4 +2,4 @@ add_subdirectory(doxygen)
 add_subdirectory(sphinx)
 
 # add the technical documentation pdf
-add_latexmk_document(SOURCE technical.tex)
+dune_add_latex_document(technical.tex)
