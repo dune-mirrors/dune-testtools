@@ -55,18 +55,15 @@ vtu file is written for each domain. The vtu files are to be given as space sepa
     name = myvtkfile1 myvtkfile2
     reference = path_to_reference_file1 path_to_reference_file2
     extension = vtu vtu
+    relative = 1e-3
+    absolute = 1.5e-7
+    zeroThreshold.velocity = 1e-18
 
     [wrapper.vtkcompare.myvtkfile1]
     relative = 1e-2
-    absolute = 1.2e-7
     zeroThreshold.velocity = 1e-18
 
-    [wrapper.vtkcompare.myvtkfile2]
-    relative = 1e-2
-    absolute = 1.2e-7
-    zeroThreshold.velocity = 1e-18
-
-In this case the parameters ``relative``, ``absolute``, and ``zeroThreshold`` can be
+In this case the parameters ``relative``, ``absolute``, and ``zeroThreshold`` may be
 set for each test separately under the sections ``[wrapper.vtkcompare.<name>]``.
 """
 if __name__ == "__main__":
@@ -102,13 +99,17 @@ if __name__ == "__main__":
 
         # loop over all vtk comparisons
         for n, e, r in zip(names, exts, references):
-            # if we have multiple vtks search in the subgroup prefixed with the vtk-name for options
-            prefix = "" if len(names) == 1 else n + "."
+            # keys may be set for each vtk (in a subsection with its name) or for all of them
+            def get_key(key):
+                if "wrapper.vtkcompare." + n + "." + key in ini:
+                    return "wrapper.vtkcompare." + n + "." + key
+                else:
+                    return "wrapper.vtkcompare." + key
 
             # check for specific options for this comparison
-            relative = float(ini.get("wrapper.vtkcompare." + prefix + "relative", 1e-2))
-            absolute = float(ini.get("wrapper.vtkcompare." + prefix + "absolute", 1.2e-7))
-            zeroThreshold = ini.get("wrapper.vtkcompare." + prefix + "zeroThreshold", {})
+            relative = float(ini.get(get_key("relative"), 1e-2))
+            absolute = float(ini.get(get_key("absolute"), 1.2e-7))
+            zeroThreshold = ini.get(get_key("zeroThreshold"), {})
 
             ret = compare_vtk(vtk1=n + timestep + "." + e,
                               vtk2=args["source"] + "/" + r + "." + e,
