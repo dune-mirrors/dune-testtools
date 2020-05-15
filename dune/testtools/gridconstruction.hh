@@ -8,7 +8,7 @@
 
 #include<dune/common/exceptions.hh>
 #include<dune/common/parametertree.hh>
-#include<dune/common/parallel/collectivecommunication.hh>
+#include<dune/common/parallel/communication.hh>
 #include<dune/grid/common/backuprestore.hh>
 #include<dune/grid/io/file/dgfparser/dgfparser.hh>
 #include<dune/grid/io/file/gmshreader.hh>
