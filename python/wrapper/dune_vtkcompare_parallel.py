@@ -13,7 +13,7 @@ To be used in the CMake system test macro as follows:
 .. code-block:: cmake
 
     dune_add_system_test(...
-                         SCRIPT dune_execute_parallel.py
+                         SCRIPT dune_vtkcompare_parallel.py
                          ...)
 
 The wrapper is a combination of the 'dune_execute_parallel.py' and
