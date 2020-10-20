@@ -25,6 +25,7 @@ if __name__ == "__main__":
     import sys
 
     from dune.testtools.wrapper.argumentparser import get_args
+    from dune.testtools.wrapper.call_executable import sanitize_mpi_arguments
     from dune.testtools.wrapper.call_executable import call_parallel
 
     # Parse the given arguments
@@ -40,10 +41,6 @@ if __name__ == "__main__":
                          "                         --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
         sys.exit(1)
 
-    # check if flags are provided
-    if args["mpi_preflags"] == ['']:
-        args["mpi_preflags"] = None
-    if args["mpi_postflags"] == ['']:
-        args["mpi_postflags"] = None
+    sanitize_mpi_arguments(args)
 
     sys.exit(call_parallel(args["exec"], args["mpi_exec"], args["mpi_numprocflag"], args["mpi_preflags"], args["mpi_postflags"], args['max_processors'][0], inifile=args["ini"]))

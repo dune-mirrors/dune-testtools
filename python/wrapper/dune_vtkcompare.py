@@ -65,26 +65,70 @@ vtu file is written for each domain. The vtu files are to be given as space sepa
 
 In this case the parameters ``relative``, ``absolute``, and ``zeroThreshold`` may be
 set for each test separately under the sections ``[wrapper.vtkcompare.<name>]``.
+
+If the programm needs to be run in parallel, the desired number of processes
+needs to be specified in an additional section:
+
+.. code-block:: ini
+
+    [wrapper.vtkcompare]
+    name = myvtkfile1 myvtkfile2
+    reference = path_to_reference_file1 path_to_reference_file2
+    extension = vtu vtu
+    relative = 1e-3
+    absolute = 1.5e-7
+    zeroThreshold.velocity = 1e-18
+
+    [wrapper.vtkcompare.parallel]
+    numprocesses = 8
 """
+
+
+def call_parallel_or_sequential(args, parsedini):
+    """
+    Execute the application either in parallel or sequentially, depending
+    on whether the number of processors was specified in the meta ini file.
+    """
+
+    if "wrapper.vtkcompare.parallel.numprocesses" in parsedini:
+
+        from dune.testtools.wrapper.call_executable import sanitize_mpi_arguments
+        sanitize_mpi_arguments(args)
+
+        return call_parallel(
+            args["exec"],
+            args["mpi_exec"],
+            args["mpi_numprocflag"],
+            args["mpi_preflags"],
+            args["mpi_postflags"],
+            args['max_processors'][0],
+            inifile=args["ini"]
+        )
+    else:
+        return call(args["exec"], args["ini"])
+
+
 if __name__ == "__main__":
 
     import sys
 
     from dune.testtools.wrapper.argumentparser import get_args
     from dune.testtools.wrapper.call_executable import call
+    from dune.testtools.wrapper.call_executable import call_parallel
     from dune.testtools.wrapper.fuzzy_compare_vtk import compare_vtk
     from dune.testtools.parser import parse_ini_file
 
     # Parse the given arguments
     args = get_args()
 
-    # Execute the actual test!
-    ret = call(args["exec"], args["ini"])
+    # parse ini file
+    ini = parse_ini_file(args["ini"])
+
+    # call executable
+    ret = call_parallel_or_sequential(args, ini)
 
     # do the vtk comparison if execution was succesful
     if ret == 0:
-        # Parse the inifile to learn about where the vtk files and its reference solutions are located.
-        ini = parse_ini_file(args["ini"])
         try:
             # get reference solutions
             names = ini["wrapper.vtkcompare.name"].split(' ')
