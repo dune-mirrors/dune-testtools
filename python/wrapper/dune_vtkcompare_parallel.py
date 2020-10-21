@@ -52,14 +52,16 @@ if __name__ == "__main__":
     # Parse the given arguments
     args = get_args()
     if not args["mpi_exec"]:
-        sys.stderr.write("call_parallel.py: error: Mpi executable not given.\n" +
-                         "usage: call_parallel.py [-h] -e EXEC -i INI --mpi-exec MPI_EXEC \n" +
-                         "                        --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
+        sys.stderr.write(
+            "call_parallel.py: error: Mpi executable not given.\n" +
+            "usage: call_parallel.py [-h] -e EXEC -i INI --mpi-exec MPI_EXEC \n" +
+            "                        --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
         sys.exit(1)
     if not args["mpi_numprocflag"]:
-        sys.stderr.write("call_parallel.py: error: Mpi number of processes flag not given.\n" +
-                         "usage: call_parallel.py [-h] -e EXEC -i INI --mpi-exec MPI_EXEC \n" +
-                         "                         --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
+        sys.stderr.write(
+            "call_parallel.py: error: Mpi number of processes flag not given.\n" +
+            "usage: call_parallel.py [-h] -e EXEC -i INI --mpi-exec MPI_EXEC \n" +
+            "                         --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
         sys.exit(1)
 
     # check if flags are provided
@@ -68,11 +70,19 @@ if __name__ == "__main__":
     if args["mpi_postflags"] == ['']:
         args["mpi_postflags"] = None
 
-    ret = call_parallel(args["exec"], args["mpi_exec"], args["mpi_numprocflag"], args["mpi_preflags"], args["mpi_postflags"], args['max_processors'][0], inifile=args["ini"])
+    ret = call_parallel(
+        args["exec"],
+        args["mpi_exec"],
+        args["mpi_numprocflag"],
+        args["mpi_preflags"],
+        args["mpi_postflags"],
+        args['max_processors'][0],
+        inifile=args["ini"])
 
     # do the vtk comparison if execution was succesful
     if ret is 0:
-        # Parse the inifile to learn about where the vtk files and its reference solutions are located.
+        # Parse the inifile to learn about where the vtk files and its
+        # reference solutions are located.
         ini = parse_ini_file(args["ini"])
         try:
             # get reference solutions
@@ -80,14 +90,18 @@ if __name__ == "__main__":
             timestep = ini.get("wrapper.vtkcompare.timestep", "")
             if timestep:
                 timestep = "-" + str(timestep).zfill(5)
-            exts = ini.get("wrapper.vtkcompare.extension", "vtu " * len(names)).split(' ')
+            exts = ini.get(
+                "wrapper.vtkcompare.extension",
+                "vtu " * len(names)).split(' ')
             references = ini["wrapper.vtkcompare.reference"].split(' ')
         except KeyError:
-            sys.stdout.write("The test wrapper vtkcompare assumes keys wrapper.vtkcompare.name \
+            sys.stdout.write(
+                "The test wrapper vtkcompare assumes keys wrapper.vtkcompare.name \
                               and wrapper.vtkcompare.reference to be existent in the inifile")
         # loop over all vtk comparisons
         for n, e, r in zip(names, exts, references):
-            # keys may be set for each vtk (in a subsection with its name) or for all of them
+            # keys may be set for each vtk (in a subsection with its name) or
+            # for all of them
             def get_key(key):
                 if "wrapper.vtkcompare." + n + "." + key in ini:
                     return "wrapper.vtkcompare." + n + "." + key
@@ -111,4 +125,3 @@ if __name__ == "__main__":
                 sys.exit(ret)
 
     sys.exit(ret)
-
