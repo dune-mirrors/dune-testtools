@@ -422,8 +422,3 @@ function(dune_add_system_test)
                                ${DEBUG})
   endif()
 endfunction()
-
-macro(add_dune_system_test)
-    message(WARNING "add_dune_system_test is deprecated. Please use dune_add_system_test!")
-    dune_add_system_test(${ARGN})
-endmacro()
