@@ -1,6 +1,6 @@
 __exec_suffix = 1, 2 | expand 1
 
-something = 1, 2 | expand
+something = 1, 2 | expand processes
 
 someother = bla, bli | expand 1
 
@@ -18,4 +18,4 @@ relative = 1.0e-2
 zeroThreshold.small = 1e-19
 
 [wrapper.vtkcompare.parallel]
-numprocesses = 2
+numprocesses = 2, 3 | expand processes
