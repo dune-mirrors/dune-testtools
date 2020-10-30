@@ -1,0 +1,21 @@
+__exec_suffix = 1, 2 | expand 1
+
+something = 1, 2 | expand
+
+someother = bla, bli | expand 1
+
+[__static]
+TESTVAR = 1, 2 | expand 1
+
+[wrapper.vtkcompare]
+name = test test2
+reference = testref testref2
+extension = vtk vtk
+
+[wrapper.vtkcompare.test]
+absolute = 1.0e-7
+relative = 1.0e-2
+zeroThreshold.small = 1e-19
+
+[wrapper.vtkcompare.parallel]
+numprocesses = 2
