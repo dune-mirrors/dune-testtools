@@ -14,7 +14,6 @@ def dune_testtools_scripts():
             './wrapper/dune_execute.py',
             './wrapper/dune_execute_parallel.py',
             './wrapper/dune_vtkcompare.py',
-            './wrapper/dune_vtkcompare_parallel.py',
             './wrapper/dune_outputtreecompare.py']
 
 
