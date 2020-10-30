@@ -91,6 +91,7 @@ if __name__ == "__main__":
     from dune.testtools.wrapper.argumentparser import get_args
     from dune.testtools.wrapper.call_executable import call
     from dune.testtools.wrapper.call_executable import call_parallel
+    from dune.testtools.wrapper.call_executable import check_mpi_arguments
     from dune.testtools.wrapper.fuzzy_compare_vtk import compare_vtk
     from dune.testtools.parser import parse_ini_file
 
@@ -106,25 +107,7 @@ if __name__ == "__main__":
 
     if "wrapper.vtkcompare.parallel.numprocesses" in ini:
 
-        if not args["mpi_exec"]:
-            sys.stderr.write(
-                "call_parallel.py: error: Mpi executable not given.\n" +
-                "usage: call_parallel.py [-h] -e EXEC -i INI --mpi-exec MPI_EXEC \n" +
-                "                        --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
-            sys.exit(1)
-
-        if not args["mpi_numprocflag"]:
-            sys.stderr.write(
-                "call_parallel.py: error: Mpi number of processes flag not given.\n" +
-                "usage: call_parallel.py [-h] -e EXEC -i INI --mpi-exec MPI_EXEC \n" +
-                "                         --mpi-numprocflag MPI_NUMPROCFLAG [-s SOURCE]\n")
-            sys.exit(1)
-
-        # check if flags are provided
-        if args["mpi_preflags"] == ['']:
-            args["mpi_preflags"] = None
-        if args["mpi_postflags"] == ['']:
-            args["mpi_postflags"] = None
+        check_mpi_arguments(args)
 
         ret = call_parallel(
             args["exec"],
