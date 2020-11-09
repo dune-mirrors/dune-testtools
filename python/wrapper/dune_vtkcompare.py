@@ -103,7 +103,6 @@ if __name__ == "__main__":
 
     # execute the application either in parallel or sequentially, depending
     # on whether the number of processors was specified in the meta ini file.
-    ret = 1
 
     if "wrapper.vtkcompare.parallel.numprocesses" in ini:
 
