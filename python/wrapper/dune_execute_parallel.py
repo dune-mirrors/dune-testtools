@@ -33,12 +33,4 @@ if __name__ == "__main__":
 
     check_mpi_arguments(args)
 
-    sys.exit(
-        call_parallel(
-            args["exec"],
-            args["mpi_exec"],
-            args["mpi_numprocflag"],
-            args["mpi_preflags"],
-            args["mpi_postflags"],
-            args['max_processors'][0],
-            inifile=args["ini"]))
+    sys.exit(call_parallel(args["exec"], args["mpi_exec"], args["mpi_numprocflag"], args["mpi_preflags"], args["mpi_postflags"], args['max_processors'][0], inifile=args["ini"]))

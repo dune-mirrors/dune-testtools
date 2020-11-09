@@ -128,19 +128,15 @@ if __name__ == "__main__":
             timestep = ini.get("wrapper.vtkcompare.timestep", "")
             if timestep:
                 timestep = "-" + str(timestep).zfill(5)
-            exts = ini.get(
-                "wrapper.vtkcompare.extension",
-                "vtu " * len(names)).split(' ')
+            exts = ini.get("wrapper.vtkcompare.extension", "vtu " * len(names)).split(' ')
             references = ini["wrapper.vtkcompare.reference"].split(' ')
         except KeyError:
-            sys.stdout.write(
-                "The test wrapper vtkcompare assumes keys wrapper.vtkcompare.name \
+            sys.stdout.write("The test wrapper vtkcompare assumes keys wrapper.vtkcompare.name \
                               and wrapper.vtkcompare.reference to be existent in the inifile")
 
         # loop over all vtk comparisons
         for n, e, r in zip(names, exts, references):
-            # keys may be set for each vtk (in a subsection with its name) or
-            # for all of them
+            # keys may be set for each vtk (in a subsection with its name) or for all of them
             def get_key(key):
                 if "wrapper.vtkcompare." + n + "." + key in ini:
                     return "wrapper.vtkcompare." + n + "." + key

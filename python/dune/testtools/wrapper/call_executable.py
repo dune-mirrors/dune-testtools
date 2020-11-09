@@ -33,8 +33,7 @@ def check_mpi_arguments(args):
 
 
 def call(executable, inifile=None):
-    # If we have an inifile, parse it and look for special keys that modify
-    # the execution
+    # If we have an inifile, parse it and look for special keys that modify the execution
     command = [executable]
     if inifile:
         iniargument = inifile
@@ -46,16 +45,8 @@ def call(executable, inifile=None):
     return subprocess.call(command)
 
 
-def call_parallel(
-        executable,
-        mpi_exec,
-        mpi_numprocflag,
-        mpi_preflags,
-        mpi_postflags,
-        max_processors,
-        inifile=None):
-    # If we have an inifile, parse it and look for special keys that modify
-    # the execution
+def call_parallel(executable, mpi_exec, mpi_numprocflag, mpi_preflags, mpi_postflags, max_processors, inifile=None):
+    # If we have an inifile, parse it and look for special keys that modify the execution
     num_processes = "2"  # a default
     command = [mpi_exec, mpi_numprocflag, num_processes]
     if mpi_preflags:
