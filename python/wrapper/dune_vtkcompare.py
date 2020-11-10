@@ -84,6 +84,26 @@ needs to be specified in an additional section:
 """
 
 
+# execute the application either in parallel or sequentially, depending
+# on whether the number of processors was specified in the meta ini file.
+def conditional_call_parallel(args, parsedini):
+
+    if "wrapper.vtkcompare.parallel.numprocesses" in parsedini:
+
+        check_mpi_arguments(args)
+
+        return call_parallel(
+            args["exec"],
+            args["mpi_exec"],
+            args["mpi_numprocflag"],
+            args["mpi_preflags"],
+            args["mpi_postflags"],
+            args['max_processors'][0],
+            inifile=args["ini"])
+    else:
+        return call(args["exec"], args["ini"])
+
+
 if __name__ == "__main__":
 
     import sys
@@ -101,23 +121,8 @@ if __name__ == "__main__":
     # parse ini file
     ini = parse_ini_file(args["ini"])
 
-    # execute the application either in parallel or sequentially, depending
-    # on whether the number of processors was specified in the meta ini file.
-
-    if "wrapper.vtkcompare.parallel.numprocesses" in ini:
-
-        check_mpi_arguments(args)
-
-        ret = call_parallel(
-            args["exec"],
-            args["mpi_exec"],
-            args["mpi_numprocflag"],
-            args["mpi_preflags"],
-            args["mpi_postflags"],
-            args['max_processors'][0],
-            inifile=args["ini"])
-    else:
-        ret = call(args["exec"], args["ini"])
+    # call executable
+    ret = conditional_call_parallel(args, ini)
 
     # do the vtk comparison if execution was succesful
     if ret is 0:
