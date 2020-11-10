@@ -9,7 +9,7 @@ import subprocess
 
 # helper function for handling the MPI arguments. Pass args here, as we
 # potentially need to modify it
-def check_mpi_arguments(args):
+def sanitize_mpi_arguments(args):
 
     if not args["mpi_exec"]:
         sys.stderr.write(
