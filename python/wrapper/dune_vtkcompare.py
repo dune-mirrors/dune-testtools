@@ -123,7 +123,7 @@ if __name__ == "__main__":
     ini = parse_ini_file(args["ini"])
 
     # call executable
-    ret = conditional_call_parallel(args, ini)
+    ret = call_parallel_or_sequential(args, ini)
 
     # do the vtk comparison if execution was succesful
     if ret is 0:
