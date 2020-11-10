@@ -6,6 +6,6 @@ int main()
   return 0;
 #else
 #warning "You need to have MPI installed to run this test!"
-  return 1;
+  return 77;
 #endif
 }
