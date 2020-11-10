@@ -90,7 +90,7 @@ def call_parallel_or_sequential(args, parsedini):
 
     if "wrapper.vtkcompare.parallel.numprocesses" in parsedini:
 
-        check_mpi_arguments(args)
+        sanitize_mpi_arguments(args)
 
         return call_parallel(
             args["exec"],
