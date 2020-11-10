@@ -25,12 +25,12 @@ if __name__ == "__main__":
     import sys
 
     from dune.testtools.wrapper.argumentparser import get_args
-    from dune.testtools.wrapper.call_executable import check_mpi_arguments
+    from dune.testtools.wrapper.call_executable import sanitize_mpi_arguments
     from dune.testtools.wrapper.call_executable import call_parallel
 
     # Parse the given arguments
     args = get_args()
 
-    check_mpi_arguments(args)
+    sanitize_mpi_arguments(args)
 
     sys.exit(call_parallel(args["exec"], args["mpi_exec"], args["mpi_numprocflag"], args["mpi_preflags"], args["mpi_postflags"], args['max_processors'][0], inifile=args["ini"]))
