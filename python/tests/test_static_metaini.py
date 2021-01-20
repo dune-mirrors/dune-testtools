@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from dune.testtools.static_metaini import *
+from dune.testtools.static_metaini import extract_static_info
 
 
 def test_empty_static(dir):

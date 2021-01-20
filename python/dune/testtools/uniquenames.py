@@ -47,7 +47,7 @@ def make_key_unique(configs=None, key=None):
 
     # Now delete all those that appeared only once (those are unique already) and reset all the others to 0
     for k, count in list(key_dict.items()):
-        if count is 1:
+        if count == 1:
             del key_dict[k]
         else:
             key_dict[k] = 0

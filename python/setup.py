@@ -50,7 +50,7 @@ setup(name='dune.testtools',
       install_requires=['pyparsing>=2.1.10',
                         'six>=1.4.1',
                         'pytest',
-                        'pytest-pep8',
+                        'pytest-flake8',
                         ],
       cmdclass={'test': PyTest},
       scripts=dune_testtools_scripts())

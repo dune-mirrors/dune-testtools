@@ -21,7 +21,7 @@ class MetaIniParser(object):
         self._currentDict = DotDict()
 
         # To avoid cyclic dependencies, we do NOT do this import in the module header
-        from dune.testtools.command import command_registry, CommandType, command_count
+        from dune.testtools.command import command_registry, command_count
         self._foundCommands = {i: [] for i in range(command_count())}
         self._commands = " ".join(command_registry())
         self._parser = self.construct_bnf(assignment=assignment, commentChar=commentChar)

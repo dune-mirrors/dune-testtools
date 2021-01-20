@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from dune.testtools.wrapper.compareini import *
+from dune.testtools.wrapper.compareini import fuzzy_compare_ini
 
 
 def test_inicompare_fuzzy(dir):

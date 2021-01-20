@@ -47,7 +47,7 @@ in your meta inifile and have it resolved to:
 """
 
 from __future__ import absolute_import
-from dune.testtools.escapes import escaped_split, replace_delimited
+from dune.testtools.escapes import replace_delimited
 
 _registry = {}
 
