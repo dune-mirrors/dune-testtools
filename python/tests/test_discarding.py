@@ -1,5 +1,5 @@
 from dune.testtools.metaini import expand_meta_ini
-from dune.testtools.static_metaini import *
+from dune.testtools.static_metaini import extract_static_info
 
 
 def test_has_correct_static_info(dir):

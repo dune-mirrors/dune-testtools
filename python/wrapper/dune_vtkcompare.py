@@ -82,7 +82,7 @@ if __name__ == "__main__":
     ret = call(args["exec"], args["ini"])
 
     # do the vtk comparison if execution was succesful
-    if ret is 0:
+    if ret == 0:
         # Parse the inifile to learn about where the vtk files and its reference solutions are located.
         ini = parse_ini_file(args["ini"])
         try:
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                               verbose=True)
 
             # early exit if one vtk comparison fails
-            if ret is not 0:
+            if ret != 0:
                 sys.exit(ret)
 
     sys.exit(ret)

@@ -42,7 +42,7 @@ class DotDict(dict):
         if "." in key:
             group, key = key.split(".", 1)
             dict.__getitem__(self, group).__delitem__(key)
-            if len(dict.__getitem__(self, group)) is 0:
+            if len(dict.__getitem__(self, group)) == 0:
                 dict.__delitem__(self, group)
         else:
             dict.__delitem__(self, key)

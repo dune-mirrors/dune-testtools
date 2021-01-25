@@ -3,10 +3,9 @@ This module provides methods for defining convergence tests.
 """
 
 from __future__ import absolute_import
-from dune.testtools.parser import *
-from dune.testtools.metaini import *
+from dune.testtools.parser import parse_ini_file, CommandToApply
 from dune.testtools.command import meta_ini_command, CommandType
-from dune.testtools.command_infrastructure import *
+from dune.testtools.command_infrastructure import replace_command_key
 from dune.testtools.writeini import write_dict_to_ini
 import os
 import sys
@@ -28,7 +27,7 @@ def _get_convergence_test(key=None, value=None, config=None, args=None, commands
 
 
 @meta_ini_command(name="convergencetest_retrieve", ctype=CommandType.POST_RESOLUTION)
-def _get_convergence_test(key=None, value=None, config=None):
+def _get_convergence_test_retrieve(key=None, value=None, config=None):
     """This command replaces the convergence test key by the original unexpanded value
        leaving a meta ini file configuring a convergence test"""
     return config["__local.wrapper.convergencetest.value"] + " | expand"
@@ -41,6 +40,7 @@ def call(executable, metaini=None):
         return 1
 
     # expand the meta ini file
+    from dune.testtools.metaini import expand_meta_ini
     configurations = expand_meta_ini(metaini)
 
     # Find out in which sections the test data is

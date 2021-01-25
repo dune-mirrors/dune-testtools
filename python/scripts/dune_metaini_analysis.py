@@ -36,10 +36,10 @@ if __name__ == "__main__":
     def check_parser(ini):
         try:
             parsed = parse_ini_file(ini)
-        except:
+        except Exception:
             try:
                 file = open(ini, "r")
-            except:
+            except Exception:
                 print("Reading the source file failed. Did you give a correct path?")
                 sys.exit(1)
             print("Parsing the meta ini file failed.")
@@ -48,7 +48,7 @@ if __name__ == "__main__":
             for line in file:
                 try:
                     parser.apply(line)
-                except:
+                except Exception:
                     print("ERROR Malformed line: '{}'".format(line))
                     # TODO give some info about how its malformed: Needs inspection of the exception.
             sys.exit(1)

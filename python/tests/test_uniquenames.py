@@ -3,13 +3,8 @@ from dune.testtools.metaini import expand_meta_ini
 
 
 def check_uniqueness(_list, key):
-    found = []
-    for l in _list:
-        if l[key] in l:
-            return False
-        else:
-            found.append(l[key])
-    return True
+    values = [c[key] for c in _list]
+    return len(set(values)) == len(_list)
 
 
 def test_metaini1(dir):

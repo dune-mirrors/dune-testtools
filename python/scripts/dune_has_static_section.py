@@ -23,5 +23,5 @@ if __name__ == "__main__":
 
     configurations = expand_meta_ini(args['ini'], whiteFilter=(args['section'],), addNameKey=False)
     if len(configurations) > 1:
-            sys.exit(1)
+        sys.exit(1)
     sys.exit(0)

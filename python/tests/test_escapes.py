@@ -1,10 +1,10 @@
 from __future__ import absolute_import
-from dune.testtools.escapes import *
-from dune.testtools.metaini import *
+from dune.testtools.escapes import count_unescaped
+from dune.testtools.metaini import expand_meta_ini
 
 
 def test_count():
-    assert count_unescaped("{{\{", "{") == 2
+    assert count_unescaped("{{\\{", "{") == 2
 
 
 def test_curly_bracket(dir):

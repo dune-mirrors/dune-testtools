@@ -6,10 +6,8 @@ using absolute and/or relative difference comparison.
 
 """
 from __future__ import absolute_import
-import argparse
 import xml.etree.ElementTree as ET
 from operator import attrgetter, itemgetter
-import sys
 from six.moves import range
 from six.moves import zip
 
@@ -165,9 +163,9 @@ def is_fuzzy_equal_node(node1, node2, absolute, relative, zeroValueThreshold, ve
                 return False
         if node1child.text or node2child.text:
             if "NumberOfComponents" in node1child.attrib:
-                    numComp = int(node1child.attrib["NumberOfComponents"])
+                numComp = int(node1child.attrib["NumberOfComponents"])
             else:
-                    numComp = 1
+                numComp = 1
             if not is_fuzzy_equal_text(node1child.text, node2child.text,
                                        node1child.attrib["Name"],
                                        numComp,
