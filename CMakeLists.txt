@@ -23,7 +23,7 @@ dune_enable_all_packages()
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
-dune_python_install_package(PATH python)
+dune_python_install_package(PATH python ADDITIONAL_PIP_PARAMS --extra-index-url file:///builds/package-index/index/simple)
 
 dune_python_add_test(NAME pytest
                      INTERPRETER ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}
