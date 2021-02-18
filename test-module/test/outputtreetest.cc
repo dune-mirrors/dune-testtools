@@ -1,4 +1,4 @@
-#include "../outputtree.hh"
+#include<dune/testtools/outputtree.hh>
 
 int main()
 {

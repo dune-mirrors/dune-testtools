@@ -1,0 +1,12 @@
+################################
+# Dune module information file #
+################################
+
+# Name of the module
+Module: test-module
+Version: 3.0git
+Maintainer: dominic.kempf@iwr.uni-heidelberg.de
+# Required build dependencies
+Depends: dune-testtools
+# Optional build dependencies
+#Suggests:
