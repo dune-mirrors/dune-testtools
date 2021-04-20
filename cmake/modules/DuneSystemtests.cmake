@@ -298,10 +298,13 @@ function(add_system_test_per_target)
       if(${DOSOMETHING})
         # Make sure to exclude the target from all, even when it is user-provided
         # This is exactly what dune_add_test does in dune-common
-        if(DUNE_BUILD_TESTS_ON_MAKE_ALL)
-          set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL 0)
-        else()
-          set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL 1)
+        get_target_property(aliased ${target} ALIASED_TARGET)
+        if(NOT aliased)
+          if(DUNE_BUILD_TESTS_ON_MAKE_ALL)
+            set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL 0)
+          else()
+            set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL 1)
+          endif()
         endif()
 
         # and have it depend on the metatarget build_tests, mimicking dune-common again
@@ -311,7 +314,7 @@ function(add_system_test_per_target)
         if (target_type STREQUAL "EXECUTABLE")
           set(EXEC_ARG --exec "$<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${target}>")
         endif ()
-        
+
         # Now add the actual test!
         if(NOT ${MPI_CXX_FOUND})
           _add_test(NAME ${target}_${ininame}
@@ -422,8 +425,3 @@ function(dune_add_system_test)
                                ${DEBUG})
   endif()
 endfunction()
-
-macro(add_dune_system_test)
-    message(WARNING "add_dune_system_test is deprecated. Please use dune_add_system_test!")
-    dune_add_system_test(${ARGN})
-endmacro()

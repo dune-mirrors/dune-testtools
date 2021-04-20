@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from pyparsing import *
+from pyparsing import Literal, Optional, restOfLine, Word, alphanums, printables, LineEnd
 from dune.testtools.parametertree.dotdict import DotDict
 
 

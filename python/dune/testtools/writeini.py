@@ -33,7 +33,7 @@ def write_to_stream(d, stream, assignment="="):
                 def groupname(prefixlist):
                     prefix = ""
                     for p in prefixlist:
-                        if prefix is not "":
+                        if prefix != "":
                             prefix = prefix + "."
                         prefix = prefix + p
                     return prefix

@@ -78,13 +78,11 @@ Commands
 
 """
 from __future__ import absolute_import
-from dune.testtools.parametertree.dotdict import DotDict
-from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, count_unescaped, replace_delimited, extract_delimited
+from dune.testtools.escapes import exists_unescaped, escaped_split, strip_escapes, replace_delimited, extract_delimited
 from dune.testtools.parser import parse_ini_file, CommandToApply
 from dune.testtools.writeini import write_dict_to_ini
 from copy import deepcopy
-from dune.testtools.command import meta_ini_command, CommandType, apply_commands, command_count
-from dune.testtools.uniquenames import *
+from dune.testtools.command import meta_ini_command, CommandType, apply_commands
 from six.moves import range
 
 

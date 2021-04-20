@@ -81,7 +81,7 @@ if __name__ == "__main__":
     ret = call(args["exec"], args["ini"])
 
     # do the outputtree comparison if execution was succesful
-    if ret is 0:
+    if ret == 0:
         # Parse the inifile to learn about where the output file and its reference are located.
         ini = parse_ini_file(args["ini"])
         try:
@@ -117,7 +117,7 @@ if __name__ == "__main__":
                                         verbose=True)
 
                 # early exit if one vtk comparison fails
-                if ret is not 0:
+                if ret != 0:
                     sys.exit(ret)
 
             # exact comparison

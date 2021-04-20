@@ -9,7 +9,6 @@ Keys can be excluded from comparison by specifying the key-list `exclude`.
 """
 
 from __future__ import absolute_import
-from dune.testtools.parametertree.dotdict import DotDict
 from dune.testtools.parametertree.parser import parse_ini_file
 from dune.testtools.escapes import extract_delimited
 
