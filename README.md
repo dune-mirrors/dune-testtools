@@ -28,7 +28,7 @@ check the bugtracker at
 https://gitlab.dune-project.org/quality/dune-testtools/issues
 
 or contact the authors directly:
-*   Timo Koch (timo.koch@iws.uni-stuttgart.de)
+*   Timo Koch (timokoch@uio.no)
 *   Dominic Kempf (dominic.kempf@iwr.uni-heidelberg.de)
 
 # Acknowledgments
