@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 rm -rf build-testmod
 mkdir build-testmod
