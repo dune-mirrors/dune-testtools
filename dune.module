@@ -6,6 +6,10 @@
 Module: dune-testtools
 Version: 3.0git
 Maintainer: dominic.kempf@iwr.uni-heidelberg.de;timo.koch@iws.uni-stuttgart.de
+Author: Timo Koch and Dominic Kempf
+Description: dune-testtools module
+URL: http://dune-project.org/
+Python-Requires: pyparsing>=2.1.10 six>=1.4.1 pytest pytest-flake8
 #depending on
 Depends: dune-common
 Suggests: dune-grid dune-alugrid

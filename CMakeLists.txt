@@ -23,8 +23,6 @@ dune_enable_all_packages()
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
-dune_python_install_package(PATH python)
-
 dune_python_add_test(NAME pytest
                      MODULE pytest
                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
@@ -41,6 +39,7 @@ _add_test(COMMAND test-setup.sh)
 add_subdirectory(dune)
 add_subdirectory(doc)
 add_subdirectory(cmake)
+add_subdirectory(python)
 
 # Use a custom section to export testtool module path for downstream modules.
 set(DUNE_CUSTOM_PKG_CONFIG_SECTION "
