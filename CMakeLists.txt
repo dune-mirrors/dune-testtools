@@ -23,16 +23,14 @@ dune_enable_all_packages()
 
 set(DUNE_TESTTOOLS_PATH ${PROJECT_SOURCE_DIR})
 
-dune_python_install_package(PATH python)
+dune_python_configure_package(PATH python)
 
 dune_python_add_test(NAME pytest
-                     INTERPRETER ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}
                      MODULE pytest
                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
                      )
 
 dune_python_add_test(NAME pep8
-                     INTERPRETER ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}
                      MODULE pytest --flake8
                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python
                      )
