@@ -317,14 +317,14 @@ function(add_system_test_per_target)
 
         # Now add the actual test!
         if(NOT ${MPI_CXX_FOUND})
-          add_test(NAME ${target}_${ininame}
+          _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env ${TARGVAR_SCRIPT}
                     ${EXEC_ARG}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
                     --source ${CMAKE_CURRENT_SOURCE_DIR}
                    )
         else()
-          add_test(NAME ${target}_${ininame}
+          _add_test(NAME ${target}_${ininame}
                     COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env ${TARGVAR_SCRIPT}
                     ${EXEC_ARG}
                     --ini "${CMAKE_CURRENT_BINARY_DIR}/${ininame}${iniext}"
