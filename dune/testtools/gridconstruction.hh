@@ -137,7 +137,7 @@ public:
       {
         typename Dune::Yasp::FixedSizePartitioning<dim> lb(partitioning);
         grid = std::make_shared<Grid> (extension, cells, periodic, overlap,
-            typename Grid::CollectiveCommunicationType(), &lb);
+            typename Grid::Communication(), &lb);
       }
     }
 
@@ -241,7 +241,7 @@ public:
       typename Dune::Yasp::FixedSizePartitioning<dim> lb(partitioning);
       grid =
           std::make_shared < Grid
-              > (lowerleft, upperright, cells, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
+              > (lowerleft, upperright, cells, periodic, overlap, typename Grid::Communication(), &lb);
     }
 
     bool keepPhysicalOverlap = params.get<bool>(
@@ -325,7 +325,7 @@ public:
       typename Dune::Yasp::FixedSizePartitioning<dim> lb(partitioning);
       grid =
           std::make_shared < Grid
-              > (coordinates, periodic, overlap, typename Grid::CollectiveCommunicationType(), &lb);
+              > (coordinates, periodic, overlap, typename Grid::Communication(), &lb);
     }
 
     bool keepPhysicalOverlap = params.get<bool>(
