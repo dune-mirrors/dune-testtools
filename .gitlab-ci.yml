@@ -3,14 +3,14 @@
 variables:
   CORES: 2
 
-debian:10--gcc:
-  image: registry.dune-project.org/docker/ci/dune:git-debian-10-gcc-8-17
+debian:12--gcc:
+  image: registry.dune-project.org/docker/ci/debian:12
   script: 
     - . /duneci/bin/duneci-init-job
     - duneci-standard-test
 
-debian:10--clang:
-  image: registry.dune-project.org/docker/ci/dune:git-debian-10-clang-7-libcpp-17
+debian:12--clang:
+  image: registry.dune-project.org/docker/ci/debian:12
   script:
   - . /duneci/bin/duneci-init-job
   - duneci-standard-test
