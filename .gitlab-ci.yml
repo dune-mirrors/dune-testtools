@@ -3,14 +3,24 @@
 variables:
   CORES: 2
 
+include:
+  - project: 'core/ci-config'
+    ref: master
+    file: 'config/common/master.yml'
+  - project: 'core/ci-config'
+    ref: master
+    file: 'jobs/common/master.yml'
+
+before_script:
+  - . /duneci/bin/duneci-init-job
+  - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
+
 debian:12--gcc:
   image: registry.dune-project.org/docker/ci/debian:12
   script: 
-    - . /duneci/bin/duneci-init-job
     - duneci-standard-test
 
 debian:12--clang:
   image: registry.dune-project.org/docker/ci/debian:12
   script:
-  - . /duneci/bin/duneci-init-job
   - duneci-standard-test
