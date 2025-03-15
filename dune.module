@@ -7,5 +7,5 @@ Module: dune-testtools
 Version: 2.11-git
 Maintainer: dominic.kempf@iwr.uni-heidelberg.de;timo.koch@iws.uni-stuttgart.de
 #depending on
-Depends: dune-common
-Suggests: dune-grid dune-alugrid
+Depends: dune-common (>= 2.11)
+Suggests: dune-grid (>= 2.11) dune-alugrid (>= 2.11)
