@@ -3,14 +3,31 @@
 variables:
   CORES: 2
 
-debian:10--gcc:
-  image: registry.dune-project.org/docker/ci/dune:git-debian-10-gcc-8-17
-  script: 
-    - . /duneci/bin/duneci-init-job
-    - duneci-standard-test
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
-debian:10--clang:
-  image: registry.dune-project.org/docker/ci/dune:git-debian-10-clang-7-libcpp-17
-  script:
-  - . /duneci/bin/duneci-init-job
-  - duneci-standard-test
+.common:
+  script: duneci-standard-test
+  artifacts:
+    expire_in: 2 years
+    reports:
+      junit: junit/*.xml
+  before_script:
+    - . /duneci/bin/duneci-init-job
+    - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
+
+debian:11--gcc:
+  extends: .common
+  image: registry.dune-project.org/docker/ci/debian:11
+  variables:
+    DUNECI_TOOLCHAIN: gcc-10-20
+
+debian:11--clang:
+  extends: .common
+  image: registry.dune-project.org/docker/ci/debian:11
+  variables:
+    DUNECI_TOOLCHAIN: clang-13-20
