@@ -135,6 +135,9 @@
 #    :ref:`add_system_test_per_target`.
 #
 
+include_guard(GLOBAL)
+include(ExpandMetaIni)
+
 function(add_static_variants)
   # parse the parameter list
   set(OPTION DEBUG)
@@ -246,18 +249,7 @@ function(add_system_test_per_target)
     set(TARGVAR_SCRIPT dune_execute.py)
   endif()
 
-  # Configure a bogus file from the meta ini file. This is a trick to retrigger configuration on meta ini changes.
-  string(REPLACE "/" "_" BOGUSFILE "tmp_${TARGVAR_INIFILE}")
-  configure_file(${TARGVAR_INIFILE} ${CMAKE_CURRENT_BINARY_DIR}/${BOGUSFILE})
-
-  # expand the given meta ini file into the build tree
-  dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env dune_expand_metaini.py
-                               --cmake
-                               --ini ${TARGVAR_INIFILE}
-                               --dir ${CMAKE_CURRENT_BINARY_DIR}
-                               --file ${CMAKE_CURRENT_BINARY_DIR}/interface.log
-                       ERROR_MESSAGE "Error expanding ${TARGVAR_INIFILE}")
-
+  dune_expand_metaini_nostatic(INIFILE ${TARGVAR_INIFILE})
   parse_python_data(PREFIX iniinfo FILE ${CMAKE_CURRENT_BINARY_DIR}/interface.log)
 
   # add the tests for all targets
@@ -395,14 +387,14 @@ function(dune_add_system_test)
     # that will prohibit the addition of tests in the implementation of
     # add_system_test_per_target.
     if(SYSTEMTEST_NO_TESTS)
-      set(targetlist)
+      dune_expand_metaini_nostatic(INIFILE ${SYSTEMTEST_INIFILE})
+    else()
+      add_system_test_per_target(INIFILE ${SYSTEMTEST_INIFILE}
+                                 TARGET ${targetlist}
+                                 SCRIPT ${SYSTEMTEST_SCRIPT}
+                                 ${DEBUG}
+                                 TARGETBASENAME ${SYSTEMTEST_BASENAME})
     endif()
-
-    add_system_test_per_target(INIFILE ${SYSTEMTEST_INIFILE}
-                               TARGET ${targetlist}
-                               SCRIPT ${SYSTEMTEST_SCRIPT}
-                               ${DEBUG}
-                               TARGETBASENAME ${SYSTEMTEST_BASENAME})
   else()
     dune_execute_process(COMMAND ${CMAKE_BINARY_DIR}/run-in-dune-env dune_has_static_section.py
                                  --ini ${SYSTEMTEST_INIFILE}
