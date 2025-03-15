@@ -4,7 +4,7 @@
 
 #Name of the module
 Module: dune-testtools
-Version: 3.0git
+Version: 2.11-git
 Maintainer: dominic.kempf@iwr.uni-heidelberg.de;timo.koch@iws.uni-stuttgart.de
 #depending on
 Depends: dune-common
