@@ -1,3 +1,5 @@
+link_libraries(dunetesttools)
+
 add_subdirectory(constructiontest)
 add_subdirectory(cmakediscard)
 add_subdirectory(cmakepython)
